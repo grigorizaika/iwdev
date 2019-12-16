@@ -1,0 +1,37 @@
+{% load static from staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>signintest</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+    </head>
+    <body>
+        <link rel="stylesheet" href="{% static '/css/style.css' %}">
+        <div class="login-page">
+            <div class="form">
+                
+              <form class="register-form">
+                {% csrf_token %}
+                <input type="text" placeholder="name"/>
+                <input type="password" placeholder="password"/>
+                <input type="email" placeholder="email address"/>
+                <button>create</button>
+                <p class="message">Already registered? <a href="#">Sign In</a></p>
+              </form>
+              <form class="login-form" action="signin" method="post">
+                {% csrf_token %}
+                <input type="email" placeholder="email" name="email"/>
+                <input type="password" placeholder="password" name="password"/>
+                <input type="submit" value="sign in" class="submitButton">
+                
+                <p class="message">Not registered? <a href="#">Create an account</a></p>
+              </form>
+            </div>
+          </div>
+        <script src="{% static '/js/loginScreenAnimation.js' %}" async defer></script>
+    </body>
+</html>

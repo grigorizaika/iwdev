@@ -1,0 +1,10 @@
+cryptography~=2.8
+Django~=2.2.4
+djangorestframework==3.10.3
+django-cors-headers~=3.1.1
+drf-jwt~=1.13.3
+pyjwt~=1.7.1
+requests~=2.22.0
+pyrebase
+psycopg2
+django-rest-swagger
