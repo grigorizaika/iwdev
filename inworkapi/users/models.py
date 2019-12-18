@@ -3,7 +3,7 @@ import datetime
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.db import models
 from django.utils.translation import gettext as _
-
+from phonenumber_field.modelfields import PhoneNumberField
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -44,8 +44,16 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     email                   = models.EmailField(_('email address'), unique=True)
     name                    = models.CharField(max_length=40)
-    createdAt               = models.DateTimeField(auto_now_add=True)
+    surname                 = models.CharField(max_length=40)
+    phone                   = PhoneNumberField(null=False, blank=False, unique=True, default="+12 345 678 910")
     
+    address                 = models.ForeignKey('utils.Address', on_delete=models.CASCADE, null=True)
+    # TODO: profilePictureUrl, after Firebase storage integration
+    role                    = models.ForeignKey('Role', on_delete=models.CASCADE, null=True)
+    supervisor              = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+
+    createdAt               = models.DateTimeField(auto_now_add=True)
+
     objects                 = UserManager()
 
     USERNAME_FIELD          = 'email'
@@ -54,3 +62,6 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.name + ', ' + self.email
 
+
+class Role(models.Model):
+    name = models.CharField(max_length=20, unique=True)
