@@ -1,3 +1,37 @@
 from django.contrib import admin
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
+
+from users.models import User as CustomUser
+from users.models import (Role, Absence)
 
 # Register your models here.
+# admin.site.unregister(User)
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
+    fields = ['email', 'role', 'name', 'surname', 'phone', 'address', 'supervisor', 'is_staff',]
+    fieldsets =  []
+    ordering = ('email',)
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'email', 'role', 'name', 'surname', 'phone', 
+                'address', 'is_staff', 'is_superuser', 'password1', 'password2'
+                )
+            }
+        ),
+    )
+    search_fields = ('email', 'name', 'surname', 'phone')
+    list_display = ('email', 'name', 'surname',)
+    list_filter = ('is_staff',)
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Absence)
+class AbsenceAdmin(admin.ModelAdmin):
+    pass

@@ -27,11 +27,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # External packages
+    'django_filters',
+    'rest_framework',
     'phonenumber_field',
+    'drf_firebase_auth',
 
     # Local apps
     'users',
     'utils',
+    'clients',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +130,21 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
 AUTH_USER_MODEL = 'users.User'
+
+#import drf_firebase_auth
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        #'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+#        'drf_firebase_auth.authentication.FirebaseAuthentication',
+    ]
+}
+
+#DRF_FIREBASE_AUTH = {
+#    'FIREBASE_SERVICE_ACCOUNT_KEY': 'project/config/firebase.json'
+#}
