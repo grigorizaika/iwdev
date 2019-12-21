@@ -1,4 +1,5 @@
 import datetime
+from firebase_admin import auth
 
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
@@ -6,6 +7,15 @@ from django.db import models
 from django.utils.translation import gettext as _
 from phonenumber_field.modelfields import PhoneNumberField
 
+firebaseConfig = {
+    'apiKey': 'AIzaSyDV00d68812eZuIoCMKKX27w7tEGs_1Bwg',
+    'authDomain': 'inworktest.firebaseapp.com',
+    'databaseURL': 'https://inworktest.firebaseio.com',
+    'projectId': 'inworktest',
+    'storageBucket': 'inworktest.appspot.com',
+    'messagingSenderId': '111246495065',
+    'appId': '1:111246495065:web:f4a63df5719dd825e41048'
+}
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -15,11 +25,22 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError("An email address has not been provided")
         
+        user = auth.create_user(
+            email=email,
+            email_verified=False,
+            phone_number=phone,
+            password=password,
+            display_name= (name + ' ' + surname),
+            #photo_url='http://www.example.com/12345678/photo.png',
+            disabled=False)
+        print('Sucessfully created new user: {0}'.format(user.uid))
+
         user = self.model(
             email = self.normalize_email(email),
             name = name,
             surname = surname,
             phone = phone,
+            firebaseId = user.uid
         )
         
         user.set_password(password)
@@ -31,6 +52,17 @@ class UserManager(BaseUserManager):
         
         if not email:
             raise ValueError("An email address has not been provided")
+        
+        user = auth.create_user(
+            email=email,
+            email_verified=False,
+            phone_number=phone,
+            password=password,
+            display_name= (name + ' ' + surname),
+            #photo_url='http://www.example.com/12345678/photo.png',
+            disabled=False)
+        print('Sucessfully created new user: {0}'.format(user.uid))
+
 
         user = self.create_user(
             email = self.normalize_email(email),
@@ -39,6 +71,7 @@ class UserManager(BaseUserManager):
             surname = surname,
             phone = phone,
             is_superuser=True,
+            firebaseId = user.uid
             #**kwargs
         )
         
@@ -60,6 +93,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role                    = models.ForeignKey('Role', on_delete=models.CASCADE, null=True, blank=True,)
     supervisor              = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, limit_choices_to={'role__name': 'administrator'})
     createdAt               = models.DateTimeField(auto_now_add=True)
+    firebaseId              = models.CharField(max_length=191, null=False, blank=False, unique=True)
 
     # A required Django field. Does not represent the business logic.
     is_staff                = models.BooleanField(default=False)

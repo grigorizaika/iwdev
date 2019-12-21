@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'phonenumber_field',
-    'drf_firebase_auth',
 
     # Local apps
     'users',
@@ -131,20 +130,18 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
 AUTH_USER_MODEL = 'users.User'
 
-#import drf_firebase_auth
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-#        'drf_firebase_auth.authentication.FirebaseAuthentication',
+    #   'rest_framework.authentication.SessionAuthentication',
+        'inworkapi.authentication.FirebaseAuthentication',
+        
     ]
 }
 
-#DRF_FIREBASE_AUTH = {
-#    'FIREBASE_SERVICE_ACCOUNT_KEY': 'project/config/firebase.json'
-#}
+FIREBASE_KEY = 'static/config/inworktest-firebase-adminsdk-vxvhx-6658e12f8d.json'

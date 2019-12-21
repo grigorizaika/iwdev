@@ -6,10 +6,12 @@ from django.shortcuts import render
 from api.serializers import (AddressSerializer, ClientSerializer, UserSerializer, )
 
 from rest_framework import generics
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 
 from clients.models import Client
 from users.models import User as CustomUser
@@ -48,6 +50,7 @@ class ClientListView(generics.ListAPIView):
     serializer_class = ClientSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['name', 'email']
+    permission_classes = [permissions.IsAuthenticated]
 
 
 # VIEWSETS
