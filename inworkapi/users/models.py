@@ -1,5 +1,6 @@
 import datetime
 from firebase_admin import auth
+from firebase_admin._auth_utils import EmailAlreadyExistsError
 
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
@@ -21,65 +22,72 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def create_user(self, email, name, surname, phone, password=None):
-        
+    # TODO: Ensure that if a Django User creation fails, Firebase User creation fails too
         if not email:
             raise ValueError("An email address has not been provided")
         
-        user = auth.create_user(
-            email=email,
-            email_verified=False,
-            phone_number=phone,
-            password=password,
-            display_name= (name + ' ' + surname),
-            #photo_url='http://www.example.com/12345678/photo.png',
-            disabled=False)
-        print('Sucessfully created new user: {0}'.format(user.uid))
-
-        user = self.model(
+        djangoUser = self.model(
             email = self.normalize_email(email),
             name = name,
             surname = surname,
             phone = phone,
-            firebaseId = user.uid
+            #firebaseId = firebaseUser.uid
         )
         
-        user.set_password(password)
-        user.save(using=self._db)
+        djangoUser.set_password(password)
+        djangoUser.save(using=self._db)
 
-        return user
+        try:
+            firebaseUser = auth.create_user(
+                email=email,
+                email_verified=False,
+                phone_number=phone,
+                password=password,
+                display_name= (name + ' ' + surname),
+                #photo_url='http://www.example.com/12345678/photo.png',
+                disabled=False)
+            print('Sucessfully created new user: {0}'.format(firebaseUser.uid))
+            djangoUser.firebaseId = firebaseUser.uid
+        except EmailAlreadyExistsError as eaee:
+            print ('EAEE')
+
+        return djangoUser
 
     def create_superuser(self, email, name, surname, phone, password):
         
         if not email:
             raise ValueError("An email address has not been provided")
         
-        user = auth.create_user(
-            email=email,
-            email_verified=False,
-            phone_number=phone,
-            password=password,
-            display_name= (name + ' ' + surname),
-            #photo_url='http://www.example.com/12345678/photo.png',
-            disabled=False)
-        print('Sucessfully created new user: {0}'.format(user.uid))
-
-
-        user = self.create_user(
+        djangoUser = self.create_user(
             email = self.normalize_email(email),
             password = password,
             name = "True",
             surname = surname,
             phone = phone,
-            is_superuser=True,
-            firebaseId = user.uid
+            
             #**kwargs
         )
+        djangoUser.is_superuser = True
+        djangoUser.is_staff = True
+        djangoUser.admin = True
+        djangoUser.save(using=self._db)
+
+        try:
+            firebaseUser = auth.create_user(
+                email=email,
+                email_verified=False,
+                phone_number=phone,
+                password=password,
+                display_name= (name + ' ' + surname),
+                #photo_url='http://www.example.com/12345678/photo.png',
+                disabled=False)
+            print('Sucessfully created new user: {0}'.format(firebaseUser.uid))
+            djangoUser.firebaseId = firebaseUser.uid
+        except EmailAlreadyExistsError as eaee:
+            # TODO: what if there really is an email collision?
+            print("EAEE")
         
-        user.staff = True
-        user.admin = True
-        user.save(using=self._db)
-        
-        return user
+        return djangoUser
 
 # TODO: change UserManager according to the updated User model
 class User(AbstractBaseUser, PermissionsMixin):

@@ -1,17 +1,14 @@
 import django_filters.rest_framework
 
+from api.serializers import (AddressSerializer, ClientSerializer, UserSerializer, )
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
-
-from api.serializers import (AddressSerializer, ClientSerializer, UserSerializer, )
-
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
 
 from clients.models import Client
 from users.models import User as CustomUser

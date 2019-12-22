@@ -11,9 +11,10 @@ from users.models import (Role, Absence)
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    fields = ['email', 'role', 'name', 'surname', 'phone', 'address', 'supervisor', 'is_staff',]
+    fields = ['email', 'role', 'name', 'surname', 'phone', 'address', 'supervisor', 'is_staff', 'firebaseId']
     fieldsets =  []
     ordering = ('email',)
+    readonly_fields=('firebaseId', )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),

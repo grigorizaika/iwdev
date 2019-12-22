@@ -13,5 +13,4 @@ psycopg2
 django-rest-swagger
 phonenumbers
 django-phonenumber-field
-drf-firebase-auth
-
+drf-firebase-authentication
