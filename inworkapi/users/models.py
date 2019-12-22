@@ -21,6 +21,8 @@ firebaseConfig = {
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
+    # TODO: Also defing user deletion (delete firebase user when django user gets deleted)
+
     def create_user(self, email, name, surname, phone, password=None):
     # TODO: Ensure that if a Django User creation fails, Firebase User creation fails too
         if not email:
