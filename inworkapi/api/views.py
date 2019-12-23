@@ -1,19 +1,20 @@
 import django_filters.rest_framework
 
-from api.serializers import (AddressSerializer, ClientSerializer, UserSerializer, )
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render
-from rest_framework import generics
-from rest_framework import permissions
-from rest_framework import status
-from rest_framework import viewsets
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from api.serializers            import (AddressSerializer, ClientSerializer, UserSerializer, )
+from django.shortcuts           import get_object_or_404
+from django.shortcuts           import render
+from rest_framework             import generics
+from rest_framework             import mixins
+from rest_framework             import permissions
+from rest_framework             import status
+from rest_framework             import viewsets
+from rest_framework.decorators  import api_view
+from rest_framework.response    import Response
 
-from clients.models import Client
-from users.models import User as CustomUser
-from users.models import Role
-from utils.models import Address
+from clients.models             import Client
+from users.models               import User as CustomUser
+from users.models               import Role
+from utils.models               import Address
 
 
 # VIEWS
@@ -27,7 +28,7 @@ def api_user_view(request, email):
         queryset = CustomUser.objects.all()
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
-    
+
     try:
         user = CustomUser.objects.get(email=email)
         serializer = UserSerializer(user)
@@ -42,12 +43,25 @@ class AddressListView(generics.ListAPIView):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['street', 'city', 'district', 'country']
 
-class ClientListView(generics.ListAPIView):
-    queryset = Client.objects.all()
-    serializer_class = ClientSerializer
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ['name', 'email']
-    permission_classes = [permissions.IsAuthenticated]
+#class ClientListView(generics.ListAPIView):
+#    queryset = Client.objects.all()
+#    serializer_class = ClientSerializer
+#    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+#    filterset_fields = ['name', 'email']
+#    permission_classes = [permissions.IsAuthenticated]
 
+class ClientViewSet(mixins.ListModelMixin, viewsets.ViewSet):
 
-# VIEWSETS
+    def list(self, request, **args):
+        
+        email = request.GET.get('email')
+        print('in list ', email )
+        queryset = Client.objects.all()
+        
+        if email:
+            client = get_object_or_404(queryset, email=email)
+            serializer = ClientSerializer(client)
+        else:
+            serializer = ClientSerializer(queryset, many=True)
+
+        return Response(serializer.data)
