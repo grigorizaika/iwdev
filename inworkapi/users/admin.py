@@ -1,16 +1,23 @@
-from django.contrib import admin
+from django.contrib             import admin
 from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin  import UserAdmin
 
-from users.models import User as CustomUser
-from users.models import (Role, Absence)
+from users.forms    import (CustomUserCreationForm, CustomUserChangeForm)
+from users.models   import User as CustomUser
+from users.models   import (Role, Absence)
 
 # Register your models here.
 # admin.site.unregister(User)
 
+
+# Users get created just fine while using get_user_model().objects.create_user,
+# but apparently admin doesn't call these functions, so that a firebase user never gets created
+
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
+    add_form = CustomUserCreationForm
+    form = CustomUserChangeForm
     fields = ['email', 'role', 'name', 'surname', 'phone', 'address', 'supervisor', 'is_staff', 'firebaseId']
     fieldsets =  []
     ordering = ('email',)

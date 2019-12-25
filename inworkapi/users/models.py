@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.translation import gettext as _
 from phonenumber_field.modelfields import PhoneNumberField
 
+
 firebaseConfig = {
     'apiKey': 'AIzaSyDV00d68812eZuIoCMKKX27w7tEGs_1Bwg',
     'authDomain': 'inworktest.firebaseapp.com',
@@ -21,10 +22,13 @@ firebaseConfig = {
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    # TODO: Also defing user deletion (delete firebase user when django user gets deleted)
+    # TODO: Also define user deletion (delete firebase user when django user gets deleted)
 
     def create_user(self, email, name, surname, phone, password=None):
     # TODO: Ensure that if a Django User creation fails, Firebase User creation fails too
+        print("in create_user")
+        
+        
         if not email:
             raise ValueError("An email address has not been provided")
         
@@ -48,7 +52,7 @@ class UserManager(BaseUserManager):
                 display_name= (name + ' ' + surname),
                 #photo_url='http://www.example.com/12345678/photo.png',
                 disabled=False)
-            print('Sucessfully created new user: {0}'.format(firebaseUser.uid))
+            print('Sucessfully created new user: {0}'.format(firebaseUser.uid)) 
             djangoUser.firebaseId = firebaseUser.uid
         except EmailAlreadyExistsError as eaee:
             print ('EAEE')
@@ -56,14 +60,16 @@ class UserManager(BaseUserManager):
         return djangoUser
 
     def create_superuser(self, email, name, surname, phone, password):
-        
+
+        print("in create_superuser")
+
         if not email:
             raise ValueError("An email address has not been provided")
         
         djangoUser = self.create_user(
             email = self.normalize_email(email),
             password = password,
-            name = "True",
+            name = name,
             surname = surname,
             phone = phone,
             
@@ -103,7 +109,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role                    = models.ForeignKey('Role', on_delete=models.CASCADE, null=True, blank=True,)
     supervisor              = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, limit_choices_to={'role__name': 'administrator'})
     createdAt               = models.DateTimeField(auto_now_add=True)
-    firebaseId              = models.CharField(max_length=191, null=False, blank=False, unique=True)
+    firebaseId              = models.CharField(max_length=191, null=False, blank=False)
 
     # A required Django field. Does not represent the business logic.
     is_staff                = models.BooleanField(default=False)

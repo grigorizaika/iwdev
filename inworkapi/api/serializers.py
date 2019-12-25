@@ -5,13 +5,55 @@ from users.models import Role
 from utils.models import Address
 from clients.models import Client
 
+class RegistrationSerializer(serializers.ModelSerializer):
+    password2   = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'name', 'surname', 'phone', 'password', 'password2']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+    
+    def save(self):
+        user = CustomUser.objects.create_user(
+            email       = self.validated_data['email'],
+            name        = self.validated_data['name'],
+            surname     = self.validated_data['surname'],
+            phone       = self.validated_data['phone'],
+        )
+        
+        password    = self.validated_data['password']
+        password2   = self.validated_data['password2']
+
+        if password != password2:
+            raise serializers.ValidationError({'password': 'Passwords don\'t match'})
+
+        user.password   = password
+        user.save()
+
+        return user
+
+
 class UserSerializer(serializers.ModelSerializer):
     address = serializers.StringRelatedField()
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(
+            email    = validated_data['email'], 
+            name     = validated_data['name'], 
+            surname  = validated_data['surname'], 
+            phone    = validated_data['phone'], 
+            password = validated_data['password'],
+        )
+        user.role    = validated_data['role']
+
 
     class Meta:
         model = CustomUser
         exclude = ('password', 'last_login', 'is_staff', 'is_superuser')
         # fields = ('email', 'name', 'surname', 'phone', 'address', 'role', 'supervisor')
+        
 
 
 class RoleSerializer(serializers.ModelSerializer):

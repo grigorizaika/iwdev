@@ -2,21 +2,17 @@ from django.conf.urls import url, include
 from django.urls import path
 from rest_framework import routers
 
-from api.views import (AddressListView, api_user_view, ClientViewSet)
+from api.views import (AddressListView, ClientViewSet, UserViewSet, registration_view)
 
 app_name = 'api'
 
-router = routers.DefaultRouter()
-#router.register(r'clients', ClientViewSet, basename='ClientViewSet')
-#urlpatterns = router.urls
-client_list     = ClientViewSet.as_view({'get': 'list'})
-#client_detail   = ClientViewSet.as_view({'get': 'retrieve'})
+address_list    = AddressListView.as_view()
+client_list     = ClientViewSet.as_view({ 'get': 'list' })
+user_list       = UserViewSet.as_view({ 'get': 'list' })
 
 urlpatterns = [
-    url(r'users(?P<email>\w{0,50})', api_user_view, name="users"),
-    url(r'addresses', AddressListView.as_view(), name="addresses"),
+    url(r'addresses', address_list, name="addresses"),
     url(r'clients(?P<email>\w{0,50})', client_list, name="clients"),
-    #url(r'fuckinhell', client_detail, name="clients_detail"),
+    url(r'users(?P<email>\w{0,50})', user_list, name="users"),
+    url(r'register', registration_view, name="registration"),
 ]
-
-urlpatterns += router.urls
