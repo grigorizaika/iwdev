@@ -1,10 +1,10 @@
 cryptography~=2.8
-Django~=2.2.4
-djangorestframework==3.10.3
+Django~=2.2.4!
+djangorestframework==3.11.0
 markdown
 django-filter
-django-cors-headers~=3.1.1
-drf-jwt~=1.13.3
+django-cors-headers~=3.2.0
+drf-jwt~=1.13.4
 pyjwt~=1.7.1
 requests~=2.22.0
 firebase-admin
