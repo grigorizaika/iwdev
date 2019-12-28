@@ -1,23 +1,16 @@
 import datetime
-from firebase_admin import auth
-from firebase_admin._auth_utils import EmailAlreadyExistsError
+import firebase_admin
 
-from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
-from django.contrib.auth.models import PermissionsMixin
-from django.db import models
-from django.utils.translation import gettext as _
-from phonenumber_field.modelfields import PhoneNumberField
+from django.contrib.auth.models     import AbstractBaseUser,BaseUserManager
+from django.contrib.auth.models     import PermissionsMixin
+from django.db                      import models
+from django.utils.translation       import gettext as _
+from firebase_admin                 import auth
+from firebase_admin._auth_utils     import EmailAlreadyExistsError
+from phonenumber_field.modelfields  import PhoneNumberField
 
-
-firebaseConfig = {
-    'apiKey': 'AIzaSyDV00d68812eZuIoCMKKX27w7tEGs_1Bwg',
-    'authDomain': 'inworktest.firebaseapp.com',
-    'databaseURL': 'https://inworktest.firebaseio.com',
-    'projectId': 'inworktest',
-    'storageBucket': 'inworktest.appspot.com',
-    'messagingSenderId': '111246495065',
-    'appId': '1:111246495065:web:f4a63df5719dd825e41048'
-}
+from inworkapi.settings             import FIREBASE_KEY
+from inworkapi.settings             import FIREBASE_CONFIG
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -27,7 +20,6 @@ class UserManager(BaseUserManager):
     def create_user(self, email, name, surname, phone, password=None):
     # TODO: Ensure that if a Django User creation fails, Firebase User creation fails too
         print("in create_user")
-        
         
         if not email:
             raise ValueError("An email address has not been provided")
@@ -42,7 +34,7 @@ class UserManager(BaseUserManager):
         
         djangoUser.set_password(password)
         djangoUser.save(using=self._db)
-
+        
         try:
             firebaseUser = auth.create_user(
                 email=email,
@@ -58,6 +50,7 @@ class UserManager(BaseUserManager):
             print ('EAEE')
 
         return djangoUser
+
 
     def create_superuser(self, email, name, surname, phone, password):
 

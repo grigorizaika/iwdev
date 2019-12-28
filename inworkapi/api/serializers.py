@@ -8,6 +8,8 @@ from clients.models import Client
 class RegistrationSerializer(serializers.ModelSerializer):
     password2   = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
+    
+
     class Meta:
         model = CustomUser
         fields = ['email', 'name', 'surname', 'phone', 'password', 'password2']
@@ -16,6 +18,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
     
     def save(self):
+
         user = CustomUser.objects.create_user(
             email       = self.validated_data['email'],
             name        = self.validated_data['name'],
@@ -34,6 +37,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
         return user
 
+    def update(self, instance, validated_data):
+        print("in UserSerializer's update")
+        instance.name       = validated_data['name']
+        instance.surname    = validated_data['surname']
+        instance.phone      = validated_data['phone']
+        instance.save()
+        return instance
 
 class UserSerializer(serializers.ModelSerializer):
     address = serializers.StringRelatedField()
@@ -55,7 +65,6 @@ class UserSerializer(serializers.ModelSerializer):
         # fields = ('email', 'name', 'surname', 'phone', 'address', 'role', 'supervisor')
         
 
-
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
@@ -72,3 +81,21 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = '__all__'
+
+    def create(self, validated_data):
+        print('In save(), ', validated_data)
+        return Client.objects.create(
+            name            = validated_data['name'], 
+            email           = validated_data['email'], 
+            contactName     = validated_data['contactName'], 
+            contactPhone    = validated_data['contactPhone']
+        )
+
+    #def update(self, instance, validated_data):
+        #instance.name       = validated_data['name']
+        #instance.surname    = validated_data['surname']
+        #instance.phone      = validated_data['phone']
+        #instance.save()
+        #return instance
+    
+
