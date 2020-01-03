@@ -7,6 +7,7 @@ from rest_framework import authentication
 firebase_creds = credentials.Certificate(FIREBASE_KEY)
 firebase_app = initialize_app(firebase_creds)
 
+
 class FirebaseAuthentication(BaseFirebaseAuthentication):
 
     def authenticate(self, request):
@@ -18,6 +19,6 @@ class FirebaseAuthentication(BaseFirebaseAuthentication):
         return firebase_app
 
     def get_django_user(self, firebase_user_record):
-	    return get_user_model().objects.get_or_create(
-		    firebaseId=firebase_user_record.uid,
-	    )[0]
+        return get_user_model().objects.get_or_create(
+            firebaseId=firebase_user_record.uid,
+        )[0]
