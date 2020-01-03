@@ -10,7 +10,10 @@ requests~=2.22.0
 firebase-admin
 pyrebase
 psycopg2
-django-rest-swagger
+drf-yasg
 phonenumbers
 django-phonenumber-field
 drf-firebase-authentication
+gunicorn
+dj-database-url
+whitenoise

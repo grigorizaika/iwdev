@@ -25,11 +25,9 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', views.signIn),
-    url(r'^signin', views.postSignIn), 
+    url(r'^signin', views.postSignIn),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # REST Framework URLs
     path('api/', include('api.urls', namespace='api'))
 ]
-
-

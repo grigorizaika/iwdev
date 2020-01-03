@@ -1,22 +1,44 @@
+from api.views import (AddressView, ClientView, CompanyView, check_phone, OrderView, TaskView, UserView,)
 from django.conf.urls import url, include
 from django.urls import path
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
 from rest_framework import routers
-
-from api.views import (AddressListView, api_user_view, ClientViewSet)
 
 app_name = 'api'
 
-router = routers.DefaultRouter()
-#router.register(r'clients', ClientViewSet, basename='ClientViewSet')
-#urlpatterns = router.urls
-client_list     = ClientViewSet.as_view({'get': 'list'})
-#client_detail   = ClientViewSet.as_view({'get': 'retrieve'})
+address_list = AddressView.as_view()
+client_list = ClientView.as_view()
+company_list = CompanyView.as_view()
+order_list = OrderView.as_view()
+task_list = TaskView.as_view()
+user_list = UserView.as_view()
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Snippets API",
+        default_version='v1',
+        description="Test description",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@snippets.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
-    url(r'users(?P<email>\w{0,50})', api_user_view, name="users"),
-    url(r'addresses', AddressListView.as_view(), name="addresses"),
-    url(r'clients(?P<email>\w{0,50})', client_list, name="clients"),
-    #url(r'fuckinhell', client_detail, name="clients_detail"),
+    #url(r'^$', schema_view),
+    url(r'^swagger/$', schema_view.with_ui('swagger',
+                                           cache_timeout=0), name='schema-swagger-ui'),
+    url(r'addresses', address_list, name="addresses"),
+    url(r'clients(?P<name>\w{0,50})/$', client_list, name="clients"),
+    url(r'users(?P<email>\w{0,50})/$', user_list),
+    url(r'users/check_phone(?P<phone>\w{0,50})/$', check_phone),
+    url(r'orders(?P<id>\w{0,50})/$', order_list),
+    url(r'tasks(?P<id>\w{0,50})/$', task_list),
+    url(r'companies(?P<id>\w{0,50})/$', company_list),
+    #url(r'check_phone(?P<phone>\w{0,50})/$', user_list, name="check_phone"),
+    #url(r'users/register', user_registration, name="registration"),
 ]
-
-urlpatterns += router.urls
