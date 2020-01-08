@@ -10,3 +10,5 @@ class AddressAdmin(admin.ModelAdmin):
 @admin.register(AddressOwner)
 class AddressOwnerAdmin(admin.ModelAdmin):
     pass
+    # def has_delete_permission(self, request, obj=None):
+    #     return False

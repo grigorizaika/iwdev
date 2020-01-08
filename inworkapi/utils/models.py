@@ -37,7 +37,7 @@ class AddressOwner(models.Model):
 
     def get_owner_instance(self):
         # Search a list of all classes that are address owners
-        return users.models.User.objects.get(address_owner=self)
+        return users.models.User.objects.get(address_owner=self.id)
 
     def __str__(self):
         return 'AO_' + str(self.id) + ' ' + str(self.get_owner_instance())
