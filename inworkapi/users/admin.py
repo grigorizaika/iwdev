@@ -18,7 +18,8 @@ class CustomUserAdmin(UserAdmin):
     model = CustomUser
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
-    fields = ['email', 'role', 'name', 'surname', 'phone', 'address', 'supervisor', 'is_staff', 'firebaseId']
+    fields = ['email', 'role', 'name', 'surname', 'phone', 'address_owner', 'supervisor', 'is_staff', 'firebaseId']
+    #fields = '__all__'
     fieldsets =  []
     ordering = ('email',)
     readonly_fields=('firebaseId', )
@@ -27,7 +28,7 @@ class CustomUserAdmin(UserAdmin):
             'classes': ('wide',),
             'fields': (
                 'email', 'role', 'name', 'surname', 'phone', 
-                'address', 'is_staff', 'is_superuser', 'password1', 'password2'
+                'address_owner', 'is_staff', 'is_superuser', 'password1', 'password2'
                 )
             }
         ),

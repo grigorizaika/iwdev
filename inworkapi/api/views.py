@@ -19,11 +19,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.helpers import (create_address, slice_fields)
-from api.permissions import IsPostOrIsAuthenticated
+from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
 from clients.models import Client
 from inworkapi.settings import FIREBASE_CONFIG
 from orders.models import (Order, Task)
-#from users.models import 
 from users.models import (User as CustomUser, Role, Company)
 from utils.models import Address
 
@@ -56,8 +55,7 @@ def check_phone(request, **kwargs):
 
 class UserView(APIView):
     authentication_classes = [BasicAuthentication]
-    permission_classes = [IsPostOrIsAuthenticated]
-
+    permission_classes = [IsAdministrator]
 
     def get(self, request, **args):
         print("Executing GET request to Users, with data ", request.query_params)
@@ -87,8 +85,8 @@ class UserView(APIView):
             addressData = {
                 'owner':        owner_id,
                 'street':       request.data.get('street'),
-                'house_no':      request.data.get('house_no'),
-                'flat_no':       request.data.get('flat_no'),
+                'house_no':     request.data.get('house_no'),
+                'flat_no':      request.data.get('flat_no'),
                 'city':         request.data.get('city'),
                 'district':     request.data.get('district'),
                 'country':      request.data.get('country'),
@@ -167,19 +165,16 @@ class UserView(APIView):
 
         try:
             djangoUser = CustomUser.objects.get(email=email)
-
-            firebase_admin.auth.delete_user(djangoUser.firebaseId)
             djangoUser.delete()
-
             data['response'] = "Successfully deleted " + str(email)
-
             return Response(data)
         except CustomUser.DoesNotExist:
             data['response'] = "User with an email " + \
                 str(email) + " does not exit"
             return Response(data)
-        except Exception as e:
-            data['response'] = "Unhandled exception " + e.message
+        #except Exception as e:
+        #    data['response'] = "Unhandled exception " + str(e)
+        #    return Response(data)
 
 
 class AddressView(generics.ListCreateAPIView, mixins.DestroyModelMixin):
@@ -206,7 +201,7 @@ class ClientView(APIView):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
 
     authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdministrator]
 
     def get(self, request, **args):
 
@@ -297,7 +292,7 @@ class OrderView(APIView):
     filterset_fields = ['client', 'name']
 
     authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdministrator]
 
 
     def get(self, request, **args):
