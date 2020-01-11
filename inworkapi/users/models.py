@@ -1,18 +1,23 @@
+import boto3
 import datetime
-import firebase_admin
+# import firebase_admin
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.db.models.signals import (post_delete, post_save)
 from django.utils.translation import gettext as _
-from firebase_admin import auth
-from firebase_admin._auth_utils import EmailAlreadyExistsError
+# from firebase_admin import auth
+# from firebase_admin._auth_utils import EmailAlreadyExistsError
 from phonenumber_field.modelfields import PhoneNumberField
 
-from inworkapi.settings import FIREBASE_KEY
-from inworkapi.settings import FIREBASE_CONFIG
+from inworkapi.settings import COGNITO_USER_POOL_ID
+from inworkapi.settings import COGNITO_APP_CLIENT_ID
+#from inworkapi.settings import COGNITO_APP_CLIENT_SECRET
+# from inworkapi.settings import FIREBASE_KEY
+# from inworkapi.settings import FIREBASE_CONFIG
 from utils.models import (AddressOwner, Address)
+from warrant import Cognito
 
 
 class UserManager(BaseUserManager):
@@ -80,7 +85,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 blank=True, 
                                 limit_choices_to={'role__name': 'administrator'})
     createdAt               = models.DateTimeField(auto_now_add=True)
-    firebaseId              = models.CharField(max_length=191, null=False, blank=False)
+    #firebaseId              = models.CharField(max_length=191, null=False, blank=False)
 
     # A required Django field. Does not represent the business logic.
     is_staff                = models.BooleanField(default=False)
@@ -106,6 +111,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         )
 
 
+    def get_cognito_sub(self):
+        client = boto3.client('cognito-idp')
+        response = client.admin_get_user(
+            UserPoolId=COGNITO_USER_POOL_ID,
+            Username=str(self.email)
+        )
+        return [item for item in response.get('UserAttributes') if item['Name'] == 'sub'][0]['Value']
+
+
+
     def save(self, *args, **kwargs):
         if self.supervisor != self:
             super(User, self).save(*args, **kwargs)
@@ -118,34 +133,36 @@ class User(AbstractBaseUser, PermissionsMixin):
         instance.address_owner = AddressOwner.objects.create()
 
 
-    # TODO: add photo_url
+# TODO: Disallow Django user creation if Cognito user creation fails
     @staticmethod
-    def create_firebase_user(instance):
-        try:
-            firebaseUser = auth.create_user(
-                email=instance.email,
-                email_verified=False,
-                phone_number=str(instance.phone),
-                password=instance.password,
-                display_name=(instance.name + ' ' + instance.surname),
-                # photo_url='http://www.example.com/12345678/photo.png',
-                disabled=False)
-            print('Sucessfully created new user: {0}'.format(firebaseUser.uid))
-            instance.firebaseId = firebaseUser.uid
-        except EmailAlreadyExistsError as eaee:
-            print('EAEE')
-                
-
-    @staticmethod
-    def delete_address_owner(instance):
-        if instance.address_owner:
-            instance.address_owner.delete()
+    def create_cognito_user(instance):
+        u = Cognito(
+                COGNITO_USER_POOL_ID,
+                COGNITO_APP_CLIENT_ID,
+#                client_secret=COGNITO_APP_CLIENT_SECRET,
+                username=instance.email,
+                #region='eu-central-1'
+            )
+        u.add_base_attributes(email=instance.email, phone_number=str(instance.phone))
+        u.register(instance.email, instance.password)
 
 
-    @staticmethod
-    def delete_firebase_user(instance):
-        if instance.firebaseId:
-            firebase_admin.auth.delete_user(instance.firebaseId)
+    # # TODO: add photo_url
+    # @staticmethod
+    # def create_firebase_user(instance):
+    #     try:
+    #         firebaseUser = auth.create_user(
+    #             email=instance.email,
+    #             email_verified=False,
+    #             phone_number=str(instance.phone),
+    #             password=instance.password,
+    #             display_name=(instance.name + ' ' + instance.surname),
+    #             # photo_url='http://www.example.com/12345678/photo.png',
+    #             disabled=False)
+    #         print('Sucessfully created new user: {0}'.format(firebaseUser.uid))
+    #         instance.firebaseId = firebaseUser.uid
+    #     except EmailAlreadyExistsError as eaee:
+    #         print('EAEE')
 
 
     @staticmethod
@@ -153,15 +170,35 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not created:
             return
         else:
-            User.create_firebase_user(instance)
+            #User.create_firebase_user(instance)
+            User.create_cognito_user(instance)
             User.create_address_owner(instance)
-            
+
+    @staticmethod
+    def delete_address_owner(instance):
+        if instance.address_owner:
+            instance.address_owner.delete()
+
+    @staticmethod
+    def delete_cognito_user(instance):
+        client = boto3.client('cognito-idp')
+        response = client.admin_delete_user(
+            UserPoolId=COGNITO_USER_POOL_ID,
+            Username=instance.email
+        )
+
+    # @staticmethod
+    # def delete_firebase_user(instance):
+    #     if instance.firebaseId:
+    #         firebase_admin.auth.delete_user(instance.firebaseId)
+
 
     @staticmethod
     def delete_cleanup(sender, instance, *args, **kwargs):
         User.delete_address_owner(instance)
-        User.delete_firebase_user(instance)
-
+        User.delete_cognito_user(instance)
+        # User.delete_firebase_user(instance)
+        
 
     def __str__(self):
         return self.name + ', ' + self.email
