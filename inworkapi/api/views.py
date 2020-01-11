@@ -1,5 +1,5 @@
 import django_filters.rest_framework
-import firebase_admin
+#import firebase_admin
 import phonenumbers
 
 from api.serializers import (
@@ -18,16 +18,44 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.helpers import (create_address, slice_fields)
+from api.helpers import (create_address, create_presigned_post, slice_fields)
 from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
 from clients.models import Client
-from inworkapi.settings import FIREBASE_CONFIG
 from orders.models import (Order, Task)
 from users.models import (User as CustomUser, Role, Company)
 from utils.models import Address
 
 
 # Function-based views
+@api_view(['GET'])
+@authentication_classes([BasicAuthentication])
+def get_presigned_url(request, **kwargs):
+    bucket_name = 'inwork-s3-bucket'
+    location = request.data.get('to')
+    data = {}
+    resource_id = request.data.get('id')
+
+    if not location:
+        data['response'] = 'Must specify \'to\' and \'id\' parameters in request body'
+        return Response(data)
+
+    if location == 'users':
+        if request.user.is_authenticated:
+            object_name = location + '/' + request.user.email
+        else:
+            data['response'] = 'Sign in to upload a file'
+            return Response(data)
+    else:
+        # TODO: allow upload to client only if admin is assigned to the client
+        if resource_id:
+            object_name = location + '/' + resource_id
+        else:
+            data['response'] = 'Must specify ' + location[:-1] + ' id'
+            return Response(data)
+
+    data = create_presigned_post(bucket_name, object_name)
+
+    return Response(data)
 
 @api_view(['GET'])
 def check_phone(request, **kwargs):
@@ -136,16 +164,16 @@ class UserView(APIView):
             else:
                 new_display_name = djangoUser.name + ' ' + djangoUser.surname
 
-            if request.data.get('phone'):
-                firebaseUser = firebase_admin.auth.update_user(
-                    djangoUser.firebaseId,
-                    phone_number=request.data.get('phone'),
-                )
-            elif request.data.get('name') or request.data.get('surname'):
-                firebaseUser = firebase_admin.auth.update_user(
-                    djangoUser.firebaseId,
-                    display_name=new_display_name,
-                )
+            # if request.data.get('phone'):
+            #     firebaseUser = firebase_admin.auth.update_user(
+            #         djangoUser.firebaseId,
+            #         phone_number=request.data.get('phone'),
+            #     )
+            # elif request.data.get('name') or request.data.get('surname'):
+            #     firebaseUser = firebase_admin.auth.update_user(
+            #         djangoUser.firebaseId,
+            #         display_name=new_display_name,
+            #     )
 
             djangoUser = serializer.save()
             data['response'] = 'Successfully updated user ' + \

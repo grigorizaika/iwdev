@@ -1,12 +1,12 @@
 import pyrebase
 
 from django.shortcuts import render
-from inworkapi.settings import FIREBASE_CONFIG
+# from inworkapi.settings import FIREBASE_CONFIG
 
 
-firebase = pyrebase.initialize_app(FIREBASE_CONFIG)
+# firebase = pyrebase.initialize_app(FIREBASE_CONFIG)
 
-auth = firebase.auth()
+# auth = firebase.auth()
 
 
 def signIn(request):
@@ -17,6 +17,6 @@ def postSignIn(request):
     email = request.POST.get('email')
     password = request.POST.get('password')
 
-    user = auth.sign_in_with_email_and_password(email, password)
+    # user = auth.sign_in_with_email_and_password(email, password)
 
     return render(request, 'welcome.html', {'email': email})
