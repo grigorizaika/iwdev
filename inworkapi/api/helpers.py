@@ -12,11 +12,12 @@ def slice_fields(key_list, l):
     return l_sliced
 
 # TODO: Probably want to use serializers here
-def create_address(street, houseNo, city, district, country, flatNo=None,):
+def create_address(owner, street, house_no, city, district, country, flat_no=None,):
     return Address.objects.create(
+        owner=owner,
         street=street,
-        houseNo=houseNo,
-        flatNo=flatNo,
+        house_no=house_no,
+        flat_no=flat_no,
         city=city,
         district=district,
         country=country

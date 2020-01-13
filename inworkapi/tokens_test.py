@@ -1,23 +1,18 @@
 
 def get_tokens() :
-    # import base64
-    # import boto3
-    # from warrant.aws_srp import AWSSRP
+    import boto3
+    import pprint
 
-    # client = boto3.client('cognito-idp')
-    # aws = AWSSRP(
-    #     username='c4f5a64a-e628-4463-a141-55a9b5f70a0f',
-    #     password='sitn1994',
-    #     pool_id='eu-central-1_4W9Ujr278',
-    #     client_id='6mipnr7jemniq9ng911uh85aub',
-    #     client=client
-    #     )
-    # tokens = aws.authenticate_user()
-    # return tokens
-    from warrant import Cognito
-    u = Cognito(
-        'eu-central-1_4W9Ujr278',
-        '6mipnr7jemniq9ng911uh85aub',
-        username='grigorizaika@outlook.com'
+    client = boto3.client('cognito-idp')
+
+    response = client.initiate_auth(
+        AuthFlow='USER_PASSWORD_AUTH',
+        AuthParameters={
+        'USERNAME': 'gregory.zaika.gmail.com',
+        'PASSWORD': 'Watermelon1#'
+        },
+        ClientId='8n4apo9vid3rje18eijbk6plh',
     )
-    return u.authenticate(password='Watermelon1#')
+
+    pp = pprint.PrettyPrinter(indent=4)
+    return pp.pprint(response)

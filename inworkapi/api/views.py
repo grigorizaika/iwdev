@@ -1,5 +1,5 @@
 import django_filters.rest_framework
-#import firebase_admin
+import json
 import phonenumbers
 
 from api.serializers import (
@@ -29,30 +29,32 @@ from utils.models import Address
 # Function-based views
 @api_view(['GET'])
 @authentication_classes([BasicAuthentication])
-def get_presigned_url(request, **kwargs):
+def get_presigned_upload_url(request, **kwargs):
     bucket_name = 'inwork-s3-bucket'
     location = request.data.get('to')
+    file_name = request.data.get('file_name')
     data = {}
     resource_id = request.data.get('id')
 
-    if not location:
-        data['response'] = 'Must specify \'to\' and \'id\' parameters in request body'
+    if not location or not file_name:
+        data['response'] = 'Must specify \'to\', \'id\' and \'filename\'  parameters in request body'
         return Response(data)
+    
 
     if location == 'users':
         if request.user.is_authenticated:
-            object_name = location + '/' + request.user.email
+            object_name = location + '/' + request.user.email + '/' + file_name
         else:
             data['response'] = 'Sign in to upload a file'
             return Response(data)
     else:
         # TODO: allow upload to client only if admin is assigned to the client
         if resource_id:
-            object_name = location + '/' + resource_id
+            object_name = location + '/' + resource_id + '/' + file_name
         else:
             data['response'] = 'Must specify ' + location[:-1] + ' id'
             return Response(data)
-
+            
     data = create_presigned_post(bucket_name, object_name)
 
     return Response(data)
@@ -260,12 +262,13 @@ class ClientView(APIView):
             client = serializer.save()
             
             address = create_address(
+                client.address_owner,
                 request.data.get('street'),
-                request.data.get('houseNo'),
+                request.data.get('house_no'),
                 request.data.get('city'),
                 request.data.get('district'),
                 request.data.get('country'),
-                request.data.get('flatNo'),
+                request.data.get('flat_no'),
             )
 
             client.address = address
@@ -345,16 +348,20 @@ class OrderView(APIView):
         modified_data = dict(request.data)
         modified_data = { key: val[0]  for key, val in modified_data.items() }
         
-        if isinstance(modified_data['client'], int):
+        if not isinstance(modified_data['client'], int):
             modified_data['client'] = Client.objects.get(name=request.data['client']).id
         
+        modified_data['owner'] = Client.objects.get(name=request.data['client']).address_owner.id
         print("Creating new Order: ", modified_data)
 
         orderSerializer = OrderSerializer(data=modified_data)
         addressSerializer = AddressSerializer(data=modified_data)
         data = {}
 
-        if orderSerializer.is_valid() and addressSerializer.is_valid():
+        order_valid = orderSerializer.is_valid()
+        address_valid = addressSerializer.is_valid()
+
+        if order_valid and address_valid:
             order = orderSerializer.save()
             order.address = addressSerializer.save()
             order.save()
@@ -397,35 +404,89 @@ class TaskView(APIView):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
-
     def get(self, request, **args):
-        taskId = request.GET.get('id')
+        task_id = request.GET.get('id')
+        worker_id = request.GET.get('worker')
+        date = request.GET.get('date')
+        date_start = request.GET.get('date_start')
+        date_end = request.GET.get('date_end')
+
         data = {}
 
-        if taskId:
+        if task_id:
             try:
-                task = Task.objects.get(id=taskId)
+                task = Task.objects.get(id=task_id)
                 serializer = TaskSerializer(task)
                 return Response(serializer.data)
             except Task.DoesNotExist:
                 data['response'] = 'Task with an id ' + taskId + ' does not exist'
                 return Response(data)
-        else:
-            queryset = Task.objects.all()
+        elif worker_id:
+            # TODO: Check admin permissions properly using DRF permissions
+            if request.user.role.name == 'Administrator':          
+                if date:
+                    queryset = Task.objects.filter(worker=worker_id).filter(date=date)
+                elif date_start and date_end:
+                    queryset = Task.objects \
+                                        .filter(worker=worker_id) \
+                                        .filter(date__gte=date_start) \
+                                        .filter(date__lte=date_end)
+                else:
+                    queryset = Task.objects.filter(worker=worker_id)
+                    # TODO: add this to the message
+                    data['comment'] = 'Date wasn\'t specified, returning all task assigned to the worker ' + worker_id        
+                serializer = TaskSerializer(queryset, many=True)
+                return Response(serializer.data)
+            else:
+                data['response'] = 'You must have administrator permissions to perform this action'
+                return Response(data)
+        elif date or (date_start and date_end):
+            # When neither worker nor particular task are specified, default to my tasks
+            if date:
+                queryset = Task.objects.filter(worker=request.user.id).filter(date=date)
+            elif date_start and date_end:
+                queryset = Task.objects \
+                                        .filter(worker=request.user.id) \
+                                        .filter(date__gte=date_start) \
+                                        .filter(date__lte=date_end)
+            
             serializer = TaskSerializer(queryset, many=True)
-            short_list = slice_fields(['id', 'order', 'name', 'worker'], serializer.data)
-            return Response(short_list)
+            return Response(serializer.data)
+        else:
+            # TODO: Check admin permissions properly using DRF permissions
+            if request.user.role.name == 'Administrator':
+                queryset = Task.objects.all()
+                serializer = TaskSerializer(queryset, many=True)
+                short_list = slice_fields(['id', 'order', 'name', 'worker'], serializer.data)
+                return Response(short_list)
+            else:
+                data['response'] = 'You must have administrator permissions to perform this action'
+                return Response(data)
 
 
     def post(self, request, **args):
-        taskSerializer = TaskSerializer(data=request.data)
-        data = {}
 
-        if taskSerializer.is_valid():
-            task = taskSerializer.save()
-            data['response'] = 'Successfully created task ' + str(task.id) + ' ' + task.name
-        else:
-            data = taskSerializer.errors
+        task_list = json.loads(request.data.get('task_list'))
+
+        print('----------------' + 'Tasks' + '----------------')
+        print(task_list)
+        print('----------------' + '-----' + '----------------')
+
+        data = {}
+        full_response = []
+
+        for task_item in task_list:
+            print('-------------' + 'Current task' + '------------')
+            print(task_item)
+            print('----------------' + '-----' + '----------------')
+            taskSerializer = TaskSerializer(data=task_item)
+            if taskSerializer.is_valid():
+                task = taskSerializer.save()
+                full_response.append('Successfully created task ' + str(task.id) + ' ' + task.name ) 
+            else:
+                full_response.append(str(taskSerializer.errors))
+        
+        data['response'] = full_response
         
         return Response(data)
 
@@ -442,7 +503,7 @@ class TaskView(APIView):
             data = serializer.errors
         return Response(data)
 
-    
+
     def delete(self, request, id):
         taskId = request.data.get('id')
         data = {}
@@ -454,6 +515,20 @@ class TaskView(APIView):
         except Task.DoesNotExist:
             data['response'] = 'Task with an id ' + str(taskId) + ' does not exist'
         return Response(data)
+
+
+@api_view(['PUT'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAdministrator])
+def accept_hours_worked(request, **kwargs):
+    task_id = request.data.get('id')
+    try:
+        task = Task.objects.get(id=task_id)
+        task.is_hours_worked_accepted = True
+        task.save()
+        return Response({ 'response': 'Successfully accepted hours in task ' + task_id })
+    except Task.DoesNotExist:
+        return Response({ 'response': 'Task id ' + task_id + ' does not exist' })
 
 
 class CompanyView(generics.ListCreateAPIView, mixins.UpdateModelMixin):

@@ -103,7 +103,11 @@ class AddressSerializer(serializers.ModelSerializer):
 
 
     def get_owner_email(self, obj):
-        return obj.get_owner_instance().email
+        owner_instance = obj.get_owner_instance()
+        if(isinstance(owner_instance, CustomUser) or isinstance(owner_instance, Client)):
+            return owner_instance.email
+        else:
+            return 'Only Users and Clients have emails'
 
 
     class Meta:
@@ -121,6 +125,14 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+    address_owner = serializers.StringRelatedField()
+    addresses = serializers.SerializerMethodField()
+
+    def get_addresses(self, obj):
+        queryset = obj.addresses()
+        serializer = AddressSerializer(queryset, many=True)
+        return serializer.data
+
     def create(self, validated_data):
         return Client.objects.create(
             name=validated_data['name'],
@@ -131,20 +143,20 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    #client  = serializers.StringRelatedField()
     address = serializers.StringRelatedField()
-
+    client_name = serializers.SerializerMethodField()
 
     def create(self, validated_data):
         print ("In Order create(): ", validated_data)
         return Order.objects.create(
             name = validated_data['name'],
             client = validated_data['client'],
-            #address = validated_data['address'],
             billingPeriod = validated_data['billingPeriod'],
             description = validated_data['description'],
         )
-
+    
+    def get_client_name(self, obj):
+        return obj.client.name
 
     class Meta:
         model = Order
@@ -153,14 +165,13 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
 
-
     def create(self, validated_data):
         print("In Task create(): ", validated_data)
         return Task.objects.create(
             order=validated_data['order'],
             name=validated_data['name'],
             date=validated_data['date'],
-            manualTimeSet=validated_data['manualTimeSet'],
+            manualTimeSet=validated_data['manual_time_set'],
             worker=validated_data['worker'],
             description=validated_data['description'],
             comment=validated_data['comment'],
