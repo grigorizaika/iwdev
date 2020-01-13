@@ -1,16 +1,50 @@
 from django.db import models
 from django.utils.translation import gettext as _
 from phonenumber_field.modelfields import PhoneNumberField
-
+from django.db.models.signals import (post_delete, post_save)
+import utils.models
 
 class Client(models.Model):
     name = models.CharField(max_length=40, unique=True)
     email = models.EmailField(_('email address'))
-    contactName = models.CharField(max_length=40)
-    contactPhone = PhoneNumberField()
-    address = models.ForeignKey(
-        'utils.Address', on_delete=models.CASCADE, null=True)
+    contact_name = models.CharField(max_length=40)
+    contact_phone = PhoneNumberField()
+    address_owner = models.OneToOneField(
+                            'utils.AddressOwner', 
+                            on_delete=models.CASCADE, 
+                            null=True, 
+                            blank=True
+                        )
     # TODO: logoUrl, after the Firebase storage integration
+
+    def addresses(self):
+        return utils.models.Address.objects.filter(owner=self.address_owner)
+    
+    @staticmethod
+    def create_address_owner(instance):
+        instance.address_owner = utils.models.AddressOwner.objects.create()
+
+
+    @staticmethod
+    def delete_address_owner(instance):
+        if instance.address_owner:
+            instance.address_owner.delete()
+
+
+    @staticmethod
+    def create_setup(sender, instance, created, *args, **kwagrs):
+        if not created:
+            return
+        Client.create_address_owner(instance)
+
+
+    @staticmethod
+    def delete_cleanup(sender, instance, *args, **kwargs):
+        Client.delete_address_owner(instance)
+
 
     def __str__(self):
         return self.name
+
+post_delete.connect(Client.delete_cleanup, sender=Client)
+post_save.connect(Client.create_setup, sender=Client)

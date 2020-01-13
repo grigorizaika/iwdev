@@ -198,8 +198,8 @@ DATABASES['default'].update(prod_db)
 
 # Cognito
 # TODO: set these up as environment variables
-COGNITO_USER_POOL_ID = 'eu-central-1_4W9Ujr278'
-COGNITO_APP_CLIENT_ID = '6mipnr7jemniq9ng911uh85aub'
+COGNITO_USER_POOL_ID = 'eu-central-1_SZFF66v4y'
+COGNITO_APP_CLIENT_ID = '8n4apo9vid3rje18eijbk6plh'
 COGNITO_APP_ID = COGNITO_APP_CLIENT_ID
 COGNITO_ATTR_MAPPING = {
     'email': 'email',

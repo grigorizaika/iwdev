@@ -1,14 +1,14 @@
 from django.db import models
 
-import users.models
+import users.models 
+import clients.models
 
-# Create your models here.
 class Address(models.Model):
     owner                   = models.ForeignKey(
                                 'utils.AddressOwner',
                                 on_delete=models.CASCADE, 
-                                #null=True,
-                                #blank=True,
+                                null=True,
+                                blank=True,
                                 )
     street                  = models.CharField(max_length=40)
     house_no                = models.PositiveIntegerField()
@@ -19,7 +19,10 @@ class Address(models.Model):
     postal_code             = models.CharField(max_length=12, default='00-001')
     
     def get_owner_instance(self):
-        return self.owner.get_owner_instance()
+        if self.owner:
+            return self.owner.get_owner_instance()
+        else:
+            return None
 
     def __str__(self):
         flat_no = ("/" + str(self.flat_no)) if self.flat_no else ''
@@ -32,7 +35,10 @@ class Address(models.Model):
     class Meta:
         verbose_name_plural = "Addresses"
 
-
+# TODO:
+# EITHER rename AddressOwner to MultipleAddressOwner,
+# and make changes in models accordingly,
+# OR make who can have and address an address owner
 class AddressOwner(models.Model):
 
     def get_owner_instance(self):
@@ -40,7 +46,11 @@ class AddressOwner(models.Model):
         try:
             return users.models.User.objects.get(address_owner=self.id)
         except users.models.User.DoesNotExist:
-            return "User not found"
+            try:
+                return clients.models.Client.objects.get(address_owner=self.id)
+            except clients.models.Client.DoesNotExist:
+                return "Neither User nor Client correspond to owner id " + str(self.id)
+
 
     def __str__(self):
         return 'AO_' + str(self.id) + ' ' + str(self.get_owner_instance())

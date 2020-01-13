@@ -40,6 +40,10 @@ class UserManager(BaseUserManager):
         djangoUser.set_password(password)
         djangoUser.save()
 
+        User.create_cognito_user(djangoUser, password)
+
+        # TODO: if create_cognito_user fails, delete django user
+        
         return djangoUser
 
 
@@ -84,7 +88,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 null=True,
                                 blank=True, 
                                 limit_choices_to={'role__name': 'administrator'})
-    createdAt               = models.DateTimeField(auto_now_add=True)
+    created_at               = models.DateTimeField(auto_now_add=True)
     #firebaseId              = models.CharField(max_length=191, null=False, blank=False)
 
     # A required Django field. Does not represent the business logic.
@@ -115,7 +119,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         client = boto3.client('cognito-idp')
         response = client.admin_get_user(
             UserPoolId=COGNITO_USER_POOL_ID,
-            Username=str(self.email)
+            Username=str(self.email).replace('@', '.')
         )
         return [item for item in response.get('UserAttributes') if item['Name'] == 'sub'][0]['Value']
 
@@ -135,16 +139,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # TODO: Disallow Django user creation if Cognito user creation fails
     @staticmethod
-    def create_cognito_user(instance):
+    def create_cognito_user(instance, password):
+        username = str(instance.email).replace('@', '.')
         u = Cognito(
                 COGNITO_USER_POOL_ID,
                 COGNITO_APP_CLIENT_ID,
-#                client_secret=COGNITO_APP_CLIENT_SECRET,
-                username=instance.email,
-                #region='eu-central-1'
+                username=username,
             )
         u.add_base_attributes(email=instance.email, phone_number=str(instance.phone))
-        u.register(instance.email, instance.password)
+        u.register(username, password)
+        # client = boto3.client('cognito-idp')
+        # response = client.sign_up(
+        #     ClientId=COGNITO_APP_CLIENT_ID
+        #     Username=username,
+        #     Password=password
+        #     UserAttributes=[
+        #         {
+        #             'Name': 'email',
+        #             'Value': str(instance.email)
+        #         },
+        #         {
+        #             'Name': 'phone_number',
+        #             'Value': str(instance.phone)
+        #         }
+        #     ]
+        # )
 
 
     # # TODO: add photo_url
@@ -171,13 +190,14 @@ class User(AbstractBaseUser, PermissionsMixin):
             return
         else:
             #User.create_firebase_user(instance)
-            User.create_cognito_user(instance)
+            #User.create_cognito_user(instance)
             User.create_address_owner(instance)
 
     @staticmethod
     def delete_address_owner(instance):
         if instance.address_owner:
             instance.address_owner.delete()
+
 
     @staticmethod
     def delete_cognito_user(instance):
@@ -187,17 +207,10 @@ class User(AbstractBaseUser, PermissionsMixin):
             Username=instance.email
         )
 
-    # @staticmethod
-    # def delete_firebase_user(instance):
-    #     if instance.firebaseId:
-    #         firebase_admin.auth.delete_user(instance.firebaseId)
-
-
     @staticmethod
     def delete_cleanup(sender, instance, *args, **kwargs):
         User.delete_address_owner(instance)
         User.delete_cognito_user(instance)
-        # User.delete_firebase_user(instance)
         
 
     def __str__(self):
@@ -224,8 +237,8 @@ class Role(models.Model):
 class Absence(models.Model):
     user = models.ForeignKey(
         'User', on_delete=models.CASCADE, null=True, blank=True,)
-    dateStart = models.DateField()
-    dateEnd = models.DateField()
+    date_start = models.DateField()
+    date_end = models.DateField()
     state = models.CharField(
         max_length=9,
         choices=[
