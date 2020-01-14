@@ -2,17 +2,15 @@ import boto3
 import datetime
 # import firebase_admin
 
+from botocore.exceptions import ParamValidationError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.db.models.signals import (post_delete, post_save)
 from django.utils.translation import gettext as _
-# from firebase_admin import auth
-# from firebase_admin._auth_utils import EmailAlreadyExistsError
 from phonenumber_field.modelfields import PhoneNumberField
 
-from inworkapi.settings import COGNITO_USER_POOL_ID
-from inworkapi.settings import COGNITO_APP_CLIENT_ID
+from inworkapi.settings import (COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID, COGNITO_ATTR_MAPPING)
 #from inworkapi.settings import COGNITO_APP_CLIENT_SECRET
 # from inworkapi.settings import FIREBASE_KEY
 # from inworkapi.settings import FIREBASE_CONFIG
@@ -58,13 +56,30 @@ class UserManager(BaseUserManager):
         djangoUser.is_superuser = True
         djangoUser.is_staff = True
         djangoUser.admin = True
+        try:
+            djangoUser.role = Role.objects.get_or_create(
+                name='Administrator'
+            )
+        except ValueError:
+            print('Didn\'t assign a role to the user')
+
         djangoUser.save()
         return djangoUser
 
 
+    def get_or_create_for_cognito(self, payload):
+        cognito_id = payload['sub']
+
+        try:
+            return self.get(cognito_id=cognito_id)
+        except self.model.DoesNotExist:
+            pass
+
+        return user
+
+
 # TODO: change UserManager according to the updated User model
 class User(AbstractBaseUser, PermissionsMixin):
-    # TODO: profilePictureUrl, after the Firebase storage integration
     username                = None
     email                   = models.EmailField(_('email address'), unique=True)
     name                    = models.CharField(max_length=40)
@@ -89,8 +104,8 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 blank=True, 
                                 limit_choices_to={'role__name': 'administrator'})
     created_at               = models.DateTimeField(auto_now_add=True)
-    #firebaseId              = models.CharField(max_length=191, null=False, blank=False)
-
+    cognito_id               = models.CharField(max_length=191)
+    profile_picture_url      = models.URLField(max_length=300, blank=True, null=True)
     # A required Django field. Does not represent the business logic.
     is_staff                = models.BooleanField(default=False)
 
@@ -115,16 +130,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         )
 
 
-    def get_cognito_sub(self):
-        client = boto3.client('cognito-idp')
-        response = client.admin_get_user(
-            UserPoolId=COGNITO_USER_POOL_ID,
-            Username=str(self.email).replace('@', '.')
-        )
-        return [item for item in response.get('UserAttributes') if item['Name'] == 'sub'][0]['Value']
-
-
-
     def save(self, *args, **kwargs):
         if self.supervisor != self:
             super(User, self).save(*args, **kwargs)
@@ -141,29 +146,29 @@ class User(AbstractBaseUser, PermissionsMixin):
     @staticmethod
     def create_cognito_user(instance, password):
         username = str(instance.email).replace('@', '.')
-        u = Cognito(
-                COGNITO_USER_POOL_ID,
-                COGNITO_APP_CLIENT_ID,
-                username=username,
+
+        # TODO: rewrite using boto3
+        try:
+            u = Cognito(
+                    COGNITO_USER_POOL_ID,
+                    COGNITO_APP_CLIENT_ID,
+                    username=username,
+                )
+            u.add_base_attributes(email=instance.email, phone_number=str(instance.phone))
+
+            u.register(username, password)
+        except Exception as e:
+            instance.delete()
+
+        try:
+            client = boto3.client('cognito-idp')
+            response = client.admin_get_user(
+                UserPoolId=COGNITO_USER_POOL_ID,
+                Username=username
             )
-        u.add_base_attributes(email=instance.email, phone_number=str(instance.phone))
-        u.register(username, password)
-        # client = boto3.client('cognito-idp')
-        # response = client.sign_up(
-        #     ClientId=COGNITO_APP_CLIENT_ID
-        #     Username=username,
-        #     Password=password
-        #     UserAttributes=[
-        #         {
-        #             'Name': 'email',
-        #             'Value': str(instance.email)
-        #         },
-        #         {
-        #             'Name': 'phone_number',
-        #             'Value': str(instance.phone)
-        #         }
-        #     ]
-        # )
+            instance.cognito_id = [item for item in response.get('UserAttributes') if item['Name'] == 'sub'][0]['Value']
+        except Exception as e:
+            print(e)
 
 
     # # TODO: add photo_url
@@ -202,10 +207,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     @staticmethod
     def delete_cognito_user(instance):
         client = boto3.client('cognito-idp')
-        response = client.admin_delete_user(
-            UserPoolId=COGNITO_USER_POOL_ID,
-            Username=instance.email
-        )
+        try:
+            response = client.admin_delete_user(
+                UserPoolId=COGNITO_USER_POOL_ID,
+                Username=str(instance.email).replace('@', '.')
+            )
+        except Exception as e:
+            print(e)
+        
 
     @staticmethod
     def delete_cleanup(sender, instance, *args, **kwargs):
@@ -228,7 +237,6 @@ class Role(models.Model):
         max_length=13,
         choices=ROLE_CHOICES,
         unique=True)
-
 
     def __str__(self):
         return self.name

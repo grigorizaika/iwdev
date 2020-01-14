@@ -18,9 +18,14 @@ class CustomUserAdmin(UserAdmin):
     model = CustomUser
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
-    fields = ['email', 'role', 'name', 'surname', 'phone', 'address_owner', 'supervisor', 'is_staff', 'cognito_sub']
+    fields = [
+        'email', 'role', 'name', 'surname', 
+        'phone', 'cognito_id', 'profile_picture_url',
+        'address_owner', 'supervisor', 'is_staff'
+        ]
     #fields = '__all__'
     fieldsets =  []
+    readonly_fields=('cognito_id',)
     ordering = ('email',)
     
     add_fieldsets = (
@@ -36,11 +41,6 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('email', 'name', 'surname', 'phone')
     list_display = ('email', 'name', 'surname',)
     list_filter = ('is_staff',)
-
-    readonly_fields=('cognito_sub', )
-    cognito_sub = lambda self, instance: instance.get_cognito_sub()
-    cognito_sub.short_description = 'Cognito sub'
-
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):

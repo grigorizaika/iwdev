@@ -27,7 +27,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             phone=validated_data['phone'],
             password=password
         )
-
+        user.role = Role.objects.get(name=validated_data.get('role'))
         user.save()
         
         return user
@@ -137,8 +137,8 @@ class ClientSerializer(serializers.ModelSerializer):
         return Client.objects.create(
             name=validated_data['name'],
             email=validated_data['email'],
-            contactName=validated_data['contactName'],
-            contactPhone=validated_data['contactPhone']
+            contact_name=validated_data['contact_name'],
+            contact_phone=validated_data['contact_phone']
         )
 
 
