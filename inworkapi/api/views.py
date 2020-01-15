@@ -4,6 +4,7 @@ import phonenumbers
 
 from api.serializers import (
     AddressSerializer, ClientSerializer, CompanySerializer, UserSerializer, RegistrationSerializer, OrderSerializer, TaskSerializer)
+from django_cognito_jwt import JSONWebTokenAuthentication
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from rest_framework import generics
@@ -28,7 +29,7 @@ from utils.models import Address
 
 # Function-based views
 @api_view(['GET'])
-@authentication_classes([BasicAuthentication])
+@authentication_classes([BasicAuthentication, JSONWebTokenAuthentication])
 def get_presigned_upload_url(request, **kwargs):
     bucket_name = 'inwork-s3-bucket'
     location = request.data.get('to')
@@ -84,7 +85,7 @@ def check_phone(request, **kwargs):
 # Class-based views
 
 class UserView(APIView):
-    authentication_classes = [BasicAuthentication]
+    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
 
     def get(self, request, **args):
@@ -140,14 +141,24 @@ class UserView(APIView):
 
 
     def patch(self, request, **args):
+        # Check if admin or self
+
         print("in data of UserView, data: ", request.data)
         print("email: ", request.query_params.get('email'))
 
+        processed_data = dict(request.data)
+
         email = request.query_params.get('email')
+
+        role = processed_data.get('role')
+        
+        if role:
+            role_id = Role.objects.get(name=role[0]).id
+            processed_data['role'] = role_id
 
         djangoUser = CustomUser.objects.get(email=email)
         serializer = UserSerializer(
-            djangoUser, data=request.data, partial=True)
+            djangoUser, data=processed_data, partial=True)
         data = {}
 
         if serializer.is_valid():
@@ -213,7 +224,7 @@ class AddressView(generics.ListCreateAPIView, mixins.DestroyModelMixin):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['owner', 'street', 'city', 'district', 'country']
 
-    authentication_classes = [BasicAuthentication]
+    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_object(self, addressId):
@@ -230,7 +241,7 @@ class ClientView(APIView):
     serializer_class = ClientSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
 
-    authentication_classes = [BasicAuthentication]
+    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
 
     def get(self, request, **args):
@@ -249,7 +260,7 @@ class ClientView(APIView):
             return Response(serializer.data)
         else:
             serializer = ClientSerializer(queryset, many=True)
-            short_list = slice_fields(['name', 'email', 'contactPhone'], serializer.data)
+            short_list = slice_fields(['name', 'email', 'contact_phone'], serializer.data)
             return Response(short_list)
 
 
@@ -322,7 +333,7 @@ class OrderView(APIView):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['client', 'name']
 
-    authentication_classes = [BasicAuthentication]
+    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
 
 
@@ -401,7 +412,7 @@ class OrderView(APIView):
 class TaskView(APIView):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['client', 'name']
-    authentication_classes = [BasicAuthentication]
+    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, **args):
@@ -518,7 +529,7 @@ class TaskView(APIView):
 
 
 @api_view(['PUT'])
-@authentication_classes([BasicAuthentication])
+@authentication_classes([BasicAuthentication, JSONWebTokenAuthentication])
 @permission_classes([IsAdministrator])
 def accept_hours_worked(request, **kwargs):
     task_id = request.data.get('id')
@@ -534,5 +545,5 @@ def accept_hours_worked(request, **kwargs):
 class CompanyView(generics.ListCreateAPIView, mixins.UpdateModelMixin):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    authentication_classes = [BasicAuthentication]
+    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAuthenticated]

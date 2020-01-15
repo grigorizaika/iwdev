@@ -14,8 +14,9 @@ SECRET_KEY = 'gm^3*#2*)@v$m)-(xv$+g%wc)nvb@)hn4#0#11k2o-p2*8_vp3'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'herokuinworkapi.herokuapp.com',
+    'inworkapi.herokuapp.com',
     '127.0.0.1',
+    'ec2-18-185-130-201.eu-central-1.compute.amazonaws.com',
 ]
 
 
@@ -167,7 +168,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
-        'django_warrant.backend.CognitoBackend',
+        #'django_warrant.backend.CognitoBackend',
+        'django_cognito_jwt.JSONWebTokenAuthentication',
         #'rest_framework.authentication.SessionAuthentication',
         #'inworkapi.authentication.FirebaseAuthentication', 
     ]
@@ -188,13 +190,10 @@ REST_FRAMEWORK = {
 # cred = firebase_admin.credentials.Certificate(FIREBASE_KEY)
 # firebase_admin.initialize_app(cred)
 
-
-
 # Heroku
 import dj_database_url 
 prod_db  =  dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(prod_db)
-
 
 # Cognito
 # TODO: set these up as environment variables
@@ -205,6 +204,6 @@ COGNITO_ATTR_MAPPING = {
     'email': 'email',
     'phone_number': 'phone',
 }
-#COGNITO_AWS_REGION = 'eu-central-1'
-#COGNITO_USER_POOL = 'eu-central-1_4W9Ujr278'
-#COGNITO_AUDIENCE = '1s4ubtdruk0t08773upbusgum7'
+COGNITO_AWS_REGION = 'eu-central-1'
+COGNITO_USER_POOL = COGNITO_USER_POOL_ID
+COGNITO_AUDIENCE = COGNITO_APP_CLIENT_ID
