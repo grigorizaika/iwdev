@@ -149,19 +149,26 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         # TODO: rewrite using boto3
         try:
-            u = Cognito(
-                    COGNITO_USER_POOL_ID,
-                    COGNITO_APP_CLIENT_ID,
-                    username=username,
-                )
-            u.add_base_attributes(email=instance.email, phone_number=str(instance.phone))
-
-            u.register(username, password)
+            client = boto3.client('cognito-idp', region_name='eu-central-1')
+            response = client.admin_create_user(
+                UserPoolId=COGNITO_USER_POOL_ID,
+                Username=username,
+                UserAttributes=[
+                    {
+                        'Name': 'email',
+                        'Value': instance.email
+                    },
+                    {
+                        'Name': 'phone_number',
+                        'Value': instance.phone
+                    },
+                ]
+            )
         except Exception as e:
             instance.delete()
 
         try:
-            client = boto3.client('cognito-idp')
+            client = boto3.client('cognito-idp', region_name='eu-central-1')
             response = client.admin_get_user(
                 UserPoolId=COGNITO_USER_POOL_ID,
                 Username=username
@@ -206,7 +213,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @staticmethod
     def delete_cognito_user(instance):
-        client = boto3.client('cognito-idp')
+        client = boto3.client('cognito-idp', region_name='eu-central-1')
         try:
             response = client.admin_delete_user(
                 UserPoolId=COGNITO_USER_POOL_ID,

@@ -14,8 +14,9 @@ SECRET_KEY = 'gm^3*#2*)@v$m)-(xv$+g%wc)nvb@)hn4#0#11k2o-p2*8_vp3'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'herokuinworkapi.herokuapp.com',
+    'inworkapi.herokuapp.com',
     '127.0.0.1',
+    'ec2-18-185-130-201.eu-central-1.compute.amazonaws.com',
 ]
 
 
