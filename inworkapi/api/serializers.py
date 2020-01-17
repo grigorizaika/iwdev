@@ -19,7 +19,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         if password != password2:
             raise serializers.ValidationError(
                 {'password': 'Passwords don\'t match'})
-        
+
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
             name=validated_data['name'],
@@ -32,7 +32,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         except Role.DoesNotExist:
             print('role ', validated_data.get('role'), ' does not exist')
         user.save()
-        
+
         return user
 
 
@@ -51,7 +51,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
-    
 
 class UserSerializer(serializers.ModelSerializer):
     address_owner = serializers.StringRelatedField()
@@ -72,8 +71,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_addresses(self, obj):
         queryset = obj.addresses()
-        print('HERE HERE HERE HERE HERE ' + str(type(queryset)))
-        print('HERE HERE HERE HERE HERE ' + str(queryset))
         serializer = AddressSerializer(queryset, many=True)
         return serializer.data
 
@@ -81,7 +78,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         exclude = ('password', 'last_login', 'is_staff', 'is_superuser')
-        # fields = ('email', 'name', 'surname', 'phone', 'address', 'role', 'supervisor')
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -154,10 +150,10 @@ class OrderSerializer(serializers.ModelSerializer):
         return Order.objects.create(
             name = validated_data['name'],
             client = validated_data['client'],
-            billingPeriod = validated_data['billingPeriod'],
+            billing_period = validated_data['billing_period'],
             description = validated_data['description'],
         )
-    
+
     def get_client_name(self, obj):
         return obj.client.name
 
@@ -174,7 +170,7 @@ class TaskSerializer(serializers.ModelSerializer):
             order=validated_data['order'],
             name=validated_data['name'],
             date=validated_data['date'],
-            manualTimeSet=validated_data['manual_time_set'],
+            manual_time_set=validated_data['manual_time_set'],
             worker=validated_data['worker'],
             description=validated_data['description'],
             comment=validated_data['comment'],

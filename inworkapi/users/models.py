@@ -77,7 +77,6 @@ class UserManager(BaseUserManager):
         return user
 
 
-# TODO: change UserManager according to the updated User model
 class User(AbstractBaseUser, PermissionsMixin):
     username                = None
     email                   = models.EmailField(_('email address'), unique=True)
@@ -134,8 +133,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             super(User, self).save(*args, **kwargs)
         else:
             raise Exception('A user can\'t be their own supervisor')
-    
-    
+
     @staticmethod
     def create_address_owner(instance):
         ao = AddressOwner.objects.create()
@@ -217,7 +215,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def delete_cleanup(sender, instance, *args, **kwargs):
         User.delete_address_owner(instance)
         User.delete_cognito_user(instance)
-        
+
 
     def __str__(self):
         return self.name + ', ' + self.email

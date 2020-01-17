@@ -51,7 +51,7 @@ def get_presigned_upload_url(request, **kwargs):
     if not location or not file_name:
         data['response'] = 'Must specify \'to\', \'id\' and \'filename\'  parameters in request body'
         return Response(data)
-    
+
 
     if location == 'users':
         if request.user.is_authenticated:
@@ -66,7 +66,7 @@ def get_presigned_upload_url(request, **kwargs):
         else:
             data['response'] = 'Must specify ' + location[:-1] + ' id'
             return Response(data)
-            
+
     data = create_presigned_post(bucket_name, object_name)
 
     return Response(data)
@@ -75,7 +75,7 @@ def get_presigned_upload_url(request, **kwargs):
 def check_phone(request, **kwargs):
     print("in check_phone with data ", request.query_params)
     data = {}
-    
+
     if not request.query_params.get('phone'):
         data['response'] = "Phone number has not been provided"
         return Response(data)
@@ -232,9 +232,6 @@ class UserView(APIView):
             data['response'] = "User with an email " + \
                 str(email) + " does not exit"
             return Response(data)
-        #except Exception as e:
-        #    data['response'] = "Unhandled exception " + str(e)
-        #    return Response(data)
 
 
 class AddressView(generics.ListCreateAPIView, mixins.DestroyModelMixin):
