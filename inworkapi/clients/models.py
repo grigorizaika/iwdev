@@ -15,7 +15,7 @@ class Client(models.Model):
                             null=True, 
                             blank=True
                         )
-    logo_url = models.URLField(max_length=300, blank=True, null=True)
+    logo_url = models.CharField(max_length=300, blank=True, null=True)
 
     def addresses(self):
         return utils.models.Address.objects.filter(owner=self.address_owner)

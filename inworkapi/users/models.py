@@ -1,6 +1,5 @@
 import boto3
 import datetime
-# import firebase_admin
 
 from botocore.exceptions import ParamValidationError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
@@ -11,9 +10,6 @@ from django.utils.translation import gettext as _
 from phonenumber_field.modelfields import PhoneNumberField
 
 from inworkapi.settings import (COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID, COGNITO_ATTR_MAPPING)
-#from inworkapi.settings import COGNITO_APP_CLIENT_SECRET
-# from inworkapi.settings import FIREBASE_KEY
-# from inworkapi.settings import FIREBASE_CONFIG
 from utils.models import (AddressOwner, Address)
 from warrant import Cognito
 
@@ -32,20 +28,23 @@ class UserManager(BaseUserManager):
             name=name,
             surname=surname,
             phone=phone,
-            #firebaseId = firebaseUser.uid
         )
-        
+
+        ao = AddressOwner.objects.create()
         djangoUser.set_password(password)
         djangoUser.save()
+        print('in create_user "saving" address owner')
+        djangoUser.address_owner = ao
+        djangoUser.save()
 
+        #User.create_address_owner(djangoUser)
         User.create_cognito_user(djangoUser, password)
 
-        # TODO: if create_cognito_user fails, delete django user
-        
         return djangoUser
 
 
     def create_superuser(self, email, name, surname, phone, password):
+        print('in create_superuser')
         djangoUser = self.create_user(
             email=self.normalize_email(email),
             password=password,
@@ -57,11 +56,11 @@ class UserManager(BaseUserManager):
         djangoUser.is_staff = True
         djangoUser.admin = True
         try:
-            djangoUser.role = Role.objects.get_or_create(
-                name='Administrator'
-            )
-        except ValueError:
+            adminRole, created =  Role.objects.get_or_create(name='Administrator')
+            djangoUser.role = adminRole
+        except ValueError as e:
             print('Didn\'t assign a role to the user')
+            print(e)
 
         djangoUser.save()
         return djangoUser
@@ -86,15 +85,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     surname                 = models.CharField(max_length=40)
     phone                   = PhoneNumberField(null=False, blank=False, unique=True)
     address_owner           = models.OneToOneField(
-                                'utils.AddressOwner', 
-                                on_delete=models.CASCADE, 
-                                null=True, 
-                                blank=True
+                                'utils.AddressOwner',
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True,
                                 )
     role                    = models.ForeignKey(
                                 'Role', 
                                 on_delete=models.CASCADE, 
-                                null=True, 
+                                null=True,
                                 blank=True,
                                 )
     supervisor              = models.ForeignKey(
@@ -105,7 +104,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 limit_choices_to={'role__name': 'administrator'})
     created_at               = models.DateTimeField(auto_now_add=True)
     cognito_id               = models.CharField(max_length=191)
-    profile_picture_url      = models.URLField(max_length=300, blank=True, null=True)
+    profile_picture_url      = models.CharField(max_length=300, blank=True, null=True)
     # A required Django field. Does not represent the business logic.
     is_staff                = models.BooleanField(default=False)
 
@@ -139,61 +138,50 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     @staticmethod
     def create_address_owner(instance):
-        instance.address_owner = AddressOwner.objects.create()
+        ao = AddressOwner.objects.create()
+        ao.save()
+        instance.address_owner = ao
+        instance.save()
 
 
 # TODO: Disallow Django user creation if Cognito user creation fails
     @staticmethod
     def create_cognito_user(instance, password):
-        username = str(instance.email).replace('@', '.')
+        client = boto3.client('cognito-idp', region_name='eu-central-1')
+        username = str(instance.email)
 
-        # TODO: rewrite using boto3
         try:
-            client = boto3.client('cognito-idp', region_name='eu-central-1')
-            response = client.admin_create_user(
-                UserPoolId=COGNITO_USER_POOL_ID,
+            response = client.sign_up(
+                ClientId=COGNITO_APP_CLIENT_ID,
                 Username=username,
+                Password=password,
                 UserAttributes=[
                     {
                         'Name': 'email',
-                        'Value': instance.email
+                        'Value': str(instance.email)
                     },
                     {
                         'Name': 'phone_number',
-                        'Value': instance.phone
+                        'Value': str(instance.phone)
                     },
                 ]
             )
         except Exception as e:
+            print('Exception from sign_up in create_cognito user')
+            print(e)
             instance.delete()
 
         try:
-            client = boto3.client('cognito-idp', region_name='eu-central-1')
             response = client.admin_get_user(
                 UserPoolId=COGNITO_USER_POOL_ID,
                 Username=username
             )
             instance.cognito_id = [item for item in response.get('UserAttributes') if item['Name'] == 'sub'][0]['Value']
         except Exception as e:
+            print('Exception from admin_get_user in create_cognito user')
             print(e)
-
-
-    # # TODO: add photo_url
-    # @staticmethod
-    # def create_firebase_user(instance):
-    #     try:
-    #         firebaseUser = auth.create_user(
-    #             email=instance.email,
-    #             email_verified=False,
-    #             phone_number=str(instance.phone),
-    #             password=instance.password,
-    #             display_name=(instance.name + ' ' + instance.surname),
-    #             # photo_url='http://www.example.com/12345678/photo.png',
-    #             disabled=False)
-    #         print('Sucessfully created new user: {0}'.format(firebaseUser.uid))
-    #         instance.firebaseId = firebaseUser.uid
-    #     except EmailAlreadyExistsError as eaee:
-    #         print('EAEE')
+        #TODO: do as below
+        cognito_confirm_sign_up(username)
 
 
     @staticmethod
@@ -201,9 +189,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not created:
             return
         else:
+            pass
             #User.create_firebase_user(instance)
             #User.create_cognito_user(instance)
-            User.create_address_owner(instance)
+            #User.create_address_owner(instance)
 
     @staticmethod
     def delete_address_owner(instance):
@@ -217,11 +206,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         try:
             response = client.admin_delete_user(
                 UserPoolId=COGNITO_USER_POOL_ID,
-                Username=str(instance.email).replace('@', '.')
+                Username=str(instance.email)
             )
         except Exception as e:
+            print('Exception from admin_delete_user in delete_cognito_user')
             print(e)
-        
+
 
     @staticmethod
     def delete_cleanup(sender, instance, *args, **kwargs):
@@ -235,9 +225,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Role(models.Model):
     ROLE_CHOICES = [
-        ('Administrator', 'administrator'),
-        ('Coordinator', 'coordinator'),
-        ('Worker', 'worker'),
+        ('Administrator', 'Administrator'),
+        ('Coordinator', 'Coordinator'),
+        ('Worker', 'Worker'),
     ]
 
     name = models.CharField(
@@ -285,3 +275,15 @@ class Company(models.Model):
 
 post_delete.connect(User.delete_cleanup, sender=User)
 post_save.connect(User.create_setup, sender=User)
+
+
+# TODO: Change it toa normal sign up confirmation endpoint
+def cognito_confirm_sign_up(username):
+    client = boto3.client('cognito-idp', region_name='eu-central-1')
+    response = client.admin_confirm_sign_up(
+        UserPoolId=COGNITO_USER_POOL_ID,
+        Username=username,
+        ClientMetadata={
+            'string': 'string'
+        }
+)

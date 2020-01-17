@@ -27,7 +27,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
             phone=validated_data['phone'],
             password=password
         )
-        user.role = Role.objects.get(name=validated_data.get('role'))
+        try:
+            user.role = Role.objects.get(name=validated_data.get('role'))
+        except Role.DoesNotExist:
+            print('role ', validated_data.get('role'), ' does not exist')
         user.save()
         
         return user

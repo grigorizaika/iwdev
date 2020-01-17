@@ -76,6 +76,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'inworkapi.wsgi.application'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'logfile': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'mylogs.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['logfile'],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -140,24 +155,14 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
+
+
 AUTH_USER_MODEL = 'users.User'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     #'django_warrant.backend.CognitoBackend',
 ]
-
-# AWS Cognito settings
-#COGNITO_USER_POOL_ID = 'eu-central-1_4W9Ujr278'
-#COGNITO_APP_ID = '1s4ubtdruk0t08773upbusgum7'
-#COGNITO_ATTR_MAPPING = {
-    #'email': 'email',
-    #'phone': 'phone',
-    #'custom:name': 'name',
-    #'custom:surname': 'surname',
-    #'custom:role': 'role'
-#}
-
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -168,27 +173,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
-        #'django_warrant.backend.CognitoBackend',
         'django_cognito_jwt.JSONWebTokenAuthentication',
-        #'rest_framework.authentication.SessionAuthentication',
-        #'inworkapi.authentication.FirebaseAuthentication', 
     ]
 }
-
-# FIREBASE_KEY = 'static/config/inworktest-firebase-adminsdk-vxvhx-6658e12f8d.json'
-
-# FIREBASE_CONFIG = {
-#     'apiKey': 'AIzaSyDV00d68812eZuIoCMKKX27w7tEGs_1Bwg',
-#     'authDomain': 'inworktest.firebaseapp.com',
-#     'databaseURL': 'https://inworktest.firebaseio.com',
-#     'projectId': 'inworktest',
-#     'storageBucket': 'inworktest.appspot.com',
-#     'messagingSenderId': '111246495065',
-#     'appId': '1:111246495065:web:f4a63df5719dd825e41048'
-# }
-# import firebase_admin
-# cred = firebase_admin.credentials.Certificate(FIREBASE_KEY)
-# firebase_admin.initialize_app(cred)
 
 # Heroku
 import dj_database_url 
@@ -197,8 +184,8 @@ DATABASES['default'].update(prod_db)
 
 # Cognito
 # TODO: set these up as environment variables
-COGNITO_USER_POOL_ID = 'eu-central-1_SZFF66v4y'
-COGNITO_APP_CLIENT_ID = '8n4apo9vid3rje18eijbk6plh'
+COGNITO_USER_POOL_ID = 'eu-central-1_4W9Ujr278'
+COGNITO_APP_CLIENT_ID = '6mipnr7jemniq9ng911uh85aub'
 COGNITO_APP_ID = COGNITO_APP_CLIENT_ID
 COGNITO_ATTR_MAPPING = {
     'email': 'email',

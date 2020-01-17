@@ -26,6 +26,17 @@ from orders.models import (Order, Task)
 from users.models import (User as CustomUser, Role, Company)
 from utils.models import Address
 
+from tokens_test import get_tokens_test
+@api_view(['GET'])
+@authentication_classes([BasicAuthentication, JSONWebTokenAuthentication])
+def get_jwt_tokens(request, **kwargs):
+    username = request.GET.get('username')
+    password = request.GET.get('password')
+    data = {}
+    data['username'] = username
+    data['password'] = password
+    tokens = get_tokens_test(username, password)
+    return Response(tokens)
 
 # Function-based views
 @api_view(['GET'])
@@ -105,12 +116,28 @@ class UserView(APIView):
 
 
     def post(self, request, **args):
-        serializer = RegistrationSerializer(data=request.data)
+
         data = {}
+
+        processed_data = dict(request.data)
+
+        for key in processed_data:
+            processed_data[key] = processed_data[key][0]
+
+        role = processed_data.get('role')
+
+
+        serializer = RegistrationSerializer(data=processed_data)
+
 
         if serializer.is_valid():
             user = serializer.save()
-            
+
+            if role:
+                role_instance, created = Role.objects.get_or_create(name=role)
+                user.role = role_instance
+                user.save()
+
             owner_id = user.address_owner.id
 
             addressData = {
@@ -151,7 +178,10 @@ class UserView(APIView):
         email = request.query_params.get('email')
 
         role = processed_data.get('role')
-        
+
+        if processed_data['profile_picture_url']:
+            processed_data['profile_picture_url'] = str(processed_data['profile_picture_url'])
+
         if role:
             role_id = Role.objects.get(name=role[0]).id
             processed_data['role'] = role_id
@@ -176,17 +206,6 @@ class UserView(APIView):
                     ' ' + request.data.get('surname')
             else:
                 new_display_name = djangoUser.name + ' ' + djangoUser.surname
-
-            # if request.data.get('phone'):
-            #     firebaseUser = firebase_admin.auth.update_user(
-            #         djangoUser.firebaseId,
-            #         phone_number=request.data.get('phone'),
-            #     )
-            # elif request.data.get('name') or request.data.get('surname'):
-            #     firebaseUser = firebase_admin.auth.update_user(
-            #         djangoUser.firebaseId,
-            #         display_name=new_display_name,
-            #     )
 
             djangoUser = serializer.save()
             data['response'] = 'Successfully updated user ' + \
