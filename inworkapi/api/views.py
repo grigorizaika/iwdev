@@ -367,8 +367,8 @@ class OrderView(APIView):
         else:
             queryset = Order.objects.all()
             serializer = OrderSerializer(queryset, many=True)
-            short_list = slice_fields(['id', 'name', 'client'], serializer.data)
-            return Response(short_list)
+#            short_list = slice_fields(['id', 'name', 'client'], serializer.data)
+            return Response(serializer.data)
 
 
     def post(self, request, **args):       
@@ -437,6 +437,9 @@ class TaskView(APIView):
         date = request.GET.get('date')
         date_start = request.GET.get('date_start')
         date_end = request.GET.get('date_end')
+        month = request.GET.get('month')
+        year = request.GET.get('year')
+
 
         data = {}
 
@@ -450,7 +453,7 @@ class TaskView(APIView):
                 return Response(data)
         elif worker_id:
             # TODO: Check admin permissions properly using DRF permissions
-            if request.user.role.name == 'Administrator':          
+            if request.user.role.name == 'Administrator':
                 if date:
                     queryset = Task.objects.filter(worker=worker_id).filter(date=date)
                 elif date_start and date_end:
@@ -458,6 +461,13 @@ class TaskView(APIView):
                                         .filter(worker=worker_id) \
                                         .filter(date__gte=date_start) \
                                         .filter(date__lte=date_end)
+                elif month and year:
+                    queryset = Task.objects \
+                                        .filter(date__year=year) \
+                                        .filter(date__month=month) \
+                                        .filter(worker=worker_id)
+                    serializer = TaskSerializer(queryset, many=True)
+                    return Response(serializer.data)
                 else:
                     queryset = Task.objects.filter(worker=worker_id)
                     # TODO: add this to the message
@@ -467,7 +477,7 @@ class TaskView(APIView):
             else:
                 data['response'] = 'You must have administrator permissions to perform this action'
                 return Response(data)
-        elif date or (date_start and date_end):
+        elif date or (date_start and date_end) and not worker_id and not task_id:
             # When neither worker nor particular task are specified, default to my tasks
             if date:
                 queryset = Task.objects.filter(worker=request.user.id).filter(date=date)
@@ -476,7 +486,12 @@ class TaskView(APIView):
                                         .filter(worker=request.user.id) \
                                         .filter(date__gte=date_start) \
                                         .filter(date__lte=date_end)
-            
+            elif month and year:
+                queryset = Task.objects \
+                                        .filter(worker=request.user.id) \
+                                        .filter(date__year=year) \
+                                        .filter(date__month=month)
+
             serializer = TaskSerializer(queryset, many=True)
             return Response(serializer.data)
         else:
