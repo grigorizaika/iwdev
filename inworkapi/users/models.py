@@ -74,7 +74,6 @@ class UserManager(BaseUserManager):
         except self.model.DoesNotExist:
             pass
 
-        return user
 
 
 class User(AbstractBaseUser, PermissionsMixin):
