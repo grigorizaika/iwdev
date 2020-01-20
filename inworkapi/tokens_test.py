@@ -3,6 +3,7 @@
 import boto3
 import pprint
 import sys
+from inworkapi.settings import COGNITO_APP_CLIENT_ID
 
 def get_tokens_test(username='gregory.zaika@gmail.com', password='Watermelon1#'):
 
@@ -14,7 +15,7 @@ def get_tokens_test(username='gregory.zaika@gmail.com', password='Watermelon1#')
         'USERNAME': username,
         'PASSWORD': password,
         },
-        ClientId='6mipnr7jemniq9ng911uh85aub',
+        ClientId=COGNITO_APP_CLIENT_ID,
     )
 
     pp = pprint.PrettyPrinter(indent=4)

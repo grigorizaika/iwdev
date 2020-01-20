@@ -1,4 +1,4 @@
-#!/home/ubuntu/django/iwdev/inworkenv/bin/python3
+#!/home/grgr/Projects/iwdev/inworkenv/bin/python
 from django.core import management
 
 if __name__ == "__main__":

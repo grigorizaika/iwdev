@@ -5,6 +5,7 @@ import phonenumbers
 from api.serializers import (
     AddressSerializer, ClientSerializer, CompanySerializer, UserSerializer, RegistrationSerializer, OrderSerializer, TaskSerializer)
 from django_cognito_jwt import JSONWebTokenAuthentication
+from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from rest_framework import generics
@@ -85,12 +86,11 @@ def check_phone(request, **kwargs):
     try:
         user = CustomUser.objects.get(phone=phone)
         print("found User ", user)
-        data['response'] = "Found User with phone number " + str(phone)
-        data['email'] = user.email
+        data['response'] = True
         return Response(data)
     except CustomUser.DoesNotExist:
         print("User does not exist ")
-        data['response'] = "User with phone number " + str(phone) + " does not exist."
+        data['response'] = False
         return Response(data)
 
 # Class-based views
@@ -98,21 +98,23 @@ def check_phone(request, **kwargs):
 class UserView(APIView):
     authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
+    #http_method_names = ['get', 'post', 'patch', 'delete']
 
-    def get(self, request, **args):
-        print("Executing GET request to Users, with data ", request.query_params)
+    
+    def get(self, request, **kwargs):
 
-        email = request.query_params.get('email')
         queryset = CustomUser.objects.all()
 
-        if email:
-            user = get_object_or_404(queryset, email=email)
+        if 'id' in kwargs:
+            user_id = kwargs.get('id')
+            print("Executing GET request to Users, with id ", user_id)
+            user = get_object_or_404(queryset, id=user_id)
             serializer = UserSerializer(user)
             return Response(serializer.data)
         else:
-            serializer = UserSerializer(queryset, many=True)
-            short_list = slice_fields(['id', 'email', 'name', 'surname',], serializer.data)
-            return Response(short_list)
+           serializer = UserSerializer(queryset, many=True)
+           short_list = slice_fields(['id', 'email', 'name', 'surname',], serializer.data)
+           return Response(short_list)
 
 
     def post(self, request, **args):
@@ -124,7 +126,8 @@ class UserView(APIView):
         for key in processed_data:
             processed_data[key] = processed_data[key][0]
 
-        role = processed_data.get('role')
+        if processed_data.get('role'):
+            del processed_data['role']
 
 
         serializer = RegistrationSerializer(data=processed_data)
@@ -133,10 +136,9 @@ class UserView(APIView):
         if serializer.is_valid():
             user = serializer.save()
 
-            if role:
-                role_instance, created = Role.objects.get_or_create(name=role)
-                user.role = role_instance
-                user.save()
+            worker_role, created = Role.objects.get_or_create(name='Worker')
+            user.role = worker_role
+            user.save()
 
             owner_id = user.address_owner.id
 
@@ -167,71 +169,54 @@ class UserView(APIView):
         return Response(data)
 
 
-    def patch(self, request, **args):
+    def patch(self, request, **kwargs):
         # Check if admin or self
-
-        print("in data of UserView, data: ", request.data)
-        print("email: ", request.query_params.get('email'))
 
         processed_data = dict(request.data)
 
-        email = request.query_params.get('email')
-
-        role = processed_data.get('role')
-
-        if processed_data['profile_picture_url']:
-            processed_data['profile_picture_url'] = str(processed_data['profile_picture_url'])
-
-        if role:
-            role_id = Role.objects.get(name=role[0]).id
-            processed_data['role'] = role_id
-
-        djangoUser = CustomUser.objects.get(email=email)
-        serializer = UserSerializer(
-            djangoUser, data=processed_data, partial=True)
         data = {}
 
-        if serializer.is_valid():
+        # Role should not be changed using PATCH request
+        if 'role' in processed_data:
+            processed_data.pop('role')
 
-            new_display_name = ''
+        if 'id' in kwargs:
+            user_id = kwargs.get('id')
 
-            if request.data.get('name') and request.data.get('surname'):
-                new_display_name = request.data.get(
-                    'name') + ' ' + request.data.get('surname')
-            elif request.data.get('name') and not request.data.get('surname'):
-                new_display_name = request.data.get(
-                    'name') + ' ' + djangoUser.surname
-            elif not request.data.get('name') and request.data.get('surname'):
-                new_display_name = djangoUser.name + \
-                    ' ' + request.data.get('surname')
+            if processed_data['profile_picture_url']:
+                processed_data['profile_picture_url'] = str(processed_data['profile_picture_url'][0])
+    
+            djangoUser = CustomUser.objects.get(id=user_id)
+            serializer = UserSerializer(djangoUser, data=processed_data, partial=True)
+
+            if serializer.is_valid():
+                djangoUser = serializer.save()
+                data['response'] = 'Successfully updated user ' + djangoUser.email
             else:
-                new_display_name = djangoUser.name + ' ' + djangoUser.surname
+                data = serializer.errors
 
-            djangoUser = serializer.save()
-            data['response'] = 'Successfully updated user ' + \
-                str(email) + ' ' + str(new_display_name)
         else:
-            data = serializer.errors
-
+            data['response'] = 'User id wasn\'t specified'
+            
         return Response(data)
 
 
-    def delete(self, request, email):
-        # TODO: also delete adress
-        print("In Users' DELETE, data: ", request.data)
-        email = request.data.get('email')
-
+    def delete(self, request, **kwargs):
+        # TODO: also delete addresses
+        print('DELETE User')
         data = {}
 
-        try:
-            djangoUser = CustomUser.objects.get(email=email)
-            djangoUser.delete()
-            data['response'] = "Successfully deleted " + str(email)
-            return Response(data)
-        except CustomUser.DoesNotExist:
-            data['response'] = "User with an email " + \
-                str(email) + " does not exit"
-            return Response(data)
+        if 'id' in kwargs:
+            user_id = kwargs.get('id')
+
+            try:
+                djangoUser = CustomUser.objects.get(id=user_id)
+                djangoUser.delete()
+                data['response'] = 'Successfully deleted ' + djangoUser.email
+                return Response(data)
+            except CustomUser.DoesNotExist:
+                data['response'] = 'User with an id + ' + user_id + ' does not exit'
+                return Response(data)
 
 
 class AddressView(generics.ListCreateAPIView, mixins.DestroyModelMixin):
@@ -260,23 +245,18 @@ class ClientView(APIView):
     authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
 
-    def get(self, request, **args):
+    def get(self, request, **kwargs):
 
-        email = request.GET.get('email')
-        name = request.GET.get('name')
         queryset = Client.objects.all()
 
-        if email:
-            client = get_object_or_404(queryset, email=email)
-            serializer = ClientSerializer(client)
-            return Response(serializer.data)
-        elif name:
-            client = get_object_or_404(queryset, name=name)
+        if 'id' in kwargs:
+            client_id = kwargs.get('id')
+            client = get_object_or_404(queryset, id=client_id)
             serializer = ClientSerializer(client)
             return Response(serializer.data)
         else:
             serializer = ClientSerializer(queryset, many=True)
-            short_list = slice_fields(['name', 'email', 'contact_phone'], serializer.data)
+            short_list = slice_fields(['id', 'name', 'email', 'contact_phone'], serializer.data)
             return Response(short_list)
 
 
@@ -287,20 +267,6 @@ class ClientView(APIView):
 
         if serializer.is_valid():
             client = serializer.save()
-            
-            address = create_address(
-                client.address_owner,
-                request.data.get('street'),
-                request.data.get('house_no'),
-                request.data.get('city'),
-                request.data.get('district'),
-                request.data.get('country'),
-                request.data.get('flat_no'),
-            )
-
-            client.address = address
-            client.save()
-
             data['response'] = "Created Client " + str(client.name)
         else:
             data = serializer.errors
@@ -308,38 +274,40 @@ class ClientView(APIView):
         return Response(data)
 
 
-    def patch(self, request, **args):
+    def patch(self, request, **kwargs):
+        if 'id' in kwargs:
+            client_id = kwargs.get('id')
+            
+            client = Client.objects.get(id=client_id)
+            
+            serializer = ClientSerializer(client, data=request.data, partial=True)
+            
+            data = {}
 
-        name = request.query_params.get('name')
-        client = Client.objects.get(name=name)
-        serializer = ClientSerializer(client, data=request.data, partial=True)
-        data = {}
+            if serializer.is_valid():
+                client = serializer.save()
+                data['response'] = 'Updated client ' + client.name
+            else:
+                data = serializer.errors
 
-        if serializer.is_valid():
-            client = serializer.save()
-            data['response'] = 'Updated client ' + name
-        else:
-            data = serializer.errors
-
-        return Response(data)
-
-
-    def delete(self, request, name):
-        # TODO: also delete adress
-        name = request.data.get('name')
-        data = {}
-
-        try:
-            client = Client.objects.get(name=name)
-            client.delete()
-            data['response'] = "Successfully deleted " + str(name)
             return Response(data)
-        except Client.DoesNotExist:
-            data['response'] = "Client with a name " + \
-                str(name) + " does not exit"
-            return Response(data)
-        except Exception as e:
-            data['response'] = "Unhandled exception " + e.message
+
+
+    def delete(self, request, **kwargs):
+        # TODO: also delete addresses
+        if 'id' in kwargs:
+            client_id = kwargs.get('id')
+
+            data = {}
+
+            try:
+                client = Client.objects.get(id=client_id)
+                client.delete()
+                data['response'] = "Successfully deleted " + client.name
+                return Response(data)
+            except Client.DoesNotExist:
+                data['response'] = 'Client with an id ' + str(client_id) + ' does not exit'
+                return Response(data)
 
 
 class OrderView(APIView):
@@ -439,7 +407,7 @@ class TaskView(APIView):
         date_end = request.GET.get('date_end')
         month = request.GET.get('month')
         year = request.GET.get('year')
-
+        group_by_worker = request.GET.get('group_by_worker')
 
         data = {}
 
@@ -477,30 +445,39 @@ class TaskView(APIView):
             else:
                 data['response'] = 'You must have administrator permissions to perform this action'
                 return Response(data)
-        elif date or (date_start and date_end) and not worker_id and not task_id:
+        elif date or (date_start and date_end) or (year and month):
             # When neither worker nor particular task are specified, default to my tasks
             if date:
-                queryset = Task.objects.filter(worker=request.user.id).filter(date=date)
+                if group_by_worker and request.user.role.name == 'Administrator':
+                    
+                    queryset = Task.objects.filter(date=date).values('worker')
+                    #query.group_by = ['worker']
+                    #queryset = QuerySet(query=query, model=Task)
+                else:
+                    queryset = Task.objects.filter(worker=request.user.id).filter(date=date)
+
             elif date_start and date_end:
                 queryset = Task.objects \
-                                        .filter(worker=request.user.id) \
-                                        .filter(date__gte=date_start) \
-                                        .filter(date__lte=date_end)
+                                    .filter(worker=request.user.id) \
+                                    .filter(date__gte=date_start) \
+                                    .filter(date__lte=date_end)
             elif month and year:
                 queryset = Task.objects \
-                                        .filter(worker=request.user.id) \
-                                        .filter(date__year=year) \
-                                        .filter(date__month=month)
+                                    .filter(worker=request.user.id) \
+                                    .filter(date__year=year) \
+                                    .filter(date__month=month)
 
             serializer = TaskSerializer(queryset, many=True)
             return Response(serializer.data)
         else:
+            print('3')
             # TODO: Check admin permissions properly using DRF permissions
             if request.user.role.name == 'Administrator':
                 queryset = Task.objects.all()
                 serializer = TaskSerializer(queryset, many=True)
-                short_list = slice_fields(['id', 'order', 'name', 'worker'], serializer.data)
-                return Response(short_list)
+                return Response(serializer.data)
+                #short_list = slice_fields(['id', 'order', 'name', 'worker'], serializer.data)
+                #return Response(short_list)
             else:
                 data['response'] = 'You must have administrator permissions to perform this action'
                 return Response(data)
