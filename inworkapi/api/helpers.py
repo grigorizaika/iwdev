@@ -44,3 +44,21 @@ def create_presigned_post(bucket_name, object_name,
 
     return response
 
+def json_list_group_by(group_by_field, json_list):
+    distinct_group_by_field_values = []
+    grouped = {}
+    
+    for item in json_list:
+        if not group_by_field in item:
+            print('field', group_by_field, 'is not present in a json object')
+            continue
+
+        key = str(item[group_by_field])
+
+        try:
+            grouped[key].append(item)
+        except KeyError:
+            grouped[key] = [item]
+
+    return grouped
+

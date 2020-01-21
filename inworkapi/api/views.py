@@ -20,7 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.helpers import (create_address, create_presigned_post, slice_fields)
+from api.helpers import (create_address, create_presigned_post, slice_fields, json_list_group_by)
 from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
 from clients.models import Client
 from orders.models import (Order, Task)
@@ -28,11 +28,12 @@ from users.models import (User as CustomUser, Role, Company)
 from utils.models import Address
 
 from tokens_test import get_tokens_test
-@api_view(['GET'])
-@authentication_classes([BasicAuthentication, JSONWebTokenAuthentication])
+@api_view(['POST'])
+@authentication_classes([])
 def get_jwt_tokens(request, **kwargs):
-    username = request.GET.get('username')
-    password = request.GET.get('password')
+    print(request.data)
+    username = request.data.get('username')
+    password = request.data.get('password')
     data = {}
     data['username'] = username
     data['password'] = password
@@ -219,22 +220,45 @@ class UserView(APIView):
                 return Response(data)
 
 
-class AddressView(generics.ListCreateAPIView, mixins.DestroyModelMixin):
-    queryset = Address.objects.all()
-    serializer_class = AddressSerializer
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ['owner', 'street', 'city', 'district', 'country']
-
+class AddressView(APIView):
     authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdministrator]
 
-    def get_object(self, addressId):
-       return get_object_or_404(Address.objects.all(), id=addressId)
+    def get(self, request, *args, **kwargs):
+        data = {}
+        if 'id' in kwargs:
+            address_id = kwargs.get('id')
+            try:
+                address = Address.objects.get(id=address_id)
+                serializer = AddressSerializer(address)
+                data = serializer.data
+            except Address.DoesNotExist:
+                data['response'] = 'Address with an id ' + address_id + ' does not exist'
+        else:
+            queryset = Address.objects.all()
+            serializer = AddressSerializer(queryset, many=True)
+            data = serializer.data
+
+        return Response(data)
+
+    #def post(self, request, *args,**kwargs):
+    #    
+    #    serializer = (request.data)
 
     def delete(self, request, *args, **kwargs):
-        object = self.get_object(request.query_params.get('id'))
-        object.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT, data={ 'response': "Success"})
+        data = {}
+        if 'id' in kwargs:
+            try:
+                address = Address.objects.get(id=kwargs.get('id'))
+                address_str = str(address)
+                address.delete()
+                data['response'] = 'Successfully deleted address ' + address_str
+                return Response(status=status.HTTP_204_NO_CONTENT, data=data)
+            except Address.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            data['response'] = 'Must specify an id'
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=data)
 
 
 class ClientView(APIView):
@@ -321,16 +345,18 @@ class OrderView(APIView):
     permission_classes = [IsAdministrator]
 
 
-    def get(self, request, **args):
-        orderId = request.GET.get('id')
+    def get(self, request, **kwargs):
+        
         data = {}
-        if orderId:
+        print('in orders')
+        if 'id' in kwargs:
+            order_id = kwargs.get('id')
             try:
-                order = Order.objects.get(id=orderId)
+                order = Order.objects.get(id=order_id)
                 serializer = OrderSerializer(order)
                 return Response(serializer.data)
             except Order.DoesNotExist:
-                data['response'] = 'Order with an id ' + orderId + ' does not exist'
+                data['response'] = 'Order with an id ' + str(order_id) + ' does not exist'
                 return Response(data)
         else:
             queryset = Order.objects.all()
@@ -339,7 +365,7 @@ class OrderView(APIView):
             return Response(serializer.data)
 
 
-    def post(self, request, **args):       
+    def post(self, request, **kwargs):       
         modified_data = dict(request.data)
         modified_data = { key: val[0]  for key, val in modified_data.items() }
         
@@ -368,29 +394,39 @@ class OrderView(APIView):
         return Response(data)
 
 
-    def patch(self, request, **args):
-        orderId = request.query_params.get('id')
-        order = Order.objects.get(id=orderId)
-        serializer = OrderSerializer(order, data=request.data, partial=True)
+    def patch(self, request, **kwargs):
+        
         data = {}
-        if serializer.is_valid():
-            client = serializer.save()
-            data['response'] = 'Updated order ' + str(order.id) + ' ' + str(order.name)
+
+        if 'id' in kwargs:
+            order_id = kwargs.get('id')
+            order = Order.objects.get(id=order_id)
+            serializer = OrderSerializer(order, data=request.data, partial=True)
+            data = {}
+            if serializer.is_valid():
+                client = serializer.save()
+                data['response'] = 'Updated order ' + str(order.id) + ' ' + str(order.name)
+            else:
+                data = serializer.errors
         else:
-            data = serializer.errors
+            data['response'] = 'Must specify the id'
+
         return Response(data)
 
+    def delete(self, request, **kwargs):
 
-    def delete(self, request, id):
-        orderId = request.data.get('id')
-        data = {}
-        try:
-            order = Order.objects.get(id=orderId)
-            orderName = order.name
-            order.delete()
-            data['response'] = 'Successfully deleted order ' + str(orderId) + ' ' + str(orderName)
-        except Order.DoesNotExist:
-            data['response'] = 'Order with an id ' + str(orderId) + ' does not exist'
+        if 'id' in kwargs:
+            order_id = kwargs.get('id')
+            data = {}
+            try:
+                order = Order.objects.get(id=order_id)
+                orderName = order.name
+                order.delete()
+                data['response'] = 'Successfully deleted order ' + str(order_id) + ' ' + str(orderName)
+            except Order.DoesNotExist:
+                data['response'] = 'Order with an id ' + str(order_id) + ' does not exist'
+        else:
+            data['response'] = 'Must specify the id'
         return Response(data)
 
 class TaskView(APIView):
@@ -399,8 +435,8 @@ class TaskView(APIView):
     authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, **args):
-        task_id = request.GET.get('id')
+    def get(self, request, **kwargs):
+        
         worker_id = request.GET.get('worker')
         date = request.GET.get('date')
         date_start = request.GET.get('date_start')
@@ -411,13 +447,14 @@ class TaskView(APIView):
 
         data = {}
 
-        if task_id:
+        if 'id' in kwargs:
+            task_id = kwargs.get('id')
             try:
                 task = Task.objects.get(id=task_id)
                 serializer = TaskSerializer(task)
                 return Response(serializer.data)
             except Task.DoesNotExist:
-                data['response'] = 'Task with an id ' + taskId + ' does not exist'
+                data['response'] = 'Task with an id ' + str(task_id) + ' does not exist'
                 return Response(data)
         elif worker_id:
             # TODO: Check admin permissions properly using DRF permissions
@@ -449,8 +486,8 @@ class TaskView(APIView):
             # When neither worker nor particular task are specified, default to my tasks
             if date:
                 if group_by_worker and request.user.role.name == 'Administrator':
-                    
-                    queryset = Task.objects.filter(date=date).values('worker')
+                    # Tasks on a paricular day, grouped by workers
+                    queryset = Task.objects.filter(date=date)#.values('worker')
                     #query.group_by = ['worker']
                     #queryset = QuerySet(query=query, model=Task)
                 else:
@@ -468,7 +505,12 @@ class TaskView(APIView):
                                     .filter(date__month=month)
 
             serializer = TaskSerializer(queryset, many=True)
-            return Response(serializer.data)
+            data = serializer.data
+                
+            if group_by_worker:
+                data = json_list_group_by('worker', data)
+
+            return Response(data)
         else:
             print('3')
             # TODO: Check admin permissions properly using DRF permissions
@@ -483,7 +525,7 @@ class TaskView(APIView):
                 return Response(data)
 
 
-    def post(self, request, **args):
+    def post(self, request, **kwargs):
 
         task_list = json.loads(request.data.get('task_list'))
 
@@ -510,29 +552,43 @@ class TaskView(APIView):
         return Response(data)
 
 
-    def patch(self, request, **args):
-        taskId = request.query_params.get('id')
-        task = Task.objects.get(id=taskId)
-        serializer = TaskSerializer(task, data=request.data, partial=True)
+    def patch(self, request, **kwargs):
+        
         data = {}
-        if serializer.is_valid():
-            task = serializer.save()
-            data['response'] = 'Updated task ' + str(task.id) + ' ' + str(task.name)
+        
+        if 'id' in kwargs:
+            task_id = kwargs.get('id')
+            task = Task.objects.get(id=task_id)
+            serializer = TaskSerializer(task, data=request.data, partial=True)
+            data = {}
+            if serializer.is_valid():
+                task = serializer.save()
+                data['response'] = 'Updated task ' + str(task.id) + ' ' + str(task.name)
+            else:
+                data = serializer.errors
         else:
-            data = serializer.errors
+            data['response'] = 'Must specify an id'
+
         return Response(data)
 
 
-    def delete(self, request, id):
-        taskId = request.data.get('id')
+    def delete(self, request, **kwargs):
+        
         data = {}
-        try:
-            task = Task.objects.get(id=taskId)
-            taskName = task.name
-            task.delete()
-            data['response'] = 'Successfully deleted task ' + str(taskId) + ' ' + str(taskName)
-        except Task.DoesNotExist:
-            data['response'] = 'Task with an id ' + str(taskId) + ' does not exist'
+
+        if 'id' in kwargs:
+            task_id = kwargs.get('id')
+            data = {}
+            try:
+                task = Task.objects.get(id=task_id)
+                taskName = task.name
+                task.delete()
+                data['response'] = 'Successfully deleted task ' + str(task_id) + ' ' + str(taskName)
+            except Task.DoesNotExist:
+                data['response'] = 'Task with an id ' + str(task_id) + ' does not exist'
+        else:
+            data['response']= 'Must specify an id'
+
         return Response(data)
 
 
