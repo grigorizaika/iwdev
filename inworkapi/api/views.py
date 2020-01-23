@@ -20,12 +20,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.helpers import (create_address, create_presigned_post, slice_fields, json_list_group_by)
+from api.helpers import (create_address, bulk_create_tasks, 
+                        create_presigned_post, slice_fields, 
+                        json_list_group_by)
 from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
 from clients.models import Client
 from orders.models import (Order, Task)
 from users.models import (User as CustomUser, Role, Company)
-from utils.models import Address
+from utils.models import Address, AddressOwner
 
 from tokens_test import get_tokens_test
 @api_view(['POST'])
@@ -42,7 +44,7 @@ def get_jwt_tokens(request, **kwargs):
 
 # Function-based views
 @api_view(['GET'])
-@authentication_classes([BasicAuthentication, JSONWebTokenAuthentication])
+@authentication_classes([JSONWebTokenAuthentication])
 def get_presigned_upload_url(request, **kwargs):
     bucket_name = 'inwork-s3-bucket'
     location = request.data.get('to')
@@ -53,7 +55,6 @@ def get_presigned_upload_url(request, **kwargs):
     if not location or not file_name:
         data['response'] = 'Must specify \'to\', \'id\' and \'filename\'  parameters in request body'
         return Response(data)
-
 
     if location == 'users':
         if request.user.is_authenticated:
@@ -94,8 +95,14 @@ def check_phone(request, **kwargs):
         data['response'] = False
         return Response(data)
 
-# Class-based views
 
+@api_view(['GET'])
+@authentication_classes([JSONWebTokenAuthentication])
+def get_current_user(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
+# Class-based views
 class UserView(APIView):
     authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
@@ -241,9 +248,18 @@ class AddressView(APIView):
 
         return Response(data)
 
-    #def post(self, request, *args,**kwargs):
-    #    
-    #    serializer = (request.data)
+    def post(self, request, *args,**kwargs):
+        serializer = AddressSerializer(data=request.data)
+        data = {}
+        
+        if serializer.is_valid():
+            address = serializer.save()
+            data['response'] = "Created Address" + str(address)
+        else:
+            data = serializer.errors
+
+        return Response(data)
+
 
     def delete(self, request, *args, **kwargs):
         data = {}
@@ -288,9 +304,14 @@ class ClientView(APIView):
         print("In ClientView post(), ", request.data)
         serializer = ClientSerializer(data=request.data)
         data = {}
-
+        
         if serializer.is_valid():
             client = serializer.save()
+            
+            ao = AddressOwner.objects.create()
+            client.address_owner = ao
+            client.save()
+
             data['response'] = "Created Client " + str(client.name)
         else:
             data = serializer.errors
@@ -365,31 +386,40 @@ class OrderView(APIView):
             return Response(serializer.data)
 
 
-    def post(self, request, **kwargs):       
-        modified_data = dict(request.data)
-        modified_data = { key: val[0]  for key, val in modified_data.items() }
-        
-        if not isinstance(modified_data['client'], int):
-            modified_data['client'] = Client.objects.get(name=request.data['client']).id
-        
-        modified_data['owner'] = Client.objects.get(name=request.data['client']).address_owner.id
-        print("Creating new Order: ", modified_data)
-
-        orderSerializer = OrderSerializer(data=modified_data)
-        addressSerializer = AddressSerializer(data=modified_data)
+    def post(self, request, **kwargs):
+        # TODO: clean this mess with the names that contain the word 'data'
         data = {}
 
-        order_valid = orderSerializer.is_valid()
-        address_valid = addressSerializer.is_valid()
+        modified_data = dict(request.data)
+        modified_data = { key: val[0]  for key, val in modified_data.items() }  
+        
+        orderSerializer = OrderSerializer(data=modified_data)
 
-        if order_valid and address_valid:
+        # Check if an address belongs to a client
+        address_id = modified_data.get('address')
+        client_id = modified_data.get('client')
+        
+        client_instance = Client.objects.get(id=client_id)
+
+        if not client_instance.addresses().filter(id=address_id).exists():
+            data['response'] = 'Address ' + address_id + ' doesn\'t belong to the client ' + client_id
+            return Response(data)
+
+        # Proceed to creation
+        if orderSerializer.is_valid():
             order = orderSerializer.save()
-            order.address = addressSerializer.save()
             order.save()
-            data['response'] = 'Created order ' + str(order.id) + ' \"' + str(order.name) + '\"'
+            
+            if 'task_list' in modified_data:
+                task_list = json.loads(request.data.get('task_list'))
+                bulk_task_creation_response = bulk_create_tasks(task_list, order.id)
+                data['response'] = ['Created order ' + str(order.id) + ' \"' + str(order.name) + '\"']
+                data['response'].append(bulk_task_creation_response)
+            else:
+                data['response'] = 'Created order ' + str(order.id) + ' \"' + str(order.name) + '\"'
+            
         else:
             data['orderErrors'] = orderSerializer.errors
-            data['addresErrors'] = addressSerializer.errors
 
         return Response(data)
 
@@ -526,29 +556,10 @@ class TaskView(APIView):
 
 
     def post(self, request, **kwargs):
-
-        task_list = json.loads(request.data.get('task_list'))
-
-        print('----------------' + 'Tasks' + '----------------')
-        print(task_list)
-        print('----------------' + '-----' + '----------------')
-
         data = {}
-        full_response = []
-
-        for task_item in task_list:
-            print('-------------' + 'Current task' + '------------')
-            print(task_item)
-            print('----------------' + '-----' + '----------------')
-            taskSerializer = TaskSerializer(data=task_item)
-            if taskSerializer.is_valid():
-                task = taskSerializer.save()
-                full_response.append('Successfully created task ' + str(task.id) + ' ' + task.name ) 
-            else:
-                full_response.append(str(taskSerializer.errors))
-        
-        data['response'] = full_response
-        
+        task_list = json.loads(request.data.get('task_list'))
+        bulk_creation_result = bulk_create_tasks(task_list)
+        data['response'] = bulk_creation_result
         return Response(data)
 
 

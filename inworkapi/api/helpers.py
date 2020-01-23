@@ -1,5 +1,5 @@
 from utils.models import Address
-
+from api.serializers import TaskSerializer
 
 def slice_fields(key_list, l):
     l_sliced = []
@@ -61,4 +61,27 @@ def json_list_group_by(group_by_field, json_list):
             grouped[key] = [item]
 
     return grouped
+
+
+def bulk_create_tasks(json_task_list, order_id=None):
+    full_response = []
+    
+    for task_json in json_task_list:
+        
+        if 'order' not in task_json:
+            task_json['order'] = order_id
+
+        if not task_json.get('order') == order_id and order_id is not None:
+            full_response.append('Task order ID doesn\'t match the one specified in the keyword argument')
+            continue
+
+        serializer = TaskSerializer(data=task_json)
+        
+        if serializer.is_valid():
+            task = serializer.save()
+            full_response.append('Successfully created task ' + str(task.id) + ' ' + task.name)
+        else:
+            full_response.append(str(taskSerializer.errors))
+    
+    return full_response
 

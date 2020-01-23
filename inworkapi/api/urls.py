@@ -1,4 +1,6 @@
-from api.views import (accept_hours_worked, AddressView, ClientView, CompanyView, check_phone, get_jwt_tokens, get_presigned_upload_url, OrderView, TaskView, UserView,)
+from api.views import (accept_hours_worked, get_current_user, AddressView,
+                        ClientView, CompanyView, check_phone, get_jwt_tokens, 
+                        get_presigned_upload_url, OrderView, TaskView, UserView,)
 from django.conf.urls import url, include
 from django.urls import path
 from drf_yasg.views import get_schema_view
@@ -37,6 +39,7 @@ urlpatterns = [
     url(r'clients/$', client_list),
     path('clients/<int:id>/', client_list),
     url(r'users/$', user_list),
+    url(r'users/me/$', get_current_user),
     path('users/<int:id>/', user_list),
     url(r'users/check_phone(?P<phone>\w{0,50})/$', check_phone),
     url(r'orders/$', order_list),

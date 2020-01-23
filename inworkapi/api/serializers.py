@@ -142,7 +142,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    address = serializers.StringRelatedField()
+    #address = serializers.StringRelatedField()
     client_name = serializers.SerializerMethodField()
 
     def create(self, validated_data):
@@ -152,6 +152,7 @@ class OrderSerializer(serializers.ModelSerializer):
             client = validated_data['client'],
             billing_period = validated_data['billing_period'],
             description = validated_data['description'],
+            address = validated_data['address']
         )
 
     def get_client_name(self, obj):
