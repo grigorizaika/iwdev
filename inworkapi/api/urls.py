@@ -1,4 +1,4 @@
-from api.views import (accept_hours_worked, get_current_user, AddressView,
+from api.views import (accept_hours_worked, client_addresses, get_current_user, AddressView,
                         ClientView, CompanyView, check_phone, get_jwt_tokens, 
                         get_presigned_upload_url, OrderView, TaskView, UserView,)
 from django.conf.urls import url, include
@@ -33,11 +33,12 @@ schema_view = get_schema_view(
 urlpatterns = [
     #url(r'^$', schema_view),
     url(r'^swagger/$', schema_view.with_ui('swagger',
-                                           cache_timeout=0), name='schema-swagger-ui'),
-    url(r'addresses/$', address_list),
+                                           cache_timeout=0), name='schema-swagger-ui'),                                       
+    url(r'^addresses/$', address_list),
     path('addresses/<int:id>/', address_list),
     url(r'clients/$', client_list),
     path('clients/<int:id>/', client_list),
+    path('clients/<int:id>/addresses/', client_addresses),
     url(r'users/$', user_list),
     url(r'users/me/$', get_current_user),
     path('users/<int:id>/', user_list),
@@ -52,4 +53,5 @@ urlpatterns = [
     #url(r'check_phone(?P<phone>\w{0,50})/$', user_list, name="check_phone"),
     #url(r'users/register', user_registration, name="registration"),
     url(r'get_tokens(?P<username>\w{0,50})(?P<password>\w{0,50})/$', get_jwt_tokens),
+
 ]

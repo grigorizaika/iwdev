@@ -123,8 +123,6 @@ class ClientSerializer(serializers.ModelSerializer):
         model = Client
         fields = '__all__'
 
-
-    address_owner = serializers.StringRelatedField()
     addresses = serializers.SerializerMethodField()
 
     def get_addresses(self, obj):

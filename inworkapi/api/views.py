@@ -13,7 +13,6 @@ from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import (
     api_view, authentication_classes, permission_classes)
 from rest_framework.permissions import IsAuthenticated
@@ -85,7 +84,6 @@ def get_presigned_upload_url(request, **kwargs):
 
 @api_view(['GET'])
 def check_phone(request, **kwargs):
-    print("in check_phone with data ", request.query_params)
     data = {}
 
     if not request.query_params.get('phone'):
@@ -105,26 +103,64 @@ def check_phone(request, **kwargs):
         return Response(data)
 
 
+@api_view(['GET', 'POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAdministrator])
+def client_addresses(request, **kwargs):
+    
+    data = {}
+    print('here yea')
+    if 'id' in kwargs:
+        if request.method == 'POST':
+            try:
+                client = Client.objects.get(id=kwargs.get('id'))
+                ao = client.address_owner
+
+                processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
+
+                processed_data['owner'] = ao.id
+
+                serializer = AddressSerializer(data=processed_data)
+                if serializer.is_valid():
+                    address = serializer.save()
+                    data['response'] = "Created Address " + str(address)
+                    data['data'] = processed_data
+                else:
+                    data = serializer.errors
+            except Client.DoesNotExist:
+                data['response'] = 'Client with an id ' + kwargs.get('id') + ' does not exist'
+        elif request.method == 'GET':
+            try:
+                client = Client.objects.get(id=kwargs.get('id'))
+                ao = client.address_owner
+                queryset = Address.objects.filter(owner=ao)
+                serializer = AddressSerializer(queryset, many=True)
+                data['response'] = serializer.data
+            except Client.DoesNotExist:
+                data['response'] = 'Client with an id ' + kwargs.get('id') + ' does not exist'
+    else:
+        data['response'] = 'Must specify a client ID'
+
+    return Response(data)
+
+
 @api_view(['GET'])
 @authentication_classes([JSONWebTokenAuthentication])
 def get_current_user(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
 
+
 # Class-based views
 class UserView(APIView):
-    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
+    authentication_classes = [JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
-    #http_method_names = ['get', 'post', 'patch', 'delete']
-
     
     def get(self, request, **kwargs):
-
         queryset = CustomUser.objects.all()
 
         if 'id' in kwargs:
             user_id = kwargs.get('id')
-            print("Executing GET request to Users, with id ", user_id)
             user = get_object_or_404(queryset, id=user_id)
             serializer = UserSerializer(user)
             return Response(serializer.data)
@@ -138,17 +174,12 @@ class UserView(APIView):
 
         data = {}
 
-        processed_data = dict(request.data)
-
-        for key in processed_data:
-            processed_data[key] = processed_data[key][0]
+        processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
 
         if processed_data.get('role'):
             del processed_data['role']
 
-
         serializer = RegistrationSerializer(data=processed_data)
-
 
         if serializer.is_valid():
             user = serializer.save()
@@ -237,7 +268,7 @@ class UserView(APIView):
 
 
 class AddressView(APIView):
-    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
+    authentication_classes = [JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
 
     def get(self, request, *args, **kwargs):
@@ -260,15 +291,36 @@ class AddressView(APIView):
     def post(self, request, *args,**kwargs):
         serializer = AddressSerializer(data=request.data)
         data = {}
-        
+        print('it can\'t be')
         if serializer.is_valid():
             address = serializer.save()
-            data['response'] = "Created Address" + str(address)
+            data['response'] = 'Created Address' + str(address)
         else:
             data = serializer.errors
 
         return Response(data)
 
+    def patch(self, request, **kwargs):
+        if 'id' in kwargs:
+            address_id = kwargs.get('id')
+            
+            try:
+                address = Address.objects.get(id=address_id)
+            except Address.DoesNotExist:
+                data['response'] = 'Address with an ID ' + address_id + ' does not exist'
+                return Response(data)
+                
+            serializer = AddressSerializer(address, data=request.data, partial=True)
+            
+            data = {}
+
+            if serializer.is_valid():
+                address = serializer.save()
+                data['response'] = 'Updated address ' + str(address.id)
+            else:
+                data = serializer.errors
+
+            return Response(data)
 
     def delete(self, request, *args, **kwargs):
         data = {}
@@ -290,8 +342,7 @@ class ClientView(APIView):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-
-    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
+    authentication_classes = [JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
 
     def get(self, request, **kwargs):
@@ -310,17 +361,14 @@ class ClientView(APIView):
 
 
     def post(self, request, **args):
-        print("In ClientView post(), ", request.data)
         serializer = ClientSerializer(data=request.data)
         data = {}
         
         if serializer.is_valid():
             client = serializer.save()
-            
             ao = AddressOwner.objects.create()
             client.address_owner = ao
             client.save()
-
             data['response'] = "Created Client " + str(client.name)
         else:
             data = serializer.errors
@@ -371,7 +419,7 @@ class OrderView(APIView):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['client', 'name']
 
-    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
+    authentication_classes = [JSONWebTokenAuthentication]
     permission_classes = [IsAdministrator]
 
 
@@ -471,7 +519,7 @@ class OrderView(APIView):
 class TaskView(APIView):
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['client', 'name']
-    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
+    authentication_classes = [JSONWebTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, **kwargs):
@@ -613,7 +661,7 @@ class TaskView(APIView):
 
 
 @api_view(['PUT'])
-@authentication_classes([BasicAuthentication, JSONWebTokenAuthentication])
+@authentication_classes([JSONWebTokenAuthentication])
 @permission_classes([IsAdministrator])
 def accept_hours_worked(request, **kwargs):
     task_id = request.data.get('id')
@@ -629,5 +677,5 @@ def accept_hours_worked(request, **kwargs):
 class CompanyView(generics.ListCreateAPIView, mixins.UpdateModelMixin):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    authentication_classes = [BasicAuthentication, JSONWebTokenAuthentication]
+    authentication_classes = [JSONWebTokenAuthentication]
     permission_classes = [IsAuthenticated]
