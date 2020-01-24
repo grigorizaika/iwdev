@@ -37,10 +37,19 @@ def get_jwt_tokens(request, **kwargs):
     username = request.data.get('username')
     password = request.data.get('password')
     data = {}
-    data['username'] = username
-    data['password'] = password
     tokens = get_tokens_test(username, password)
-    return Response(tokens)
+
+    id_token = tokens.get('AuthenticationResult').get('IdToken')
+    auth = JSONWebTokenAuthentication()
+    token_validator = auth.get_token_validator(request)
+    jwt_payload = token_validator.validate(id_token)
+    user = auth.get_user_model().objects.get_or_create_for_cognito(jwt_payload)
+    
+    data['auth_response'] = tokens
+    data['user'] = UserSerializer(user).data
+    
+    return Response(data)
+
 
 # Function-based views
 @api_view(['GET'])
