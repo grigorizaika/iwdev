@@ -81,7 +81,7 @@ def bulk_create_tasks(json_task_list, order_id=None):
             task = serializer.save()
             full_response.append('Successfully created task ' + str(task.id) + ' ' + task.name)
         else:
-            full_response.append(str(taskSerializer.errors))
+            full_response.append(str(serializer.errors))
     
     return full_response
 
