@@ -11,8 +11,8 @@ class Address(models.Model):
                                 blank=True,
                                 )
     street                  = models.CharField(max_length=40)
-    house_no                = models.PositiveIntegerField()
-    flat_no                 = models.PositiveIntegerField(blank=True, null=True)
+    house_no                = models.CharField(max_length=10)
+    flat_no                 = models.CharField(max_length=40, blank=True, null=True)
     city                    = models.CharField(max_length=40)
     district                = models.CharField(max_length=40)
     country                 = models.CharField(max_length=40)
