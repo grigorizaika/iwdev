@@ -220,8 +220,8 @@ class UserView(APIView):
     def patch(self, request, **kwargs):
         # Check if admin or self
 
-        processed_data = dict(request.data)
-
+        processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
+        
         data = {}
 
         # Role should not be changed using PATCH request
@@ -231,8 +231,8 @@ class UserView(APIView):
         if 'id' in kwargs:
             user_id = kwargs.get('id')
 
-            if processed_data['profile_picture_url']:
-                processed_data['profile_picture_url'] = str(processed_data['profile_picture_url'][0])
+            if 'profile_picture_url' in processed_data:
+                processed_data['profile_picture_url'] = str(processed_data['profile_picture_url'])
     
             djangoUser = CustomUser.objects.get(id=user_id)
             serializer = UserSerializer(djangoUser, data=processed_data, partial=True)
