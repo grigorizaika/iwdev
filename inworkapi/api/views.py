@@ -667,12 +667,12 @@ def accept_hours_worked(request, **kwargs):
     task_id = request.data.get('id')
     try:
         task = Task.objects.get(id=task_id)
-            if not task.is_hours_worked_accepted:
-                task.is_hours_worked_accepted = True
-                task.save()
-                return Response({ 'response': 'Successfully accepted hours in task ' + task_id })
-            else 
-                return Response({ 'response': 'Hours were already accepted by an administrator'})
+        if not task.is_hours_worked_accepted:
+            task.is_hours_worked_accepted = True
+            task.save()
+            return Response({ 'response': 'Successfully accepted hours in task ' + task_id })
+        else 
+            return Response({ 'response': 'Hours were already accepted by an administrator'})
     except Task.DoesNotExist:
         return Response({ 'response': 'Task id ' + task_id + ' does not exist' })
 
