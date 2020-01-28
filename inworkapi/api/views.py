@@ -57,10 +57,20 @@ def refresh_jwt_tokens(request, **kwargs):
     data = {}
     
     if refresh_token:
-        data['response'] = refresh_id_token(refresh_token)
+        auth_response = refresh_id_token(refresh_token)
+
+        # Get the user
+        id_token = auth_response.get('AuthenticationResult').get('IdToken')
+        auth = JSONWebTokenAuthentication()
+        token_validator = auth.get_token_validator(request)
+        jwt_payload = token_validator.validate(id_token)
+        user = auth.get_user_model().objects.get_or_create_for_cognito(jwt_payload)
+
+        data['auth_response'] = auth_response
+        data['user'] = UserSerializer(user).data
     else:
         data['response'] = 'Please specify refresh_token in the request body.'
-        
+
     return Response(data)
 
 # Function-based views

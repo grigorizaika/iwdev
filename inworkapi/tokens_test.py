@@ -22,7 +22,7 @@ def get_tokens_test(username='gregory.zaika@gmail.com', password='Watermelon1#')
 
 def refresh_id_token(refresh_token):
 
-    client = boto3.client('cognito-idp', region_name='eu-central-1')
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
 
     print('refresh_token', refresh_token)
     
