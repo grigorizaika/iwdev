@@ -122,6 +122,7 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = '__all__'
+        depth=1
 
     addresses = serializers.SerializerMethodField()
 
@@ -141,7 +142,7 @@ class ClientSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     #address = serializers.StringRelatedField()
-    client_name = serializers.SerializerMethodField()
+    #client_name = serializers.SerializerMethodField()
 
     def create(self, validated_data):
         print ("In Order create(): ", validated_data)
@@ -159,6 +160,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
+        depth=1
 
 
 class TaskSerializer(serializers.ModelSerializer):

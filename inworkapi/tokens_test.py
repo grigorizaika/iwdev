@@ -3,7 +3,7 @@
 import boto3
 import pprint
 import sys
-from inworkapi.settings import COGNITO_APP_CLIENT_ID
+from inworkapi.settings import COGNITO_APP_CLIENT_ID, COGNITO_USER_POOL_ID
 
 def get_tokens_test(username='gregory.zaika@gmail.com', password='Watermelon1#'):
 
@@ -18,7 +18,23 @@ def get_tokens_test(username='gregory.zaika@gmail.com', password='Watermelon1#')
         ClientId=COGNITO_APP_CLIENT_ID,
     )
 
-    pp = pprint.PrettyPrinter(indent=4)
+    return response
+
+def refresh_id_token(refresh_token):
+
+    client = boto3.client('cognito-idp', region_name='eu-central-1')
+
+    print('refresh_token', refresh_token)
+    
+    response = client.initiate_auth(
+        AuthFlow='REFRESH_TOKEN_AUTH',
+        AuthParameters={
+            'REFRESH_TOKEN': refresh_token
+        },
+        #UserPoolId=COGNITO_USER_POOL_ID,
+        ClientId=COGNITO_APP_CLIENT_ID,
+    )
+
     return response
 
 def main():

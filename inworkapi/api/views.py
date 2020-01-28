@@ -28,7 +28,7 @@ from orders.models import (Order, Task)
 from users.models import (User as CustomUser, Role, Company)
 from utils.models import Address, AddressOwner
 
-from tokens_test import get_tokens_test
+from tokens_test import get_tokens_test, refresh_id_token
 @api_view(['POST'])
 @authentication_classes([])
 def get_jwt_tokens(request, **kwargs):
@@ -38,6 +38,7 @@ def get_jwt_tokens(request, **kwargs):
     data = {}
     tokens = get_tokens_test(username, password)
 
+    # Get the user
     id_token = tokens.get('AuthenticationResult').get('IdToken')
     auth = JSONWebTokenAuthentication()
     token_validator = auth.get_token_validator(request)
@@ -49,6 +50,18 @@ def get_jwt_tokens(request, **kwargs):
     
     return Response(data)
 
+@api_view(['POST'])
+@authentication_classes([])
+def refresh_jwt_tokens(request, **kwargs):
+    refresh_token = request.data.get('refresh_token')
+    data = {}
+    
+    if refresh_token:
+        data['response'] = refresh_id_token(refresh_token)
+    else:
+        data['response'] = 'Please specify refresh_token in the request body.'
+        
+    return Response(data)
 
 # Function-based views
 @api_view(['GET'])
@@ -166,8 +179,8 @@ class UserView(APIView):
             return Response(serializer.data)
         else:
            serializer = UserSerializer(queryset, many=True)
-           short_list = slice_fields(['id', 'email', 'name', 'surname',], serializer.data)
-           return Response(short_list)
+           #short_list = slice_fields(['id', 'email', 'name', 'surname',], serializer.data)
+           return Response(serializer.data)
 
 
     def post(self, request, **args):
@@ -356,8 +369,8 @@ class ClientView(APIView):
             return Response(serializer.data)
         else:
             serializer = ClientSerializer(queryset, many=True)
-            short_list = slice_fields(['id', 'name', 'email', 'contact_phone'], serializer.data)
-            return Response(short_list)
+            #short_list = slice_fields(['id', 'name', 'email', 'contact_phone'], serializer.data)
+            return Response(serializer.data)
 
 
     def post(self, request, **args):
