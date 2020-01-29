@@ -37,7 +37,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
     def update(self, instance, validated_data):
-        print("in UserSerializer's update")
         instance.name = validated_data['name']
         instance.surname = validated_data['surname']
         instance.phone = validated_data['phone']
@@ -50,6 +49,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+        depth=1
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -116,6 +116,7 @@ class AddressSerializer(serializers.ModelSerializer):
             'id', 'street', 'house_no', 'flat_no', 'city', 'district', 
             'country', 'postal_code', 'owner', 'owner_email', 'owner_class'
         ]
+        depth=1
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -180,6 +181,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
+        depth=1
 
 
 class CompanySerializer(serializers.ModelSerializer):
