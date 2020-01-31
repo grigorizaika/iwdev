@@ -1,10 +1,13 @@
+import boto3
 import django_filters.rest_framework
 import json
 import phonenumbers
 
 from api.serializers import (
-    AddressSerializer, ClientSerializer, CompanySerializer, UserSerializer, RegistrationSerializer, OrderSerializer, TaskSerializer)
+    AddressSerializer, ClientSerializer, CompanySerializer, UserSerializer, 
+    PasswordSerializer, RegistrationSerializer, OrderSerializer, TaskSerializer)
 from django_cognito_jwt import JSONWebTokenAuthentication
+from django.contrib.auth.hashers import check_password
 from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
@@ -14,7 +17,7 @@ from rest_framework import permissions
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import (
-    api_view, authentication_classes, permission_classes)
+    action, api_view, authentication_classes, permission_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -173,6 +176,38 @@ def get_current_user(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
 
+@api_view(['POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+def change_password(request, **kwargs):
+    data = {}
+    
+    if (not 'old_password' in request.data
+        or not 'new_password' in request.data
+        or not 'access_token' in request.data):
+        data['response'] = '''Must specify \'old_password\', 
+            \'new_password\' and \'access_token\' in the request body'''
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)    
+    
+    user = request.user
+    serializer = PasswordSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        if check_password(serializer.data['old_password'], user.password):
+            client = boto3.client('cognito-idp')
+            response = client.change_password(
+                PreviousPassword=serializer.data['old_password'],
+                ProposedPassword=serializer.data['new_password'],
+                AccessToken=request.data['access_token']
+            )
+            user.set_password(serializer.data['new_password'])
+            user.save()
+            return Response({'response': 'Password set'}, status=status.HTTP_200_OK)
+        else:
+            data['response'] = 'Old password didn\'t match'
+            return Response(data, status=status.HTTP_403_FORBIDDEN)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Class-based views
 class UserView(APIView):
@@ -314,7 +349,6 @@ class AddressView(APIView):
     def post(self, request, *args,**kwargs):
         serializer = AddressSerializer(data=request.data)
         data = {}
-        print('it can\'t be')
         if serializer.is_valid():
             address = serializer.save()
             data['response'] = 'Created Address' + str(address)
