@@ -193,7 +193,7 @@ def change_password(request, **kwargs):
     
     if serializer.is_valid():
         if check_password(serializer.data['old_password'], user.password):
-            client = boto3.client('cognito-idp')
+            client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
             response = client.change_password(
                 PreviousPassword=serializer.data['old_password'],
                 ProposedPassword=serializer.data['new_password'],
