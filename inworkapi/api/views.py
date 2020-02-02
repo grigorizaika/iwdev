@@ -27,6 +27,7 @@ from api.helpers import (create_address, bulk_create_tasks,
                         json_list_group_by)
 from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
 from clients.models import Client
+from inworkapi.settings import COGNITO_APP_CLIENT_ID
 from orders.models import (Order, Task)
 from users.models import (User as CustomUser, Role, Company)
 from utils.models import Address, AddressOwner
@@ -194,6 +195,8 @@ def change_password(request, **kwargs):
     if serializer.is_valid():
         if check_password(serializer.data['old_password'], user.password):
             client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
+
+            # TODO: catch An error occurred (NotAuthorizedException) when calling the ChangePassword operation: Invalid Access Token
             response = client.change_password(
                 PreviousPassword=serializer.data['old_password'],
                 ProposedPassword=serializer.data['new_password'],
@@ -208,6 +211,139 @@ def change_password(request, **kwargs):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+def initiate_reset_password(request, **kwargs):
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
+    resonse = client.forgot_password(
+        ClientId=COGNITO_APP_CLIENT_ID,
+        Username=str(request.user.email),
+    )
+    return Response(resonse, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+def confirm_reset_password(request, **kwargs):
+    data = {}
+
+    if not 'new_password' in request.data or not 'confirmation_code' in request.data:
+        data['response'] = 'Must specify \'new_password\' and \'confirmation_code\' in the request body'
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    user = request.user
+
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
+    response = client.confirm_forgot_password(
+        ClientId=COGNITO_APP_CLIENT_ID,
+        Username=str(user.email),
+        ConfirmationCode = str(request.data['confirmation_code']),
+        Password=str(request.data['new_password']),   
+    )
+
+    user.set_password(str(request.data['new_password']))
+    user.save()
+
+    data['response'] = response
+
+    return Response(response, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAdministrator])
+def resend_confirmation_code(request, **kwargs):
+
+    if not 'id' in kwargs:
+        return Response({'response': 'Specify a user id'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = CustomUser.objects.get(id=kwargs.get('id'))
+    except CustomUser.DoesNotExist:
+        return Response({'response': 'User with this id does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
+    response = client.resend_confirmation_code(
+        ClientId=COGNITO_APP_CLIENT_ID,
+        Username=str(user.email),
+    )
+
+    return Response(response, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def confirm_sign_up(request, **kwargs):
+
+    if (not 'confirmation_code' in request.data or
+        not 'email' in request.data):
+        return Response({'response': 'Please provide a \'confirmation_code\' in the request body'}, status=status.HTTP_400_BAD_REQUEST)
+
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
+    response = client.confirm_sign_up(
+        ClientId=COGNITO_APP_CLIENT_ID,
+        Username=request.data['email'],
+        ConfirmationCode=request.data['confirmation_code'],
+    )
+
+    return Response(response, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+def initiate_verify_attribute(request, **kwargs):
+    data = {}
+    if ('access_token' not in request.data or
+        'attribute_name' not in request.data):
+        data['response'] = '''Must specify \'access_token\', \'attribute_name\', 
+        and \'confirmation_code\' in the request body'''
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    available_attribute_names = ['email', 'phone_number']
+
+    if request.data['attribute_name'] not in available_attribute_names:
+        data['response'] = '''Invalid value for \'attribute_name\'. Possible values are: ''' + str(available_attribute_names)
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
+    
+    response = client.get_user_attribute_verification_code(
+        AccessToken=request.data['access_token'],
+        AttributeName=request.data['attribute_name'],
+    )
+
+    return Response(response, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+def verify_attribute(request, **kwargs):
+    data = {}
+
+    if ('access_token' not in request.data or
+        'attribute_name' not in request.data or
+        'confirmation_code' not in request.data):
+        data['response'] = '''Must specify \'access_token\', \'attribute_name\', 
+        and \'confirmation_code\' in the request body'''
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+    
+    available_attribute_names = ['email', 'phone_number']
+    
+    if request.data['attribute_name'] not in available_attribute_names:
+        data['response'] = '''Invalid value for \'attribute_name\'. Possible values are: ''' + str(available_attribute_names)
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
+    print(request.data)
+
+    response = client.verify_user_attribute(
+        AccessToken=request.data['access_token'],
+        AttributeName=request.data['attribute_name'],
+        Code=request.data['confirmation_code'],
+    )
+
+    return Response(response, status=status.HTTP_200_OK)
+      
 
 # Class-based views
 class UserView(APIView):
@@ -291,7 +427,11 @@ class UserView(APIView):
 
             if 'profile_picture_url' in processed_data:
                 processed_data['profile_picture_url'] = str(processed_data['profile_picture_url'])
-    
+
+            if 'email' in processed_data:
+                processed_data.pop('email')
+                data['details'] = '\'email\' field has not been changed as it as an immutable field'
+
             djangoUser = CustomUser.objects.get(id=user_id)
             serializer = UserSerializer(djangoUser, data=processed_data, partial=True)
 

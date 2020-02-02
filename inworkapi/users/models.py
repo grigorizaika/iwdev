@@ -178,7 +178,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             print('Exception from admin_get_user in create_cognito user')
             print(e)
         #TODO: do as below
-        cognito_confirm_sign_up(username)
+        #cognito_confirm_sign_up(username)
 
 
     @staticmethod

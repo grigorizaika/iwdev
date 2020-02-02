@@ -1,7 +1,9 @@
-from api.views import (accept_hours_worked, change_password, client_addresses, 
-                        get_current_user, AddressView, ClientView, CompanyView, 
-                        check_phone, get_jwt_tokens, get_presigned_upload_url, 
-                        OrderView, refresh_jwt_tokens, TaskView, UserView,)
+from api.views import (accept_hours_worked, change_password, client_addresses,
+                        confirm_sign_up, confirm_reset_password, get_current_user, 
+                        AddressView, ClientView, CompanyView, check_phone, get_jwt_tokens, 
+                        get_presigned_upload_url, initiate_reset_password, 
+                        initiate_verify_attribute, OrderView, refresh_jwt_tokens, 
+                        resend_confirmation_code, TaskView, UserView, verify_attribute)
 from django.conf.urls import url, include
 from django.urls import path
 from drf_yasg.views import get_schema_view
@@ -56,4 +58,10 @@ urlpatterns = [
     url(r'get_tokens(?P<username>\w{0,50})(?P<password>\w{0,50})/$', get_jwt_tokens),
     url(r'refresh_tokens/$', refresh_jwt_tokens),
     url(r'change_password/$', change_password),
+    url(r'initiate_reset_password/$', initiate_reset_password),
+    url(r'confirm_reset_password/$', confirm_reset_password),
+    path('users/<int:id>/resend_confirmation_code/', resend_confirmation_code),
+    url(r'confirm_sign_up/$', confirm_sign_up),
+    url(r'^verify_attribute/$', verify_attribute),
+    url(r'^initiate_verify_attribute/$', initiate_verify_attribute),
 ]

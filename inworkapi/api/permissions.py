@@ -17,7 +17,7 @@ class IsPostOrIsAuthenticated(permissions.BasePermission):
 
 class IsAdministrator(permissions.BasePermission):
     def has_permission(self, request, view):
-        if not request.user.is_anonymous:
+        if request.user and not request.user.is_anonymous:
             if not request.user.role:
                 return False
             return request.user.role.name == 'Administrator'
