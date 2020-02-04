@@ -4,13 +4,12 @@ from clients.models import Client
 from orders.models import (Order, Task)
 from users.models import User as CustomUser
 from users.models import (Company, Role)
-from utils.models import (Address, AddressOwner)
+from utils.models import (Address, AddressOwner, CustomFile, FileOwner)
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(
         style={'input_type': 'password'}, write_only=True)
-
 
     def create(self, validated_data):
         password = validated_data['password']
@@ -95,13 +94,15 @@ class AddressOwnerSerializer(serializers.ModelSerializer):
 class AddressSerializer(serializers.ModelSerializer):
     owner_email = serializers.SerializerMethodField()
     owner_class = serializers.SerializerMethodField()
-
+    owner = serializers.PrimaryKeyRelatedField(queryset=AddressOwner.objects.all())
 
     def get_owner_class(self, obj):
+        # TODO: surround with try-except
         return obj.get_owner_instance().__class__.__name__
 
 
     def get_owner_email(self, obj):
+        # TODO: surround with try-except
         owner_instance = obj.get_owner_instance()
         if(isinstance(owner_instance, CustomUser) or isinstance(owner_instance, Client)):
             return owner_instance.email
@@ -144,6 +145,8 @@ class ClientSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     #address = serializers.StringRelatedField()
     #client_name = serializers.SerializerMethodField()
+    client = serializers.PrimaryKeyRelatedField(queryset=Client.objects.all())
+    address = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all())
 
     def create(self, validated_data):
         print ("In Order create(): ", validated_data)
@@ -165,6 +168,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    order = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
+    # TODO: May need to restrict it to users only
+    worker = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
 
     def create(self, validated_data):
         print("In Task create(): ", validated_data)
@@ -193,3 +199,32 @@ class CompanySerializer(serializers.ModelSerializer):
 class PasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+
+
+class FileSerializer(serializers.ModelSerializer):
+    owner_instance_id = serializers.SerializerMethodField()
+    owner_instance_class = serializers.SerializerMethodField()
+    owner = serializers.PrimaryKeyRelatedField(queryset=FileOwner.objects.all())
+
+    def get_owner_instance_class(self, obj):
+        # TODO: surround with try-except
+        return obj.get_owner_instance().__class__.__name__
+
+    def get_owner_instance_id(self, obj):
+        # TODO: surround with try-except
+        return obj.get_owner_instance().id
+
+    class Meta:
+        model = CustomFile
+        fields = [
+            'id', 'name', 'location', 'owner', 
+            'owner_instance_class', 'owner_instance_id',
+        ]
+        depth=1
+
+
+
+class FileOwnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FileOwner
+        fields = '__all__'

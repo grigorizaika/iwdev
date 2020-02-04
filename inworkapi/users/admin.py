@@ -21,7 +21,8 @@ class CustomUserAdmin(UserAdmin):
     fields = [
         'email', 'role', 'name', 'surname', 
         'phone', 'cognito_id', 'profile_picture_url',
-        'address_owner', 'supervisor', 'is_staff'
+        'address_owner', 'file_owner', 'supervisor', 
+        'is_staff'
         ]
     #fields = '__all__'
     fieldsets =  []

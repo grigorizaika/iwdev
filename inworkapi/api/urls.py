@@ -1,9 +1,10 @@
 from api.views import (accept_hours_worked, change_password, client_addresses,
-                        confirm_sign_up, confirm_reset_password, get_current_user, 
-                        AddressView, ClientView, CompanyView, check_phone, get_jwt_tokens, 
-                        get_presigned_upload_url, initiate_reset_password, 
-                        initiate_verify_attribute, OrderView, refresh_jwt_tokens, 
-                        resend_confirmation_code, TaskView, UserView, verify_attribute)
+                        confirm_sign_up, confirm_reset_password, FileView, 
+                        get_current_user, AddressView, ClientView, CompanyView,
+                        check_phone, get_jwt_tokens, get_presigned_upload_url, 
+                        initiate_reset_password, initiate_verify_attribute, model_files,
+                        my_files, OrderView, refresh_jwt_tokens, resend_confirmation_code, 
+                        TaskView, UserView, verify_attribute)
 from django.conf.urls import url, include
 from django.urls import path
 from drf_yasg.views import get_schema_view
@@ -16,6 +17,7 @@ app_name = 'api'
 address_list = AddressView.as_view()
 client_list = ClientView.as_view()
 company_list = CompanyView.as_view()
+file_list = FileView.as_view()
 order_list = OrderView.as_view()
 task_list = TaskView.as_view()
 user_list = UserView.as_view()
@@ -39,11 +41,13 @@ urlpatterns = [
                                            cache_timeout=0), name='schema-swagger-ui'),                                       
     url(r'^addresses/$', address_list),
     path('addresses/<int:id>/', address_list),
+    url(r'^files/$', file_list),
+    path('files/<int:id>/', file_list),
     url(r'clients/$', client_list),
     path('clients/<int:id>/', client_list),
     path('clients/<int:id>/addresses/', client_addresses),
-    url(r'users/$', user_list),
-    url(r'users/me/$', get_current_user),
+    url(r'^users/$', user_list),
+    url(r'^users/me/$', get_current_user),
     path('users/<int:id>/', user_list),
     url(r'users/check_phone(?P<phone>\w{0,50})/$', check_phone),
     url(r'orders/$', order_list),
@@ -64,4 +68,7 @@ urlpatterns = [
     url(r'confirm_sign_up/$', confirm_sign_up),
     url(r'^verify_attribute/$', verify_attribute),
     url(r'^initiate_verify_attribute/$', initiate_verify_attribute),
+    
+    path('<str:model>/<int:id>/files/', model_files),
+    url(r'^users/me/files/$', my_files),
 ]

@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from phonenumber_field.modelfields import PhoneNumberField
 
 from inworkapi.settings import (COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID, COGNITO_ATTR_MAPPING)
-from utils.models import (AddressOwner, Address)
+from utils.models import AddressOwner, Address, CustomFile, FileOwner
 from warrant import Cognito
 
 
@@ -88,6 +88,12 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 null=True,
                                 blank=True,
                                 )
+    file_owner              = models.OneToOneField(
+                                'utils.FileOwner',
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True,
+                                )
     role                    = models.ForeignKey(
                                 'Role', 
                                 on_delete=models.CASCADE, 
@@ -115,6 +121,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     def addresses(self):
         return Address.objects.filter(owner=self.address_owner)
 
+    def files(self):
+        return CustomFile.objects.filter(owner=self.file_owner)
 
     def add_address(self, **args):
         # In order to assign an address to the user,
@@ -138,6 +146,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         ao = AddressOwner.objects.create()
         ao.save()
         instance.address_owner = ao
+        instance.save()
+
+    @staticmethod
+    def create_file_owner(instance):
+        fo = FileOwner.objects.create()
+        fo.save()
+        instance.file_owner = fo
         instance.save()
 
 
@@ -186,16 +201,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not created:
             return
         else:
-            pass
             #User.create_firebase_user(instance)
             #User.create_cognito_user(instance)
-            #User.create_address_owner(instance)
+            User.create_file_owner(instance)
 
     @staticmethod
     def delete_address_owner(instance):
         if instance.address_owner:
             instance.address_owner.delete()
 
+    @staticmethod
+    def delete_file_owner(instance):
+        if instance.file_owner:
+            instance.file_owner.delete()
 
     @staticmethod
     def delete_cognito_user(instance):
@@ -213,6 +231,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     @staticmethod
     def delete_cleanup(sender, instance, *args, **kwargs):
         User.delete_address_owner(instance)
+        User.delete_file_owner(instance)
         User.delete_cognito_user(instance)
 
 

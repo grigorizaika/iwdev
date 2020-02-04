@@ -4,7 +4,7 @@ import json
 import phonenumbers
 
 from api.serializers import (
-    AddressSerializer, ClientSerializer, CompanySerializer, UserSerializer, 
+    AddressSerializer, ClientSerializer, CompanySerializer, FileSerializer, UserSerializer, 
     PasswordSerializer, RegistrationSerializer, OrderSerializer, TaskSerializer)
 from django_cognito_jwt import JSONWebTokenAuthentication
 from django.contrib.auth.hashers import check_password
@@ -29,10 +29,12 @@ from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
 from clients.models import Client
 from inworkapi.settings import COGNITO_APP_CLIENT_ID
 from orders.models import (Order, Task)
-from users.models import (User as CustomUser, Role, Company)
-from utils.models import Address, AddressOwner
-
 from tokens_test import get_tokens_test, refresh_id_token
+from users.models import (User as CustomUser, Role, Company)
+from utils.models import Address, AddressOwner, CustomFile, FileOwner
+
+
+
 @api_view(['POST'])
 @authentication_classes([])
 def get_jwt_tokens(request, **kwargs):
@@ -136,7 +138,6 @@ def check_phone(request, **kwargs):
 def client_addresses(request, **kwargs):
     
     data = {}
-    print('here yea')
     if 'id' in kwargs:
         if request.method == 'POST':
             try:
@@ -155,7 +156,7 @@ def client_addresses(request, **kwargs):
                 else:
                     data = serializer.errors
             except Client.DoesNotExist:
-                data['response'] = 'Client with an id ' + kwargs.get('id') + ' does not exist'
+                data['response'] = 'Client with an id ' + str(kwargs.get('id')) + ' does not exist'
         elif request.method == 'GET':
             try:
                 client = Client.objects.get(id=kwargs.get('id'))
@@ -170,6 +171,79 @@ def client_addresses(request, **kwargs):
 
     return Response(data)
 
+
+@api_view(['GET', 'POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAdministrator])
+def model_files(request, **kwargs):
+    print('in model_files; kwargs: ' + str(kwargs))
+
+    data = {}
+    possible_model_values = {
+        'users': CustomUser, 
+        'workers': CustomUser,
+        'orders': Order, 
+        'tasks' : Task,
+    }
+
+    if (not 'model' in kwargs or 
+        not 'id' in kwargs):
+            data['response'] = 'Wrong url for the file endpoint. \
+                Please follow this structure: /api/<string:model>/<int:id>/files/'
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        
+    if not kwargs['model'] in list(possible_model_values.keys()):
+        data['response'] = ('\'model\' argument must be one of these values: '
+                            + str(list(possible_model_values.keys())))
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+    
+    model = possible_model_values[kwargs['model']]
+    instance_id = kwargs['id']    
+        
+    if request.method == 'POST':
+        try:
+            instance = model.objects.get(id=instance_id)
+            fo = instance.file_owner
+
+            processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
+            processed_data['owner'] = fo.id
+
+            serializer = FileSerializer(data=processed_data)
+            if serializer.is_valid():
+                file = serializer.save()
+                data['response'] = "Created File " + str(file)
+                data['data'] = processed_data
+            else:
+                data = serializer.errors
+        except model.DoesNotExist:
+            data['response'] = (
+                str(model.__name__) + ' with an id ' + 
+                str(instance_id) + ' does not exist'
+            )
+    elif request.method == 'GET':
+        try:
+            instance = model.objects.get(id=instance_id)
+            fo = instance.file_owner
+            queryset = CustomFile.objects.filter(owner=fo)
+            serializer = FileSerializer(queryset, many=True)
+            data['response'] = serializer.data
+        except model.DoesNotExist:
+            data['response'] = (
+                str(model.__name__) + ' with an id ' + 
+                str(instance_id) + ' does not exist'
+            )
+    else:
+        data['response'] = 'Must specify a ' + str(model) + ' ID'
+
+    return Response(data)
+
+@api_view(['GET', 'POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def my_files(request, **kwargs):   
+    me = request.user
+    serializer = FileSerializer(me.files(), many=True)
+    return Response(serializer.data)
 
 @api_view(['GET'])
 @authentication_classes([JSONWebTokenAuthentication])
@@ -478,7 +552,7 @@ class AddressView(APIView):
                 serializer = AddressSerializer(address)
                 data = serializer.data
             except Address.DoesNotExist:
-                data['response'] = 'Address with an id ' + address_id + ' does not exist'
+                data['response'] = 'Address with an id ' + str(address_id) + ' does not exist'
         else:
             queryset = Address.objects.all()
             serializer = AddressSerializer(queryset, many=True)
@@ -498,18 +572,17 @@ class AddressView(APIView):
         return Response(data)
 
     def patch(self, request, **kwargs):
+        data = {}
         if 'id' in kwargs:
             address_id = kwargs.get('id')
             
             try:
                 address = Address.objects.get(id=address_id)
             except Address.DoesNotExist:
-                data['response'] = 'Address with an ID ' + address_id + ' does not exist'
+                data['response'] = 'Address with an ID ' + str(address_id) + ' does not exist'
                 return Response(data)
                 
             serializer = AddressSerializer(address, data=request.data, partial=True)
-            
-            data = {}
 
             if serializer.is_valid():
                 address = serializer.save()
@@ -879,3 +952,72 @@ class CompanyView(generics.ListCreateAPIView, mixins.UpdateModelMixin):
     serializer_class = CompanySerializer
     authentication_classes = [JSONWebTokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+
+class FileView(APIView):
+    authentication_classes = [JSONWebTokenAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        data = {}
+        if 'id' in kwargs:
+            file_id = kwargs.get('id')
+            try:
+                file = CustomFile.objects.get(id=file_id)
+                serializer = FileSerializer(file)
+                data = serializer.data
+            except CustomFile.DoesNotExist:
+                data['response'] = 'File with an id ' + file_id + ' does not exist'
+        else:
+            queryset = CustomFile.objects.all()
+            serializer = FileSerializer(queryset, many=True)
+            data = serializer.data
+
+        return Response(data)
+
+    def post(self, request, *args, **kwargs):
+        serializer = FileSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            file = serializer.save()
+            data['response'] = 'Created file ' + str(file)
+        else:
+            data = serializer.errors
+
+        return Response(data)
+
+    def patch(self, request, **kwargs):
+        if 'id' in kwargs:
+            file_id = kwargs.get('id')
+            
+            try:
+                file = CustomFile.objects.get(id=file_id)
+            except CustomFile.DoesNotExist:
+                data['response'] = 'File with an ID ' + file_id + ' does not exist'
+                return Response(data)
+                
+            serializer = FileSerializer(file, data=request.data, partial=True)
+            
+            data = {}
+
+            if serializer.is_valid():
+                file = serializer.save()
+                data['response'] = 'Updated file ' + str(file.id)
+            else:
+                data = serializer.errors
+
+            return Response(data)
+
+    def delete(self, request, *args, **kwargs):
+        data = {}
+        if 'id' in kwargs:
+            try:
+                file = CustomFile.objects.get(id=kwargs.get('id'))
+                file_str = str(file)
+                file.delete()
+                data['response'] = 'Successfully deleted file ' + file_str
+                return Response(status=status.HTTP_204_NO_CONTENT, data=data)
+            except CustomFile.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            data['response'] = 'Must specify an id'
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=data)

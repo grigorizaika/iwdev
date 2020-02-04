@@ -1,4 +1,5 @@
 from django.db import models
+from rest_framework import exceptions
 
 import users.models 
 import clients.models
@@ -44,13 +45,27 @@ class AddressOwner(models.Model):
 
     def get_owner_instance(self):
         # Search a list of all classes that are address owners
-        try:
-            return users.models.User.objects.get(address_owner=self.id)
-        except users.models.User.DoesNotExist:
+        # TODO: so far, this is implemented on the assumption that 
+        # all one to one relations with this model are address owners
+        owner_instance_models = [ field.related_model for field in self._meta.get_fields() 
+                                if field.__class__ is models.fields.reverse_related.OneToOneRel]
+        owner_instance = None
+        for owner_instance_model in owner_instance_models:
             try:
-                return clients.models.Client.objects.get(address_owner=self.id)
-            except clients.models.Client.DoesNotExist:
-                return "Neither User nor Client correspond to owner id " + str(self.id)
+                owner_instance = owner_instance_model.objects.get(address_owner=self.id)
+            except owner_instance_model.DoesNotExist:
+                continue
+        
+        try:
+            if not owner_instance:
+                print("""Neither the of owner instance classes has an instance 
+                        that corresponds to the owner id """ + str(self.id))
+                # TODO: there may be a problem with loose address_owners
+                return None
+        except UnboundLocalError:
+            raise exceptions.NotFound(detail="Address owner instance not found for this address owner2")
+
+        return owner_instance
 
 
     def __str__(self):
@@ -61,25 +76,56 @@ class CustomFile(models.Model):
     owner               = models.ForeignKey(
                             'utils.FileOwner',
                             on_delete=models.CASCADE, 
-                            null=True,
-                            blank=True,
+                            null=False,
+                            blank=False,
                             )
     name                = models.CharField(max_length=191)
     location            = models.URLField(max_length=300)
     date_created        = models.DateTimeField(auto_now_add=True)
 
+    def get_owner_instance(self):
+        if self.owner:
+            return self.owner.get_owner_instance()
+        else:
+            print(self.owner)
+            return None
+
+    def __str__(self):
+        return str(self.name) + ' ' + str(self.location)
+    
+    class Meta:
+        verbose_name= "File"
+        verbose_name_plural = "Files"
 
 class FileOwner(models.Model):
     
     def get_owner_instance(self):
-        return 'get_owner_instance is not yet implemented'
-        # try:
-        #     return users.models.User.objects.get(file_owner=self.id)
-        # except users.models.User.DoesNotExist:
-        #     try:
-        #         return clients.models.Client.objects.get(file_owner=self.id)
-        #     except clients.models.Client.DoesNotExist:
-        #         return "Neither User nor Client correspond to owner id " + str(self.id)
+        # Search a list of all classes that are address owners
+        # TODO: so far, this is implemented on the assumption that 
+        # all one to one relations with this model are address owners
+        owner_instance_models = [ field.related_model for field in self._meta.get_fields() 
+                                if field.__class__ is models.fields.reverse_related.OneToOneRel]
+        
+        owner_instance = None
+        
+        for owner_instance_model in owner_instance_models:
+            try:
+                owner_instance = owner_instance_model.objects.get(file_owner=self.id)
+            except owner_instance_model.DoesNotExist:
+                continue
+
+        try:
+            if not owner_instance:
+                print("""Neither the of owner instance classes has an instance 
+                        that corresponds to the owner id """ + str(self.id))
+                # TODO: there may be a problem with loose address_owners
+                return None
+        except UnboundLocalError:
+            raise exceptions.NotFound(detail="File owner instance not found for this address owner2")
+
+        return owner_instance
 
     def __str__(self):
         return 'FO_' + str(self.id) + ' ' + str(self.get_owner_instance())
+
+
