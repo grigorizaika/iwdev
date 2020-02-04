@@ -5,18 +5,17 @@ from botocore.exceptions import ParamValidationError
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-from django.db.models.signals import (post_delete, post_save)
+from django.db.models.signals import post_delete, pre_save
 from django.utils.translation import gettext as _
 from phonenumber_field.modelfields import PhoneNumberField
 
-from inworkapi.settings import (COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID, COGNITO_ATTR_MAPPING)
+from inworkapi.settings import COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID, COGNITO_ATTR_MAPPING
 from utils.models import AddressOwner, Address, CustomFile, FileOwner
 from warrant import Cognito
 
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
-
 
     def create_user(self, email, name, surname, phone, password=None):
         # TODO: Ensure that if a Django User creation fails, Firebase User creation fails too
@@ -31,6 +30,7 @@ class UserManager(BaseUserManager):
         )
 
         ao = AddressOwner.objects.create()
+        ao.save()
         djangoUser.set_password(password)
         djangoUser.save()
         print('in create_user "saving" address owner')
@@ -203,6 +203,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         else:
             #User.create_firebase_user(instance)
             #User.create_cognito_user(instance)
+            #User.create_address_owner(instance)
+            # TODO: Why can i create a file owner, but not an address owner here???
             User.create_file_owner(instance)
 
     @staticmethod
@@ -290,7 +292,7 @@ class Company(models.Model):
 
 
 post_delete.connect(User.delete_cleanup, sender=User)
-post_save.connect(User.create_setup, sender=User)
+pre_save.connect(User.create_setup, sender=User)
 
 
 # TODO: Change it toa normal sign up confirmation endpoint

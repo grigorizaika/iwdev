@@ -56,6 +56,7 @@ def get_jwt_tokens(request, **kwargs):
     
     return Response(data)
 
+
 @api_view(['POST'])
 @authentication_classes([])
 def refresh_jwt_tokens(request, **kwargs):
@@ -78,6 +79,7 @@ def refresh_jwt_tokens(request, **kwargs):
         data['response'] = 'Please specify refresh_token in the request body.'
 
     return Response(data)
+
 
 # Function-based views
 @api_view(['GET'])
@@ -110,6 +112,7 @@ def get_presigned_upload_url(request, **kwargs):
     data = create_presigned_post(bucket_name, object_name)
 
     return Response(data)
+
 
 @api_view(['GET'])
 def check_phone(request, **kwargs):
@@ -237,6 +240,7 @@ def model_files(request, **kwargs):
 
     return Response(data)
 
+
 @api_view(['GET', 'POST'])
 @authentication_classes([JSONWebTokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -245,11 +249,13 @@ def my_files(request, **kwargs):
     serializer = FileSerializer(me.files(), many=True)
     return Response(serializer.data)
 
+
 @api_view(['GET'])
 @authentication_classes([JSONWebTokenAuthentication])
 def get_current_user(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 @authentication_classes([JSONWebTokenAuthentication])
@@ -285,6 +291,7 @@ def change_password(request, **kwargs):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 @authentication_classes([JSONWebTokenAuthentication])
 def initiate_reset_password(request, **kwargs):
@@ -294,6 +301,7 @@ def initiate_reset_password(request, **kwargs):
         Username=str(request.user.email),
     )
     return Response(resonse, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 @authentication_classes([JSONWebTokenAuthentication])
