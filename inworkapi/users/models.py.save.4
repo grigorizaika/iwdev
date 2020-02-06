@@ -19,6 +19,7 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def create_user(self, email, name, surname, phone, password=None):
+        # TODO: Ensure that if a Django User creation fails, Firebase User creation fails too
         if not email:
             raise ValueError("An email address has not been provided")
 
@@ -29,16 +30,19 @@ class UserManager(BaseUserManager):
             phone=phone,
         )
 
+#        ao = AddressOwner.objects.create()
+        ao.save()
+
+        sys.stderr.write('\nao written\n')
+        sys.stderr.write('\n' + str(ao))
+
+        djangoUser.address_owner = ao
         djangoUser.set_password(password)
         djangoUser.save()
+        print('in create_user "saving" address owner')
 
-        print('--- user address owner BEFORE ---', djangoUser.address_owner)
-
-
+#        User.create_address_owner(djangoUser)
         User.create_cognito_user(djangoUser, password)
-
-        print('---1---')
-        print('--- user address owner AFTER ---', djangoUser.address_owner)
 
         return djangoUser
 
@@ -53,9 +57,6 @@ class UserManager(BaseUserManager):
             surname=surname,
             phone=phone,
         )
-        print('---3---')
-
-        print('zdes', djangoUser.address_owner)
         djangoUser.is_superuser = True
         djangoUser.is_staff = True
         djangoUser.admin = True
@@ -66,8 +67,6 @@ class UserManager(BaseUserManager):
             print('Didn\'t assign a role to the user')
             print(e)
 
-        print('TUUUUUUT', djangoUser.address_owner)
-# djangoUser.address_owner.save() ???
         djangoUser.save()
         return djangoUser
 
@@ -149,22 +148,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @staticmethod
     def create_address_owner(instance):
-        print('Creating AddressOwner for user ', instance)
-        print('---2---')
-
         ao = AddressOwner.objects.create()
         ao.save()
         instance.address_owner = ao
-        instance.address_owner.save()
         instance.save()
-        print('address owner: ', instance.address_owner)
 
     @staticmethod
     def create_file_owner(instance):
         fo = FileOwner.objects.create()
         fo.save()
         instance.file_owner = fo
-        instance.file_owner.save()
         instance.save()
 
 
@@ -217,7 +210,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             #User.create_cognito_user(instance)
             #User.create_address_owner(instance)
             # TODO: Why can i create a file owner, but not an address owner here???
-            User.create_address_owner(instance)
             User.create_file_owner(instance)
 
     @staticmethod

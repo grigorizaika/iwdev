@@ -53,6 +53,7 @@ class AddressOwner(models.Model):
         for owner_instance_model in owner_instance_models:
             try:
                 owner_instance = owner_instance_model.objects.get(address_owner=self.id)
+                print('Found owner instance', owner_instance)
             except owner_instance_model.DoesNotExist:
                 continue
         
@@ -101,13 +102,11 @@ class FileOwner(models.Model):
     
     def get_owner_instance(self):
         # Search a list of all classes that are address owners
-        # TODO: so far, this is implemented on the assumption that 
+        # TODO: so far, this is implemented on the assumption that
         # all one to one relations with this model are address owners
-        owner_instance_models = [ field.related_model for field in self._meta.get_fields() 
+        owner_instance_models = [ field.related_model for field in self._meta.get_fields()
                                 if field.__class__ is models.fields.reverse_related.OneToOneRel]
-        
         owner_instance = None
-        
         for owner_instance_model in owner_instance_models:
             try:
                 owner_instance = owner_instance_model.objects.get(file_owner=self.id)

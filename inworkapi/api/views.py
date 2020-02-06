@@ -168,7 +168,7 @@ def client_addresses(request, **kwargs):
                 serializer = AddressSerializer(queryset, many=True)
                 data['response'] = serializer.data
             except Client.DoesNotExist:
-                data['response'] = 'Client with an id ' + kwargs.get('id') + ' does not exist'
+                data['response'] = 'Client with an id ' + str(kwargs.get('id')) + ' does not exist'
     else:
         data['response'] = 'Must specify a client ID'
 
@@ -948,11 +948,11 @@ def accept_hours_worked(request, **kwargs):
         if not task.is_hours_worked_accepted:
             task.is_hours_worked_accepted = True
             task.save()
-            return Response({ 'response': 'Successfully accepted hours in task ' + task_id })
+            return Response({ 'response': 'Successfully accepted hours in task ' + str(task_id) })
         else:
-            return Response({ 'response': 'Hours on task ' + task_id + ' were already accepted by an administrator'})
+            return Response({ 'response': 'Hours on task ' + str(task_id) + ' were already accepted by an administrator'})
     except Task.DoesNotExist:
-        return Response({ 'response': 'Task id ' + task_id + ' does not exist' })
+        return Response({ 'response': 'Task id ' + str(task_id) + ' does not exist' })
 
 
 class CompanyView(generics.ListCreateAPIView, mixins.UpdateModelMixin):
@@ -974,7 +974,7 @@ class FileView(APIView):
                 serializer = FileSerializer(file)
                 data = serializer.data
             except CustomFile.DoesNotExist:
-                data['response'] = 'File with an id ' + file_id + ' does not exist'
+                data['response'] = 'File with an id ' + str(file_id) + ' does not exist'
         else:
             queryset = CustomFile.objects.all()
             serializer = FileSerializer(queryset, many=True)
@@ -1000,7 +1000,7 @@ class FileView(APIView):
             try:
                 file = CustomFile.objects.get(id=file_id)
             except CustomFile.DoesNotExist:
-                data['response'] = 'File with an ID ' + file_id + ' does not exist'
+                data['response'] = 'File with an ID ' + str(file_id) + ' does not exist'
                 return Response(data)
                 
             serializer = FileSerializer(file, data=request.data, partial=True)
