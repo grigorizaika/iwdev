@@ -16,6 +16,7 @@ class IsPostOrIsAuthenticated(permissions.BasePermission):
 
 
 class IsAdministrator(permissions.BasePermission):
+    message = 'Must have Administrator permissions to perform this action.'
     def has_permission(self, request, view):
         if request.user and not request.user.is_anonymous:
             if not request.user.role:

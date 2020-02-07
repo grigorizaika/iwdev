@@ -443,7 +443,7 @@ class UserView(APIView):
     permission_classes = [IsAdministrator]
     
     def get(self, request, **kwargs):
-        queryset = CustomUser.objects.all()
+        queryset = CustomUser.objects.filter(company=request.user.company)
 
         if 'id' in kwargs:
             user_id = kwargs.get('id')
@@ -697,7 +697,7 @@ class ClientView(APIView):
             client = serializer.save()
             ao = AddressOwner.objects.create()
             client.address_owner = ao
-            client.company = requets.user.company
+            client.company = request.user.company
             client.save()
             data['response'] = "Created Client " + str(client.name)
         else:
@@ -738,7 +738,7 @@ class ClientView(APIView):
 
             try:
                 client = Client.objects.get(id=client_id)
-                
+
                 if not client.company == request.user.company:
                     data['response'] = 'Client\'s company doesn\'t match the request user\'s company'
                     return Response(data, status=status.HTTP_403_FORBIDDEN)
@@ -763,20 +763,20 @@ class OrderView(APIView):
 
 
     def get(self, request, **kwargs):
-        
+
         data = {}
         print('in orders')
         if 'id' in kwargs:
             order_id = kwargs.get('id')
             try:
                 order = Order.objects.get(id=order_id)
-                
+
                 if not order.client.company == request.user.company:
                     data['response'] = 'Order client\'s company doesn\'t match the request user\'s company'
                     return Response(data, status=status.HTTP_403_FORBIDDEN)
 
-
                 serializer = OrderSerializer(order)
+
                 return Response(serializer.data)
             except Order.DoesNotExist:
                 data['response'] = 'Order with an id ' + str(order_id) + ' does not exist'
@@ -793,15 +793,19 @@ class OrderView(APIView):
         data = {}
 
         modified_data = dict(request.data)
-        modified_data = { key: val[0]  for key, val in modified_data.items() }  
-        
+        modified_data = { key: val[0]  for key, val in modified_data.items() }
+
         orderSerializer = OrderSerializer(data=modified_data)
 
         # Check if an address belongs to a client
         address_id = modified_data.get('address')
         client_id = modified_data.get('client')
-        
+
         client_instance = Client.objects.get(id=client_id)
+
+        if not client_instance.company == request.user.company:
+            data['response'] = 'Client\'s company doesn\'t match the company of the request user'
+            return Response(data, status=status.HTTP_403_FORBIDDEN)
 
         if not client_instance.addresses().filter(id=address_id).exists():
             data['response'] = 'Address ' + address_id + ' doesn\'t belong to the client ' + client_id
@@ -811,7 +815,7 @@ class OrderView(APIView):
         if orderSerializer.is_valid():
             order = orderSerializer.save()
             order.save()
-            
+
             if 'task_list' in modified_data:
                 task_list = json.loads(request.data.get('task_list'))
                 bulk_task_creation_response = bulk_create_tasks(task_list, order.id)
@@ -892,7 +896,7 @@ class TaskView(APIView):
         if 'id' in kwargs:
             task_id = kwargs.get('id')
             try:
-                task = Task.objects.get(id=task_id)
+                task = Task.objects.filter(order__client__company=user.request.company).get(id=task_id)
                 serializer = TaskSerializer(task)
                 return Response(serializer.data)
             except Task.DoesNotExist:
@@ -902,21 +906,23 @@ class TaskView(APIView):
             # TODO: Check admin permissions properly using DRF permissions
             if request.user.role.name == 'Administrator':
                 if date:
-                    queryset = Task.objects.filter(worker=worker_id).filter(date=date)
+                    queryset = Task.objects.filter(order__client__company=user.request.company).filter(worker=worker_id).filter(date=date)
                 elif date_start and date_end:
                     queryset = Task.objects \
+                                        .filter(order__client__company=user.request.company) \
                                         .filter(worker=worker_id) \
                                         .filter(date__gte=date_start) \
                                         .filter(date__lte=date_end)
                 elif month and year:
                     queryset = Task.objects \
+                                        .filter(order__client__company=user.request.company) \
                                         .filter(date__year=year) \
                                         .filter(date__month=month) \
                                         .filter(worker=worker_id)
                     serializer = TaskSerializer(queryset, many=True)
                     return Response(serializer.data)
                 else:
-                    queryset = Task.objects.filter(worker=worker_id)
+                    queryset = Task.objects.filter(order__client__company=user.request.company).filter(worker=worker_id)
                     # TODO: add this to the message
                     data['comment'] = 'Date wasn\'t specified, returning all task assigned to the worker ' + worker_id        
                 serializer = TaskSerializer(queryset, many=True)
@@ -929,7 +935,7 @@ class TaskView(APIView):
             if date:
                 if group_by_worker and request.user.role.name == 'Administrator':
                     # Tasks on a paricular day, grouped by workers
-                    queryset = Task.objects.filter(date=date)#.values('worker')
+                    queryset = Task.objects.filter(order__client__company=user.request.company).filter(date=date)#.values('worker')
                     #query.group_by = ['worker']
                     #queryset = QuerySet(query=query, model=Task)
                 else:
@@ -937,18 +943,20 @@ class TaskView(APIView):
 
             elif date_start and date_end:
                 queryset = Task.objects \
+                                    .filter(order__client__company=user.request.company) \
                                     .filter(worker=request.user.id) \
                                     .filter(date__gte=date_start) \
                                     .filter(date__lte=date_end)
             elif month and year:
                 queryset = Task.objects \
+                                    .filter(order__client__company=user.request.company) \
                                     .filter(worker=request.user.id) \
                                     .filter(date__year=year) \
                                     .filter(date__month=month)
 
             serializer = TaskSerializer(queryset, many=True)
             data = serializer.data
-                
+
             if group_by_worker:
                 data = json_list_group_by('worker', data)
 
@@ -957,7 +965,7 @@ class TaskView(APIView):
             print('3')
             # TODO: Check admin permissions properly using DRF permissions
             if request.user.role.name == 'Administrator':
-                queryset = Task.objects.all()
+                queryset = Task.objects.filter(order__client__company=request.user.company)
                 serializer = TaskSerializer(queryset, many=True)
                 return Response(serializer.data)
                 #short_list = slice_fields(['id', 'order', 'name', 'worker'], serializer.data)
@@ -970,18 +978,21 @@ class TaskView(APIView):
     def post(self, request, **kwargs):
         data = {}
         task_list = json.loads(request.data.get('task_list'))
-        bulk_creation_result = bulk_create_tasks(task_list)
+        bulk_creation_result = bulk_create_tasks(task_list, request.user)
         data['response'] = bulk_creation_result
         return Response(data)
 
 
     def patch(self, request, **kwargs):
-        
         data = {}
-        
         if 'id' in kwargs:
             task_id = kwargs.get('id')
             task = Task.objects.get(id=task_id)
+
+            if not task.order.client.company == request.user.company:
+                data['response'] = 'Task\'s company doesn\'t match the company of the request user'
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+
             serializer = TaskSerializer(task, data=request.data, partial=True)
             data = {}
             if serializer.is_valid():
@@ -1004,6 +1015,9 @@ class TaskView(APIView):
             data = {}
             try:
                 task = Task.objects.get(id=task_id)
+                if not task.order.client.company == request.user.company:
+                    data['response'] = 'Task\'s company doesn\'t match the company of the request user'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)
                 taskName = task.name
                 task.delete()
                 data['response'] = 'Successfully deleted task ' + str(task_id) + ' ' + str(taskName)
@@ -1022,6 +1036,8 @@ def accept_hours_worked(request, **kwargs):
     task_id = request.data.get('id')
     try:
         task = Task.objects.get(id=task_id)
+        if not task.order.client.company == user.request.company:
+            return Response({ 'response': 'This task belongs to another company than the request user\'s company' }, status=status.HTTP_403_FORBIDDEN)
         if not task.is_hours_worked_accepted:
             task.is_hours_worked_accepted = True
             task.save()

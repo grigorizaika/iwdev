@@ -182,7 +182,7 @@ import dj_database_url
 prod_db  =  dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(prod_db)
 
-TESTING_ON_LOCAL_MACHINE = True
+TESTING_ON_LOCAL_MACHINE = False
 # Cognito
 # TODO: set these up as environment variables
 COGNITO_USER_POOL_ID = 'eu-central-1_U5WunPyYI' if TESTING_ON_LOCAL_MACHINE else 'eu-central-1_4W9Ujr278'

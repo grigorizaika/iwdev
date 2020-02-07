@@ -7,16 +7,20 @@ from inworkapi.settings import COGNITO_APP_CLIENT_ID, COGNITO_USER_POOL_ID
 
 def get_tokens_test(username='gregory.zaika@gmail.com', password='Watermelon1#'):
 
-    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHP2BNSLB6R', aws_secret_access_key = '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')
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHPT7O6QHML', aws_secret_access_key = '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')
 
-    response = client.initiate_auth(
-        AuthFlow='USER_PASSWORD_AUTH',
-        AuthParameters={
-        'USERNAME': username,
-        'PASSWORD': password,
-        },
-        ClientId=COGNITO_APP_CLIENT_ID,
-    )
+    try:
+        response = client.initiate_auth(
+            AuthFlow='USER_PASSWORD_AUTH',
+            AuthParameters={
+            'USERNAME': username,
+            'PASSWORD': password,
+            },
+            ClientId=COGNITO_APP_CLIENT_ID,
+        )
+    except Exception as e:
+        print(e)
+        print('credentials:', username, password)
 
     return response
 

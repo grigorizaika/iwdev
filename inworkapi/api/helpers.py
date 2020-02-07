@@ -63,20 +63,26 @@ def json_list_group_by(group_by_field, json_list):
     return grouped
 
 
-def bulk_create_tasks(json_task_list, order_id=None):
+def bulk_create_tasks(json_task_list, user, order_id=None):
     full_response = []
-    
+
     for task_json in json_task_list:
-        
+
         if 'order' not in task_json:
             task_json['order'] = order_id
+
+        order = Order.objects.get(id=task_json['order'])
+
+        if not order.client.company == user.company:
+            full_response.append('Can\'t create a task for an order that doesn\'t belong to the request user\'s company')
+            continue
 
         if not task_json.get('order') == order_id and order_id is not None:
             full_response.append('Task order ID doesn\'t match the one specified in the keyword argument')
             continue
 
         serializer = TaskSerializer(data=task_json)
-        
+
         if serializer.is_valid():
             task = serializer.save()
             full_response.append('Successfully created task ' + str(task.id) + ' ' + task.name)
