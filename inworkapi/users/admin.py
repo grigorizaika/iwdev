@@ -4,7 +4,7 @@ from django.contrib.auth.admin  import UserAdmin
 
 from users.forms    import (CustomUserCreationForm, CustomUserChangeForm)
 from users.models   import User as CustomUser
-from users.models   import (Role, Absence)
+from users.models   import Role, Absence, Company
 
 # Register your models here.
 # admin.site.unregister(User)
@@ -20,15 +20,13 @@ class CustomUserAdmin(UserAdmin):
     form = CustomUserChangeForm
     fields = [
         'email', 'role', 'name', 'surname', 
-        'phone', 'cognito_id', 'profile_picture_url',
-        'address_owner', 'file_owner', 'supervisor', 
-        'is_staff'
+        'phone', 'supervisor', 'company',
+        'cognito_id', 'profile_picture_url',
+        'address_owner', 'file_owner', 'is_staff'
         ]
-    #fields = '__all__'
     fieldsets =  []
     readonly_fields=('cognito_id',)
     ordering = ('email',)
-    
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -49,4 +47,8 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(Absence)
 class AbsenceAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
     pass

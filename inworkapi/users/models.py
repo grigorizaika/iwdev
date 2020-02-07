@@ -111,7 +111,13 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 on_delete=models.CASCADE, 
                                 null=True,
                                 blank=True, 
-                                limit_choices_to={'role__name': 'administrator'})
+                                limit_choices_to={'role__name': 'Administrator'})
+    company                  = models.ForeignKey(
+                                'Company',
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True,
+                                )    
     created_at               = models.DateTimeField(auto_now_add=True)
     cognito_id               = models.CharField(max_length=191)
     profile_picture_url      = models.CharField(max_length=300, blank=True, null=True)
@@ -205,7 +211,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             print('Exception from admin_get_user in create_cognito user')
             print(e)
         #TODO: do as below
-        #cognito_confirm_sign_up(username)
+        cognito_confirm_sign_up(username)
 
 
     @staticmethod
@@ -213,12 +219,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not created:
             return
         else:
-            #User.create_firebase_user(instance)
             #User.create_cognito_user(instance)
-            #User.create_address_owner(instance)
-            # TODO: Why can i create a file owner, but not an address owner here???
             User.create_address_owner(instance)
             User.create_file_owner(instance)
+
 
     @staticmethod
     def delete_address_owner(instance):
@@ -299,10 +303,12 @@ class Absence(models.Model):
 class Company(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
 
-
     def __str__(self):
-        return 'id: ' + str(self.id) + '; ' + 'name: ' + str(self.name)
+            return 'id: ' + str(self.id) + '; ' + 'name: ' + str(self.name)
 
+    class Meta:
+        verbose_name_plural = 'companies'
+    
 
 post_delete.connect(User.delete_cleanup, sender=User)
 post_save.connect(User.create_setup, sender=User)

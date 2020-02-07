@@ -55,7 +55,9 @@ urlpatterns = [
     url(r'tasks/$', task_list),
     path('tasks/<int:id>/', task_list),
     url(r'tasks/accept_hours/$', accept_hours_worked),
-    url(r'companies(?P<id>\w{0,50})/$', company_list),
+    path('companies/', company_list),
+    path('companies/<int:id>/', company_list),
+    
     url(r'get_upload_url/$', get_presigned_upload_url),
     #url(r'check_phone(?P<phone>\w{0,50})/$', user_list, name="check_phone"),
     #url(r'users/register', user_registration, name="registration"),

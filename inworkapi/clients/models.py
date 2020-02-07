@@ -9,6 +9,12 @@ class Client(models.Model):
     email               = models.EmailField(_('email address'))
     contact_name        = models.CharField(max_length=40)
     contact_phone       = PhoneNumberField()
+    company             = models.ForeignKey(
+                            'users.Company',
+                            on_delete=models.CASCADE,
+                            null=True,
+                            blank=True,
+                            )   
     address_owner       = models.OneToOneField(
                             'utils.AddressOwner', 
                             on_delete=models.CASCADE, 

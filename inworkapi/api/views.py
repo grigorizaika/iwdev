@@ -145,6 +145,11 @@ def client_addresses(request, **kwargs):
         if request.method == 'POST':
             try:
                 client = Client.objects.get(id=kwargs.get('id'))
+                
+                if not client.company == request.user.company:
+                    data['response'] = 'Client\'s company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)              
+                
                 ao = client.address_owner
 
                 processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
@@ -163,6 +168,11 @@ def client_addresses(request, **kwargs):
         elif request.method == 'GET':
             try:
                 client = Client.objects.get(id=kwargs.get('id'))
+
+                if not client.company == request.user.company:
+                    data['response'] = 'Client\'s company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)                
+                
                 ao = client.address_owner
                 queryset = Address.objects.filter(owner=ao)
                 serializer = AddressSerializer(queryset, many=True)
@@ -202,7 +212,7 @@ def model_files(request, **kwargs):
     
     model = possible_model_values[kwargs['model']]
     instance_id = kwargs['id']    
-        
+
     if request.method == 'POST':
         try:
             instance = model.objects.get(id=instance_id)
@@ -438,12 +448,18 @@ class UserView(APIView):
         if 'id' in kwargs:
             user_id = kwargs.get('id')
             user = get_object_or_404(queryset, id=user_id)
+
+            if not user.company == request.user.company:
+                data['response'] = 'User\'s company doesn\'t match the request user\'s company'
+                return Response(data, status=status.HTTP_403_FORBIDDEN)                
+
             serializer = UserSerializer(user)
             return Response(serializer.data)
         else:
-           serializer = UserSerializer(queryset, many=True)
-           #short_list = slice_fields(['id', 'email', 'name', 'surname',], serializer.data)
-           return Response(serializer.data)
+            queryset.filter(company=request.user.company)
+            serializer = UserSerializer(queryset, many=True)
+            #short_list = slice_fields(['id', 'email', 'name', 'surname',], serializer.data)
+            return Response(serializer.data)
 
 
     def post(self, request, **args):
@@ -462,6 +478,7 @@ class UserView(APIView):
 
             worker_role, created = Role.objects.get_or_create(name='Worker')
             user.role = worker_role
+            user.company = request.user.company
             user.save()
 
             owner_id = user.address_owner.id
@@ -507,6 +524,7 @@ class UserView(APIView):
         if 'id' in kwargs:
             user_id = kwargs.get('id')
 
+            
             if 'profile_picture_url' in processed_data:
                 processed_data['profile_picture_url'] = str(processed_data['profile_picture_url'])
 
@@ -515,6 +533,11 @@ class UserView(APIView):
                 data['details'] = '\'email\' field has not been changed as it as an immutable field'
 
             djangoUser = CustomUser.objects.get(id=user_id)
+
+            if not djangoUser.company == request.user.company:
+                data['response'] = 'User\'s company doesn\'t match the request user\'s company'
+                return Response(data, status=status.HTTP_403_FORBIDDEN)    
+
             serializer = UserSerializer(djangoUser, data=processed_data, partial=True)
 
             if serializer.is_valid():
@@ -539,6 +562,11 @@ class UserView(APIView):
 
             try:
                 djangoUser = CustomUser.objects.get(id=user_id)
+            
+                if not djangoUser.company == request.user.company:
+                    data['response'] = 'User\'s company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)    
+
                 djangoUser.delete()
                 data['response'] = 'Successfully deleted ' + djangoUser.email
                 return Response(data)
@@ -557,20 +585,33 @@ class AddressView(APIView):
             address_id = kwargs.get('id')
             try:
                 address = Address.objects.get(id=address_id)
+                if not address.owner.get_owner_instance.company == request.user.company:
+                    data['response'] = 'Addresse\'s owner company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)    
                 serializer = AddressSerializer(address)
                 data = serializer.data
             except Address.DoesNotExist:
                 data['response'] = 'Address with an id ' + str(address_id) + ' does not exist'
         else:
-            queryset = Address.objects.all()
+            # TODO: Filter addresses by the owner's company
+            queryset = Address.objects.filter()
             serializer = AddressSerializer(queryset, many=True)
             data = serializer.data
 
         return Response(data)
 
     def post(self, request, *args,**kwargs):
-        serializer = AddressSerializer(data=request.data)
         data = {}
+
+        if 'owner' in request.data:
+            ao = AddressOwner.objects.get(id=request.data['owner'])
+            owner_instance = ao.get_owner_instance()
+
+            if not owner_instance.company == request.user.company:
+                data['response'] = 'Instance\'s company doesn\'t match the request user\'s company'
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = AddressSerializer(data=request.data)
         if serializer.is_valid():
             address = serializer.save()
             data['response'] = 'Created Address' + str(address)
@@ -586,6 +627,10 @@ class AddressView(APIView):
             
             try:
                 address = Address.objects.get(id=address_id)
+                owner_instance = address.owner.get_owner_instance()
+                if not owner_instance.company == request.user.company:
+                    data['response'] = 'Instance\'s company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)
             except Address.DoesNotExist:
                 data['response'] = 'Address with an ID ' + str(address_id) + ' does not exist'
                 return Response(data)
@@ -605,6 +650,12 @@ class AddressView(APIView):
         if 'id' in kwargs:
             try:
                 address = Address.objects.get(id=kwargs.get('id'))
+
+                owner_instance = address.owner.get_owner_instance()
+                if not owner_instance.company == request.user.company:
+                    data['response'] = 'Instance\'s company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)
+
                 address_str = str(address)
                 address.delete()
                 data['response'] = 'Successfully deleted address ' + address_str
@@ -625,7 +676,7 @@ class ClientView(APIView):
 
     def get(self, request, **kwargs):
 
-        queryset = Client.objects.all()
+        queryset = Client.objects.filter(company=request.user.company)
 
         if 'id' in kwargs:
             client_id = kwargs.get('id')
@@ -646,6 +697,7 @@ class ClientView(APIView):
             client = serializer.save()
             ao = AddressOwner.objects.create()
             client.address_owner = ao
+            client.company = requets.user.company
             client.save()
             data['response'] = "Created Client " + str(client.name)
         else:
@@ -659,6 +711,10 @@ class ClientView(APIView):
             client_id = kwargs.get('id')
             
             client = Client.objects.get(id=client_id)
+
+            if not client.company == request.user.company:
+                data['response'] = 'Client\'s company doesn\'t match the request user\'s company'
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
             
             serializer = ClientSerializer(client, data=request.data, partial=True)
             
@@ -682,6 +738,11 @@ class ClientView(APIView):
 
             try:
                 client = Client.objects.get(id=client_id)
+                
+                if not client.company == request.user.company:
+                    data['response'] = 'Client\'s company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)
+
                 client.delete()
                 data['response'] = "Successfully deleted " + client.name
                 return Response(data)
@@ -709,13 +770,19 @@ class OrderView(APIView):
             order_id = kwargs.get('id')
             try:
                 order = Order.objects.get(id=order_id)
+                
+                if not order.client.company == request.user.company:
+                    data['response'] = 'Order client\'s company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)
+
+
                 serializer = OrderSerializer(order)
                 return Response(serializer.data)
             except Order.DoesNotExist:
                 data['response'] = 'Order with an id ' + str(order_id) + ' does not exist'
                 return Response(data)
         else:
-            queryset = Order.objects.all()
+            queryset = Order.objects.filter(client__company=request.user.company)
             serializer = OrderSerializer(queryset, many=True)
 #            short_list = slice_fields(['id', 'name', 'client'], serializer.data)
             return Response(serializer.data)
@@ -766,6 +833,11 @@ class OrderView(APIView):
         if 'id' in kwargs:
             order_id = kwargs.get('id')
             order = Order.objects.get(id=order_id)
+
+            if not order.client.company == request.user.company:
+                data['response'] = 'Order client\'s company doesn\'t match the request user\'s company'
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+
             serializer = OrderSerializer(order, data=request.data, partial=True)
             data = {}
             if serializer.is_valid():
@@ -774,7 +846,7 @@ class OrderView(APIView):
             else:
                 data = serializer.errors
         else:
-            data['response'] = 'Must specify the id'
+            data['response'] = 'Must specify an id'
 
         return Response(data)
 
@@ -785,6 +857,11 @@ class OrderView(APIView):
             data = {}
             try:
                 order = Order.objects.get(id=order_id)
+                
+                if not order.client.company == request.user.company:
+                    data['response'] = 'Order client\'s company doesn\'t match the request user\'s company'
+                    return Response(data, status=status.HTTP_403_FORBIDDEN)
+                
                 orderName = order.name
                 order.delete()
                 data['response'] = 'Successfully deleted order ' + str(order_id) + ' ' + str(orderName)

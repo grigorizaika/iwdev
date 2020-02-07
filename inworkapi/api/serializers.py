@@ -54,7 +54,11 @@ class RegistrationSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     address_owner = serializers.StringRelatedField()
     addresses = serializers.SerializerMethodField()
-
+    address_owner = serializers.PrimaryKeyRelatedField(queryset=AddressOwner.objects.all())
+    file_owner = serializers.PrimaryKeyRelatedField(queryset=FileOwner.objects.all())
+    role = serializers.PrimaryKeyRelatedField(queryset=Role.objects.all())
+    supervisor = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    company = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all())
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
@@ -77,6 +81,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         exclude = ('password', 'last_login', 'is_staff', 'is_superuser')
+        depth=1
 
 
 class RoleSerializer(serializers.ModelSerializer):
