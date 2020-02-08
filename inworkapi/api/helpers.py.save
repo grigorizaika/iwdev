@@ -1,6 +1,5 @@
 from utils.models import Address
 from api.serializers import TaskSerializer
-from orders.models import Order
 
 def slice_fields(key_list, l):
     l_sliced = []
@@ -64,7 +63,7 @@ def json_list_group_by(group_by_field, json_list):
     return grouped
 
 
-def bulk_create_tasks(json_task_list, user, order_id=None):
+def bulk_create_tasks(json_task_list, order_id=None):
     full_response = []
 
     for task_json in json_task_list:
@@ -73,16 +72,10 @@ def bulk_create_tasks(json_task_list, user, order_id=None):
             task_json['order'] = order_id
 
         try:
-            order = Order.objects.get(id=task_json['order'])
+            Order.objects.filter(client__company=user.company).get(id=order_id)
         except Order.DoesNotExist:
-            full_response.append('Order' + str(task_json) + ' does not exist.')
-            continue
-
-        if not order.client.company == user.company:
-            full_response.append('Can\'t create a task for an order that doesn\'t belong to the request user\'s company')
-            continue
-
-        if not task_json.get('order') == order_id and order_id is not None:
+            full_response.append('Task order ID doesn\'t match the one specified in the keyword argument')
+       if not task_json.get('order') == order_id and order_id is not None:
             full_response.append('Task order ID doesn\'t match the one specified in the keyword argument')
             continue
 
@@ -93,6 +86,6 @@ def bulk_create_tasks(json_task_list, user, order_id=None):
             full_response.append('Successfully created task ' + str(task.id) + ' ' + task.name)
         else:
             full_response.append(str(serializer.errors))
-    
+
     return full_response
 

@@ -818,7 +818,7 @@ class OrderView(APIView):
 
             if 'task_list' in modified_data:
                 task_list = json.loads(request.data.get('task_list'))
-                bulk_task_creation_response = bulk_create_tasks(task_list, order.id)
+                bulk_task_creation_response = bulk_create_tasks(task_list, request.user, order.id)
                 data['response'] = ['Created order ' + str(order.id) + ' \"' + str(order.name) + '\"']
                 data['response'].append(bulk_task_creation_response)
             else:
@@ -896,7 +896,7 @@ class TaskView(APIView):
         if 'id' in kwargs:
             task_id = kwargs.get('id')
             try:
-                task = Task.objects.filter(order__client__company=user.request.company).get(id=task_id)
+                task = Task.objects.filter(order__client__company=request.user.company).get(id=task_id)
                 serializer = TaskSerializer(task)
                 return Response(serializer.data)
             except Task.DoesNotExist:
@@ -906,23 +906,23 @@ class TaskView(APIView):
             # TODO: Check admin permissions properly using DRF permissions
             if request.user.role.name == 'Administrator':
                 if date:
-                    queryset = Task.objects.filter(order__client__company=user.request.company).filter(worker=worker_id).filter(date=date)
+                    queryset = Task.objects.filter(order__client__company=request.user.company).filter(worker=worker_id).filter(date=date)
                 elif date_start and date_end:
                     queryset = Task.objects \
-                                        .filter(order__client__company=user.request.company) \
+                                        .filter(order__client__company=request.user.company) \
                                         .filter(worker=worker_id) \
                                         .filter(date__gte=date_start) \
                                         .filter(date__lte=date_end)
                 elif month and year:
                     queryset = Task.objects \
-                                        .filter(order__client__company=user.request.company) \
+                                        .filter(order__client__company=request.user.company) \
                                         .filter(date__year=year) \
                                         .filter(date__month=month) \
                                         .filter(worker=worker_id)
                     serializer = TaskSerializer(queryset, many=True)
                     return Response(serializer.data)
                 else:
-                    queryset = Task.objects.filter(order__client__company=user.request.company).filter(worker=worker_id)
+                    queryset = Task.objects.filter(order__client__company=request.user.company).filter(worker=worker_id)
                     # TODO: add this to the message
                     data['comment'] = 'Date wasn\'t specified, returning all task assigned to the worker ' + worker_id        
                 serializer = TaskSerializer(queryset, many=True)
@@ -935,7 +935,7 @@ class TaskView(APIView):
             if date:
                 if group_by_worker and request.user.role.name == 'Administrator':
                     # Tasks on a paricular day, grouped by workers
-                    queryset = Task.objects.filter(order__client__company=user.request.company).filter(date=date)#.values('worker')
+                    queryset = Task.objects.filter(order__client__company=request.user.company).filter(date=date)#.values('worker')
                     #query.group_by = ['worker']
                     #queryset = QuerySet(query=query, model=Task)
                 else:
@@ -943,13 +943,13 @@ class TaskView(APIView):
 
             elif date_start and date_end:
                 queryset = Task.objects \
-                                    .filter(order__client__company=user.request.company) \
+                                    .filter(order__client__company=request.user.company) \
                                     .filter(worker=request.user.id) \
                                     .filter(date__gte=date_start) \
                                     .filter(date__lte=date_end)
             elif month and year:
                 queryset = Task.objects \
-                                    .filter(order__client__company=user.request.company) \
+                                    .filter(order__client__company=request.user.company) \
                                     .filter(worker=request.user.id) \
                                     .filter(date__year=year) \
                                     .filter(date__month=month)
