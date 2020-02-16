@@ -13636,3 +13636,11 @@ Watching for file changes with StatReloader
 "GET /api/tasks/9/ HTTP/1.1" 200 1917
 "PATCH /api/tasks/9/ HTTP/1.1" 200 43
 "GET /api/tasks/9/ HTTP/1.1" 200 1596
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Invalid HTTP_HOST header: 'ec2-54-93-249-212.eu-central-1.compute.amazonaws.com'. You may need to add 'ec2-54-93-249-212.eu-central-1.compute.amazonaws.com' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: 'ec2-54-93-249-212.eu-central-1.compute.amazonaws.com'. You may need to add 'ec2-54-93-249-212.eu-central-1.compute.amazonaws.com' to ALLOWED_HOSTS.
+Bad Request: /favicon.ico
+Invalid HTTP_HOST header: '54.93.249.212'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /
