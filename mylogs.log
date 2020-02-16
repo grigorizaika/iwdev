@@ -13644,3 +13644,29 @@ Invalid HTTP_HOST header: 'ec2-54-93-249-212.eu-central-1.compute.amazonaws.com'
 Bad Request: /favicon.ico
 Invalid HTTP_HOST header: '54.93.249.212'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
 Bad Request: /
+Internal Server Error: /
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/inworkapi/views.py", line 6, in main_page
+    return render(request, 'main.html')
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/shortcuts.py", line 36, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/template/loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: main.html
+Not Found: /favicon.ico
+Invalid HTTP_HOST header: '54.93.249.212'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /dfsd
+Not Found: /favicon.ico
+Not Found: /asdasd
+Not Found: /favicon.ico
