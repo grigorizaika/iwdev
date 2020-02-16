@@ -95,16 +95,30 @@ LOGGING = {
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-        'NAME': 'inworktestdb',
-        'USER': 'gz',
-        'PASSWORD': 'watermelon',
-        'HOST': 'localhost',
-        'PORT': '',
+BEFORE_MIGRATION = False
+
+if BEFORE_MIGRATION:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+            'NAME': 'inworktestdb',
+            'USER': 'gz',
+            'PASSWORD': 'watermelon',
+            'HOST': 'localhost',
+            'PORT': '',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+            'NAME': 'inwork_db',
+            'USER': 'inwork_user',
+            'PASSWORD': 'sr2R#97f7GKf',
+            'HOST': 'localhost',
+            'PORT': '',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -149,7 +163,7 @@ STATICFILES_DIRS = (
     )
 
 # Heroku
-#  Add configuration for static files storage using whitenoise
+# Add configuration for static files storage using whitenoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
