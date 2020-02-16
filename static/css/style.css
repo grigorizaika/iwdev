@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css?family=Inconsolata&display=swap');
+
+body {
+  background: #373b44; /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #373b44, #4286f4); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #373b44, #4286f4); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  font-family: 'Inconsolata', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.error-message {
+  padding: 32px;
+}
+
+.error-message h1,
+.error-message h2 {
+  color: white;
+}
