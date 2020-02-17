@@ -95,7 +95,7 @@ LOGGING = {
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-BEFORE_MIGRATION = False
+BEFORE_MIGRATION = True
 
 if BEFORE_MIGRATION:
     DATABASES = {
@@ -199,8 +199,8 @@ DATABASES['default'].update(prod_db)
 TESTING_ON_LOCAL_MACHINE = True
 # Cognito
 # TODO: set these up as environment variables in production
-COGNITO_USER_POOL_ID = 'eu-central-1_U5WunPyYI' if TESTING_ON_LOCAL_MACHINE else 'eu-central-1_4W9Ujr278'
-COGNITO_APP_CLIENT_ID = '1ttqlbg0nfc7ii6jm7gfcbntkk' if TESTING_ON_LOCAL_MACHINE else '26of6qnpc3v587ckks1b67u3ip'
+COGNITO_USER_POOL_ID = 'eu-central-1_crdW7BRxk' if TESTING_ON_LOCAL_MACHINE else 'eu-central-1_rrLpMIOR8'
+COGNITO_APP_CLIENT_ID = '5o4f3n78nmf88a3tegfv6gfnu4' if TESTING_ON_LOCAL_MACHINE else '5ofalkd3mkj00sfbt6uociio5v'
 COGNITO_APP_ID = COGNITO_APP_CLIENT_ID
 COGNITO_ATTR_MAPPING = {
     'email': 'email',
@@ -208,8 +208,8 @@ COGNITO_ATTR_MAPPING = {
 }
 COGNITO_AWS_REGION = 'eu-central-1'
 # TODO: set these up as environment variables in production
-AWS_ACCESS_KEY_ID = 'AKIAQCUV7DHPQFLM7OKM'
-AWS_SECRET_ACCESS_KEY = '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'
+AWS_ACCESS_KEY_ID = 'AKIA35BTZJ3G742FYXGN'
+AWS_SECRET_ACCESS_KEY = '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'
 
 COGNITO_USER_POOL = COGNITO_USER_POOL_ID
 COGNITO_AUDIENCE = COGNITO_APP_CLIENT_ID
