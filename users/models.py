@@ -2,13 +2,14 @@ import boto3
 import datetime
 import sys
 
-from botocore.exceptions import ParamValidationError
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import PermissionsMixin
-from django.db import models
-from django.db.models.signals import post_delete, post_save
-from django.utils.translation import gettext as _
-from phonenumber_field.modelfields import PhoneNumberField
+from botocore.exceptions            import ParamValidationError
+from django.conf                    import settings
+from django.contrib.auth.models     import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models     import PermissionsMixin
+from django.db                      import models
+from django.db.models.signals       import post_delete, post_save
+from django.utils.translation       import gettext as _
+from phonenumber_field.modelfields  import PhoneNumberField
 
 from inworkapi.settings import COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID, COGNITO_ATTR_MAPPING
 from utils.models import AddressOwner, Address, CustomFile, FileOwner
@@ -163,7 +164,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 # TODO: Disallow Django user creation if Cognito user creation fails
     @staticmethod
     def create_cognito_user(instance, password):
-        client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHPT7O6QHML', aws_secret_access_key = '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')
+        client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
         username = str(instance.email)
         try:
             response = client.sign_up(
@@ -218,7 +219,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @staticmethod
     def delete_cognito_user(instance):
-        client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHPT7O6QHML', aws_secret_access_key = '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')
+        client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
         try:
             response = client.admin_delete_user(
                 UserPoolId=COGNITO_USER_POOL_ID,
@@ -296,7 +297,7 @@ post_save.connect(User.create_setup, sender=User)
 
 # TODO: Change it toa normal sign up confirmation endpoint
 def cognito_confirm_sign_up(username):
-    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = 'AKIAQCUV7DHPT7O6QHML', aws_secret_access_key = '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')
+    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
     response = client.admin_confirm_sign_up(
         UserPoolId=COGNITO_USER_POOL_ID,
         Username=username,
