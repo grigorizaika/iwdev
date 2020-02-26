@@ -16,6 +16,7 @@ from utils.models import AddressOwner, Address, CustomFile, FileOwner
 from warrant import Cognito
 
 
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 

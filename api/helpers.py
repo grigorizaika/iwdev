@@ -1,7 +1,7 @@
 import random
 
 from utils.models import Address
-from api.serializers import TaskSerializer
+from orders.serializers import TaskSerializer
 from django_cognito_jwt import JSONWebTokenAuthentication
 from orders.models import Order
 
