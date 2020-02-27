@@ -111,5 +111,6 @@ def generate_temporary_password(password_length=10):
 def get_user_by_token(request, token):
     auth = JSONWebTokenAuthentication()
     jwt_payload = auth.get_token_validator(request).validate(token)
+    print(jwt_payload)
     user = auth.get_user_model().objects.get_or_create_for_cognito(jwt_payload)
     return user

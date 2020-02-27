@@ -36,9 +36,9 @@ def check_phone(request, **kwargs):
         data['response'] = False
         return Response(data)
 
-
+from rest_framework.authentication import get_authorization_header
 @api_view(['GET'])
-@authentication_classes([JSONWebTokenAuthentication])
+#@authentication_classes([JSONWebTokenAuthentication])
 def get_current_user(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)

@@ -13878,3 +13878,581 @@ Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 "POST /api/get_tokens HTTP/1.1" 200 4721
 "GET /api/users/me HTTP/1.1" 200 385
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Internal Server Error: /api/get_tokens
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/api/views.py", line 36, in get_jwt_tokens
+    id_token = tokens_result['data']['AuthenticationResult'].get('IdToken')
+KeyError: 'data'
+Internal Server Error: /api/get_tokens
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/api/views.py", line 36, in get_jwt_tokens
+    id_token = tokens_result['AuthenticationResult'].get('IdToken')
+KeyError: 'data'
+Internal Server Error: /api/users/me/
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 44, in get_current_user
+    return Response(serializer.data)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 559, in data
+    ret = super().data
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 261, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 526, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/fields.py", line 1873, in to_representation
+    return method(value)
+  File "/home/ubuntu/django/inwork/iwdev/users/serializers.py", line 113, in get_addresses
+    queryset = obj.addresses()
+AttributeError: 'AnonymousUser' object has no attribute 'addresses'
+Internal Server Error: /api/get_tokens
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/api/views.py", line 37, in get_jwt_tokens
+    user = get_user_by_token(request, id_token)
+  File "/home/ubuntu/django/inwork/iwdev/api/helpers.py", line 115, in get_user_by_token
+    user = auth.get_user_model().objects.get_or_create_for_cognito(jwt_payload)
+  File "/home/ubuntu/django/inwork/iwdev/users/models.py", line 69, in get_or_create_for_cognito
+    return self.get(cognito_id=cognito_id)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/db/models/manager.py", line 82, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/db/models/query.py", line 408, in get
+    self.model._meta.object_name
+users.models.User.DoesNotExist: User matching query does not exist.
+Internal Server Error: /api/get_tokens
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/api/views.py", line 37, in get_jwt_tokens
+    user = get_user_by_token(request, id_token)
+  File "/home/ubuntu/django/inwork/iwdev/api/helpers.py", line 115, in get_user_by_token
+    user = auth.get_user_model().objects.get_or_create_for_cognito(jwt_payload)
+  File "/home/ubuntu/django/inwork/iwdev/users/models.py", line 70, in get_or_create_for_cognito
+    return self.get(cognito_id=cognito_id)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/db/models/manager.py", line 82, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/db/models/query.py", line 408, in get
+    self.model._meta.object_name
+users.models.User.DoesNotExist: User matching query does not exist.
+Internal Server Error: /api/users/me
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 44, in get_current_user
+    return Response(serializer.data)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 559, in data
+    ret = super().data
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 261, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 526, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/fields.py", line 1873, in to_representation
+    return method(value)
+  File "/home/ubuntu/django/inwork/iwdev/users/serializers.py", line 113, in get_addresses
+    queryset = obj.addresses()
+AttributeError: 'AnonymousUser' object has no attribute 'addresses'
+Internal Server Error: /api/users/me
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 44, in get_current_user
+    return Response(serializer.data)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 559, in data
+    ret = super().data
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 261, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 526, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/fields.py", line 1873, in to_representation
+    return method(value)
+  File "/home/ubuntu/django/inwork/iwdev/users/serializers.py", line 113, in get_addresses
+    queryset = obj.addresses()
+AttributeError: 'AnonymousUser' object has no attribute 'addresses'
+Internal Server Error: /api/users/me
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 44, in get_current_user
+    return Response(serializer.data)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 559, in data
+    ret = super().data
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 261, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 526, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/fields.py", line 1873, in to_representation
+    return method(value)
+  File "/home/ubuntu/django/inwork/iwdev/users/serializers.py", line 113, in get_addresses
+    queryset = obj.addresses()
+AttributeError: 'AnonymousUser' object has no attribute 'addresses'
+Internal Server Error: /api/users/me
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 44, in get_current_user
+    return Response(serializer.data)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 559, in data
+    ret = super().data
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 261, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 526, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/fields.py", line 1873, in to_representation
+    return method(value)
+  File "/home/ubuntu/django/inwork/iwdev/users/serializers.py", line 113, in get_addresses
+    queryset = obj.addresses()
+AttributeError: 'AnonymousUser' object has no attribute 'addresses'
+Unauthorized: /api/users/
+Not Found: /api/refresh_tokens/
+Internal Server Error: /api/users/me
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 44, in get_current_user
+    return Response(serializer.data)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 559, in data
+    ret = super().data
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 261, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 526, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/fields.py", line 1873, in to_representation
+    return method(value)
+  File "/home/ubuntu/django/inwork/iwdev/users/serializers.py", line 113, in get_addresses
+    queryset = obj.addresses()
+AttributeError: 'AnonymousUser' object has no attribute 'addresses'
+Internal Server Error: /api/users/me
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 44, in get_current_user
+    serializer = UserSerializer(request.user)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 559, in data
+    ret = super().data
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 261, in data
+    self._data = self.to_representation(self.instance)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 526, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/fields.py", line 1873, in to_representation
+    return method(value)
+  File "/home/ubuntu/django/inwork/iwdev/users/serializers.py", line 113, in get_addresses
+    queryset = obj.addresses()
+AttributeError: 'AnonymousUser' object has no attribute 'addresses'
+Internal Server Error: /api/users/me
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 143, in _get_response
+    response = response.render()
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/template/response.py", line 106, in render
+    self.content = self.rendered_content
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/renderers.py", line 104, in render
+    allow_nan=not self.strict, separators=separators
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/utils/json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "/usr/lib/python3.6/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "/usr/lib/python3.6/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/lib/python3.6/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/utils/encoders.py", line 66, in default
+    return tuple(item for item in obj)
+TypeError: 'Request' object is not iterable
+Internal Server Error: /api/users/me
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 143, in _get_response
+    response = response.render()
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/template/response.py", line 106, in render
+    self.content = self.rendered_content
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/renderers.py", line 104, in render
+    allow_nan=not self.strict, separators=separators
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/utils/json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "/usr/lib/python3.6/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "/usr/lib/python3.6/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/lib/python3.6/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/utils/encoders.py", line 66, in default
+    return tuple(item for item in obj)
+TypeError: 'Request' object is not iterable
+Internal Server Error: /api/users/me/
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 43, in get_current_user
+    response['request'] =request.META
+NameError: name 'response' is not defined
+Invalid HTTP_HOST header: '54.93.249.212:80'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /solr/admin/info/system
+Internal Server Error: /api/users/me/
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 43, in get_current_user
+    return Response(response.META)
+NameError: name 'response' is not defined
+Internal Server Error: /api/users/me/
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 145, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 143, in _get_response
+    response = response.render()
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/template/response.py", line 106, in render
+    self.content = self.rendered_content
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/response.py", line 70, in rendered_content
+    ret = renderer.render(self.data, accepted_media_type, context)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/renderers.py", line 104, in render
+    allow_nan=not self.strict, separators=separators
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/utils/json.py", line 25, in dumps
+    return json.dumps(*args, **kwargs)
+  File "/usr/lib/python3.6/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+  File "/usr/lib/python3.6/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/usr/lib/python3.6/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/utils/encoders.py", line 66, in default
+    return tuple(item for item in obj)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/utils/encoders.py", line 66, in <genexpr>
+    return tuple(item for item in obj)
+io.UnsupportedOperation: not readable
+Invalid HTTP_HOST header: '54.93.249.212:80'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '54.93.249.212:80'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '54.93.249.212:80'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /index.php
+Invalid HTTP_HOST header: '54.93.249.212'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /
+Unauthorized: /api/users/me/
+Internal Server Error: /api/users/me/
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 44, in get_current_user
+    return Response(serializer.data)
+NameError: name 'serializer' is not defined
+Invalid HTTP_HOST header: '54.93.249.212'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /phpmyadmin/
+Invalid HTTP_HOST header: '54.93.249.212:80'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '54.93.249.212:80'. You may need to add '54.93.249.212' to ALLOWED_HOSTS.
+Bad Request: /
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Not Found: /favicon.ico
+Internal Server Error: /api/users/
+Traceback (most recent call last):
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/ubuntu/django/inwork/iwdev/users/views.py", line 373, in post
+    user = serializer.save()
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/rest_framework/serializers.py", line 213, in save
+    self.instance = self.create(validated_data)
+  File "/home/ubuntu/django/inwork/iwdev/users/serializers.py", line 54, in create
+    create_cognito_user=self.create_cognito_user_on_post
+  File "/home/ubuntu/django/inwork/iwdev/users/models.py", line 39, in create_user
+    User.create_cognito_user(djangoUser, password)
+  File "/home/ubuntu/django/inwork/iwdev/users/models.py", line 199, in create_cognito_user
+    cognito_confirm_sign_up(username)
+  File "/home/ubuntu/django/inwork/iwdev/users/models.py", line 305, in cognito_confirm_sign_up
+    Username=username,
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/botocore/client.py", line 276, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+  File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/botocore/client.py", line 586, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.exceptions.ClientError: An error occurred (UnrecognizedClientException) when calling the AdminConfirmSignUp operation: The security token included in the request is invalid.
