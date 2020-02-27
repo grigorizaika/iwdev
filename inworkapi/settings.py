@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'gm^3*#2*)@v$m)-(xv$+g%wc)nvb@)hn4#0#11k2o-p2*8_vp3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'inworkapi.herokuapp.com',
@@ -95,7 +95,7 @@ LOGGING = {
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-BEFORE_MIGRATION = False
+BEFORE_MIGRATION = True
 
 if BEFORE_MIGRATION:
     DATABASES = {
@@ -196,7 +196,7 @@ import dj_database_url
 prod_db  =  dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(prod_db)
 
-TESTING_ON_LOCAL_MACHINE = False
+TESTING_ON_LOCAL_MACHINE = True
 # Cognito
 # TODO: set these up as environment variables in production
 COGNITO_USER_POOL_ID = 'eu-central-1_crdW7BRxk' if TESTING_ON_LOCAL_MACHINE else 'eu-central-1_rrLpMIOR8'

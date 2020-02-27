@@ -6,7 +6,7 @@ import sys
 
 from django.conf import settings
 
-def get_tokens(username='gregory.zaika@gmail.com', password='Watermelon1#'):
+def get_tokens(username, password):
     data = {}
     client = boto3.client('cognito-idp', region_name=settings.COGNITO_AWS_REGION, aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
 
