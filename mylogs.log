@@ -1,3 +1,14 @@
 
 Not Found: /favicon.ico
 Not Found: /favicon.ico
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+"GET / HTTP/1.1" 200 314
+"GET /static/css/style.css HTTP/1.1" 200 588
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 2291
+Watching for file changes with StatReloader

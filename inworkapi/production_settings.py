@@ -5,7 +5,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # TODO: print->logging
 print('using production settings')
 
-SECRET_KEY = 'gm^3*#2*)@v$m)-(xv$+g%wc)nvb@)hn4#0#11k2o-p2*8_vp3'
+SECRET_KEY = os.getenv('DJANGO_INWORK_SECRET_KEY')
 
 DEBUG = True
 
@@ -85,10 +85,10 @@ LOGGING = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-        'NAME': 'inwork_db',
-        'USER': 'inwork_user',
-        'PASSWORD': 'sr2R#97f7GKf',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('INWORK_DB_USER'),
+        'USER': os.getenv('INWORK_DB_NAME'),
+        'PASSWORD': os.getenv('INWORK_DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '',
     }
