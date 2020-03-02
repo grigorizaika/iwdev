@@ -1,26 +1,17 @@
 import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'gm^3*#2*)@v$m)-(xv$+g%wc)nvb@)hn4#0#11k2o-p2*8_vp3'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+
+APPEND_SLASH = True
 
 ALLOWED_HOSTS = [
-    'inworkapi.herokuapp.com',
     '127.0.0.1',
     '.compute.amazonaws.com',
 ]
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -29,13 +20,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     # External packages
     'django_filters',
     'drf_yasg',
     'rest_framework',
     'phonenumber_field',
-
     # Local apps
     'users',
     'utils',
@@ -45,7 +34,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # Heroku
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -92,36 +80,16 @@ LOGGING = {
     },
 }
 
-# Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
-BEFORE_MIGRATION = False
-
-if BEFORE_MIGRATION:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-            'NAME': 'inworktestdb',
-            'USER': 'gz',
-            'PASSWORD': 'watermelon',
-            'HOST': 'localhost',
-            'PORT': '',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+        'NAME': 'inwork_db',
+        'USER': 'inwork_user',
+        'PASSWORD': 'sr2R#97f7GKf',
+        'HOST': 'localhost',
+        'PORT': '',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-            'NAME': 'inwork_db',
-            'USER': 'inwork_user',
-            'PASSWORD': 'sr2R#97f7GKf',
-            'HOST': 'localhost',
-            'PORT': '',
-        }
-    }
-
-# Password validation
-# https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -138,10 +106,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/2.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -152,30 +116,20 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
-
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
-    )
-
-# Heroku
-# Add configuration for static files storage using whitenoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+)
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
-
-
 
 AUTH_USER_MODEL = 'users.User'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    #'django_warrant.backend.CognitoBackend',
 ]
 
 REST_FRAMEWORK = {
@@ -191,30 +145,14 @@ REST_FRAMEWORK = {
     ]
 }
 
-# Heroku
-import dj_database_url 
-prod_db  =  dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(prod_db)
-
-TESTING_ON_LOCAL_MACHINE = False
 # Cognito
-# TODO: set these up as environment variables in production
-COGNITO_USER_POOL_ID = 'eu-central-1_crdW7BRxk' if TESTING_ON_LOCAL_MACHINE else 'eu-central-1_rrLpMIOR8'
-COGNITO_APP_CLIENT_ID = '5o4f3n78nmf88a3tegfv6gfnu4' if TESTING_ON_LOCAL_MACHINE else '5ofalkd3mkj00sfbt6uociio5v'
+COGNITO_USER_POOL_ID = os.getenv('INWORK_COGNITO_USER_POOL_ID')
+COGNITO_APP_CLIENT_ID =  os.getenv('INWORK_COGNITO_APP_CLIENT_ID')
+COGNITO_AWS_REGION =  os.getenv('INWORK_COGNITO_AWS_REGION')
+AWS_ACCESS_KEY_ID = os.getenv('INWORK_AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('INWORK_AWS_SECRET_ACCESS_KEY')
 COGNITO_APP_ID = COGNITO_APP_CLIENT_ID
-COGNITO_ATTR_MAPPING = {
-    'email': 'email',
-    'phone_number': 'phone',
-}
-COGNITO_AWS_REGION = 'eu-central-1'
-# TODO: set these up as environment variables in production
-AWS_ACCESS_KEY_ID = 'AKIA35BTZJ3G742FYXGN'
-AWS_SECRET_ACCESS_KEY = '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'
-
 COGNITO_USER_POOL = COGNITO_USER_POOL_ID
 COGNITO_AUDIENCE = COGNITO_APP_CLIENT_ID
 
 
-
-
-APPEND_SLASH = True

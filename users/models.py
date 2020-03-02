@@ -11,7 +11,6 @@ from django.db.models.signals       import post_delete, post_save
 from django.utils.translation       import gettext as _
 from phonenumber_field.modelfields  import PhoneNumberField
 
-from inworkapi.settings import COGNITO_USER_POOL_ID, COGNITO_APP_CLIENT_ID, COGNITO_ATTR_MAPPING
 from utils.models import AddressOwner, Address, CustomFile, FileOwner
 from warrant import Cognito
 
@@ -170,7 +169,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         username = str(instance.email)
         try:
             response = client.sign_up(
-                ClientId=COGNITO_APP_CLIENT_ID,
+                ClientId=settings.COGNITO_APP_CLIENT_ID,
                 Username=username,
                 Password=password,
                 UserAttributes=[
@@ -189,7 +188,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         try:
             response = client.admin_get_user(
-                UserPoolId=COGNITO_USER_POOL_ID,
+                UserPoolId=settings.COGNITO_USER_POOL_ID,
                 Username=username
             )
             instance.cognito_id = [item for item in response.get('UserAttributes') if item['Name'] == 'sub'][0]['Value']
@@ -224,7 +223,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
         try:
             response = client.admin_delete_user(
-                UserPoolId=COGNITO_USER_POOL_ID,
+                UserPoolId=settings.COGNITO_USER_POOL_ID,
                 Username=str(instance.email)
             )
         except Exception as e:
@@ -301,6 +300,6 @@ post_save.connect(User.create_setup, sender=User)
 def cognito_confirm_sign_up(username):
     client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
     response = client.admin_confirm_sign_up(
-        UserPoolId=COGNITO_USER_POOL_ID,
+        UserPoolId=settings.COGNITO_USER_POOL_ID,
         Username=username,
     )

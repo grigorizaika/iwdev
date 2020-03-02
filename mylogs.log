@@ -14456,3 +14456,24 @@ Traceback (most recent call last):
   File "/home/ubuntu/django/inwork/env/lib/python3.6/site-packages/botocore/client.py", line 586, in _make_api_call
     raise error_class(parsed_response, operation_name)
 botocore.exceptions.ClientError: An error occurred (UnrecognizedClientException) when calling the AdminConfirmSignUp operation: The security token included in the request is invalid.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/users/models.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/manage.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
