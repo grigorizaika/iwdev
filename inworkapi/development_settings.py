@@ -1,4 +1,11 @@
+import json
 import os
+
+VARIABLES_PATH = os.path.abspath('/home/grgr/Projects/iwdev/variables.json')
+
+with open(VARIABLES_PATH) as variables_json_file:
+    variables_dict = json.load(variables_json_file)
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -10,7 +17,7 @@ print('using development settings')
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'gm^3*#2*)@v$m)-(xv$+g%wc)nvb@)hn4#0#11k2o-p2*8_vp3'
+SECRET_KEY = variables_dict['DJANGO_INWORK_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -100,9 +107,9 @@ LOGGING = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-        'NAME': 'inworktestdb',
-        'USER': 'gz',
-        'PASSWORD': 'watermelon',
+        'NAME': variables_dict['INWORK_DB_NAME'],
+        'USER': variables_dict['INWORK_DB_USER'],
+        'PASSWORD':  variables_dict['INWORK_DB_PASSWORD'],
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -185,24 +192,14 @@ prod_db  =  dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(prod_db)
 
 # Cognito
-# TODO: set these up as environment variables in production
-COGNITO_USER_POOL_ID = 'eu-central-1_crdW7BRxk'
-COGNITO_USER_POOL = COGNITO_USER_POOL_ID
+COGNITO_USER_POOL_ID = variables_dict['INWORK_COGNITO_USER_POOL_ID']
+COGNITO_APP_CLIENT_ID = variables_dict['INWORK_COGNITO_APP_CLIENT_ID']
+COGNITO_AWS_REGION = variables_dict['INWORK_COGNITO_AWS_REGION']
+AWS_ACCESS_KEY_ID = variables_dict['INWORK_AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = variables_dict['INWORK_AWS_SECRET_ACCESS_KEY']
 
-COGNITO_APP_CLIENT_ID = '5o4f3n78nmf88a3tegfv6gfnu4'
+COGNITO_USER_POOL = COGNITO_USER_POOL_ID
 COGNITO_APP_ID = COGNITO_APP_CLIENT_ID
 COGNITO_AUDIENCE = COGNITO_APP_CLIENT_ID
-
-COGNITO_AWS_REGION = 'eu-central-1'
-
-# TODO: set these up as environment variables in production
-AWS_ACCESS_KEY_ID = 'AKIA35BTZJ3G742FYXGN'
-AWS_SECRET_ACCESS_KEY = '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'
-
-
-
-
-
-
 
 APPEND_SLASH = True
