@@ -36,7 +36,8 @@ urlpatterns = [
     path('clients/', include('clients.urls', namespace='clients')),
     path('', include('users.urls', namespace='users')),
     path('', include('orders.urls', namespace='orders')),
-           
+
     url(r'get_tokens(?P<username>\w{0,50})(?P<password>\w{0,50})/?$', get_jwt_tokens),
     url(r'refresh_tokens/?$', refresh_jwt_tokens),
 ]
+

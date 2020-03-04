@@ -1,16 +1,24 @@
 import pyrebase
 
+from django.http import JsonResponse
 from django.shortcuts import render
+from rest_framework import status
+from rest_framework.response import Response
 
 def main_page(request):
     return render(request, 'main.html')
 
 def handler404(request, *args, **argv):
-    return render(request, '404.html', status=404)
+    response = {}
+    response['status'] = 'fail'
+    response['data'] = '404 page not found'
+    return JsonResponse(response)
 
 def handler500(request, *args, **argv):
-    return render(request, '500.html', status=500)
-
+    response = {}
+    response['status'] = 'fail'
+    response['data'] = '500 internal server error'
+    return JsonResponse(response)
 
 def signIn(request):
     return render(request, 'signIn.html')

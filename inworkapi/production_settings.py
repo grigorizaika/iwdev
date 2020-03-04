@@ -7,7 +7,7 @@ print('using production settings')
 
 SECRET_KEY = os.getenv('DJANGO_INWORK_SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 APPEND_SLASH = True
 
@@ -86,8 +86,8 @@ LOGGING = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('INWORK_DB_USER'),
-        'USER': os.getenv('INWORK_DB_NAME'),
+        'NAME': os.getenv('INWORK_DB_NAME'),
+        'USER': os.getenv('INWORK_DB_USER'),
         'PASSWORD': os.getenv('INWORK_DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '',
