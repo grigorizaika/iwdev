@@ -30,3 +30,6 @@ urlpatterns = [
     # REST Framework URLs
     path('api/', include('api.urls', namespace='api'))
 ]
+
+handler404 = 'inworkapi.views.handler404'
+handler500 = 'inworkapi.views.handler500'
