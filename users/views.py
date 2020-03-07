@@ -36,6 +36,7 @@ def check_phone(request, **kwargs):
         data['response'] = False
         return Response(data)
 
+
 from rest_framework.authentication import get_authorization_header
 @api_view(['GET'])
 #@authentication_classes([JSONWebTokenAuthentication])
@@ -120,24 +121,35 @@ def confirm_reset_password(request, **kwargs):
 
 @api_view(['POST'])
 @authentication_classes([JSONWebTokenAuthentication])
-@permission_classes([IsAdministrator])
+#@permission_classes([IsAdministrator])
 def resend_confirmation_code(request, **kwargs):
+    response = {}
 
     if not 'id' in kwargs:
-        return Response({'response': 'Specify a user id'}, status=status.HTTP_400_BAD_REQUEST)
+        response['result'] = 'fail'
+        response['data'] = 'Must specify a user id'
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
     
     try:
-        user = CustomUser.objects.get(id=kwargs.get('id'))
+        user = CustomUser.objects.get(id=kwargs.get('id'))    
     except CustomUser.DoesNotExist:
-        return Response({'response': 'User with this id does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        response['result'] = 'fail'
+        response['data'] = 'User with this id does not exist'
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-    client = boto3.client('cognito-idp', region_name=settings.COGNITO_AWS_REGION, aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
-    response = client.resend_confirmation_code(
-        ClientId=settings.COGNITO_APP_CLIENT_ID,
-        Username=str(user.email),
-    )
+    if request.user.is_administrator() or request.user.id == kwargs.get('id'):
+        client = boto3.client('cognito-idp', region_name=settings.COGNITO_AWS_REGION, aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
+        response['success'] = 'fail'
+        response['data'] = client.resend_confirmation_code(
+            ClientId=settings.COGNITO_APP_CLIENT_ID,
+            Username=str(user.email),
+        )
+        return Response(response, status=status.HTTP_200_OK)
+    
+    response['result'] = 'fail'
+    response['data'] = 'Must be administrator or self to perform this action'
 
-    return Response(response, status=status.HTTP_200_OK)
+    return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -157,7 +169,6 @@ def confirm_sign_up(request, **kwargs):
     )
 
     return Response(response, status=status.HTTP_200_OK)
-
 
 
 @api_view(['POST'])

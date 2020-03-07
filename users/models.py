@@ -102,7 +102,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                                 null=True,
                                 blank=True, 
                                 limit_choices_to={'role__name': 'Administrator'})
-    company                  = models.ForeignKey(
+    company                 = models.ForeignKey(
                                 'Company',
                                 on_delete=models.CASCADE,
                                 null=True,
@@ -119,6 +119,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'surname', 'phone']
 
+    def is_administrator(self):
+        return self.role.name == 'Administrator'
 
     def addresses(self):
         addresses = Address.objects.filter(owner=self.address_owner)

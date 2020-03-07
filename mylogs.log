@@ -122,3 +122,349 @@ Unauthorized: /api/users/
 Watching for file changes with StatReloader
 "GET /api/clies HTTP/1.1" 200 48
 "GET /api/companies/ HTTP/1.1" 200 2
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/api/permissions.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/users/models.py changed, reloading.
+Watching for file changes with StatReloader
+"GET / HTTP/1.1" 200 327
+"GET /favicon.ico HTTP/1.1" 200 48
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 175
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 175
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 175
+"GET / HTTP/1.1" 200 327
+"GET /favicon.ico HTTP/1.1" 200 48
+Unauthorized: /api/users/
+"POST /api/users/ HTTP/1.1" 401 50
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 175
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 175
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 175
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 170
+OK: /api/users/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/connection.py", line 157, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/util/connection.py", line 61, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+  File "/home/grgr/anaconda3/lib/python3.7/socket.py", line 748, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/connectionpool.py", line 672, in urlopen
+    chunked=chunked,
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/connectionpool.py", line 376, in _make_request
+    self._validate_conn(conn)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/connectionpool.py", line 994, in _validate_conn
+    conn.connect()
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/connection.py", line 334, in connect
+    conn = self._new_conn()
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/connection.py", line 169, in _new_conn
+    self, "Failed to establish a new connection: %s" % e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.VerifiedHTTPSConnection object at 0x7fd3259f1630>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/requests/adapters.py", line 449, in send
+    timeout=timeout
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/connectionpool.py", line 720, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/urllib3/util/retry.py", line 436, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='cognito-idp.eu-central-1.amazonaws.com', port=443): Max retries exceeded with url: /eu-central-1_crdW7BRxk/.well-known/jwks.json (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7fd3259f1630>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 493, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 410, in initial
+    self.perform_authentication(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 324, in perform_authentication
+    request.user
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/request.py", line 220, in user
+    self._authenticate()
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/request.py", line 373, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django_cognito_jwt/backend.py", line 27, in authenticate
+    jwt_payload = token_validator.validate(jwt_token)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django_cognito_jwt/validator.py", line 56, in validate
+    public_key = self._get_public_key(token)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django_cognito_jwt/validator.py", line 50, in _get_public_key
+    jwk_data = self._json_web_keys.get(headers["kid"])
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/utils/functional.py", line 80, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django_cognito_jwt/validator.py", line 30, in _json_web_keys
+    response = requests.get(self.pool_url + "/.well-known/jwks.json")
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/requests/api.py", line 75, in get
+    return request('get', url, params=params, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/requests/api.py", line 60, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/requests/sessions.py", line 533, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/requests/sessions.py", line 646, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/requests/adapters.py", line 516, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='cognito-idp.eu-central-1.amazonaws.com', port=443): Max retries exceeded with url: /eu-central-1_crdW7BRxk/.well-known/jwks.json (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7fd3259f1630>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+"POST /api/users/ HTTP/1.1" 200 55
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 150
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 150
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 150
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 175
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 175
+Unauthorized: /api/users/
+"POST /api/users/ HTTP/1.1" 401 50
+"POST /api/get_tokens HTTP/1.1" 200 4721
+"POST /api/users/ HTTP/1.1" 200 352
+"GET /api/users/?= HTTP/1.1" 200 758
+"POST /api/users/1/resend_confirmation_code/ HTTP/1.1" 200 447
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 200 447
+"POST /api/get_tokens HTTP/1.1" 200 4691
+Forbidden: /api/users/
+"GET /api/users/?= HTTP/1.1" 403 72
+Bad Request: /api/users/1/resend_confirmation_code/
+"POST /api/users/1/resend_confirmation_code/ HTTP/1.1" 400 79
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+"GET /api/users/me/ HTTP/1.1" 200 370
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+Watching for file changes with StatReloader
+"POST /api/get_tokens HTTP/1.1" 200 4691
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+"GET /api/users/me/ HTTP/1.1" 200 370
+Watching for file changes with StatReloader
+Unauthorized: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 401 50
+"POST /api/get_tokens HTTP/1.1" 200 4691
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+Bad Request: /api/users/2/resend_confirmation_code/
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 400 79
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+OK: /api/users/2/resend_confirmation_code/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/users/views.py", line 142, in resend_confirmation_code
+    if request.user.is_administrator() or request.user.id == int(id):
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'builtin_function_or_method'
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 200 55
+OK: /api/users/2/resend_confirmation_code/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/users/views.py", line 142, in resend_confirmation_code
+    if request.user.is_administrator() or request.user.id == int(id):
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'builtin_function_or_method'
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 200 55
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+OK: /api/users/2/resend_confirmation_code/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/users/views.py", line 140, in resend_confirmation_code
+    print('is administrator: ', request.user.is_administrator(), 'is self: ', request.user.id == int(id) )
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'builtin_function_or_method'
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 200 55
+OK: /api/users/2/resend_confirmation_code/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/users/views.py", line 140, in resend_confirmation_code
+    print('is administrator: ', request.user.is_administrator(), 'is self: ', request.user.id == int(id) )
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'builtin_function_or_method'
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 200 55
+OK: /api/users/2/resend_confirmation_code/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/users/views.py", line 140, in resend_confirmation_code
+    print('is administrator: ', request.user.is_administrator(), 'is self: ', request.user.id == int(id) )
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'builtin_function_or_method'
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 200 55
+/home/grgr/Projects/iwdev/iwdev/inworkapi/development_settings.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/users/2/resend_confirmation_code/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/users/views.py", line 140, in resend_confirmation_code
+    print('is administrator: ', request.user.is_administrator(), 'is self: ', request.user.id == int(id) )
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'builtin_function_or_method'
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 500 19760
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
+"POST /api/users/2/resend_confirmation_code/ HTTP/1.1" 200 447
+/home/grgr/Projects/iwdev/iwdev/users/views.py changed, reloading.
+Watching for file changes with StatReloader
