@@ -6,6 +6,9 @@ import sys
 
 from django.conf import settings
 
+from inworkapi.utils import JSendResponse
+
+
 def get_tokens(username, password):
     data = {}
     client = boto3.client('cognito-idp', region_name=settings.COGNITO_AWS_REGION, aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
@@ -32,19 +35,24 @@ def refresh_id_token(refresh_token):
     client = boto3.client('cognito-idp', region_name = settings.COGNITO_AWS_REGION, aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)    
     
     try:
-        response['data'] = client.initiate_auth(
+        auth_result = client.initiate_auth(
             AuthFlow='REFRESH_TOKEN_AUTH',
             AuthParameters={
                 'REFRESH_TOKEN': refresh_token
             },
             ClientId=settings.COGNITO_APP_CLIENT_ID,
         )
-        response['status'] = 'success'
+        response = JSendResponse(
+            status = JSendResponse.SUCCESS,
+            data = {'auth_response' : auth_result}
+        )
     except client.exceptions.UserNotFoundException as e:
-        response['status'] = 'error'
-        response['message'] = str(e)
-
-    return response
+        response = JSendResponse(
+            status = JSendResponse.ERROR,
+            message = str(e)
+        )
+        
+    return response.make_json()
 
 def main():
     if len(sys.argv) > 2:

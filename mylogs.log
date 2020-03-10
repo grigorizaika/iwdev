@@ -484,3 +484,268 @@ Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 /home/grgr/Projects/iwdev/iwdev/utils/views.py changed, reloading.
 Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/tokens_test.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+"GET / HTTP/1.1" 200 314
+"GET /static/css/style.css HTTP/1.1" 200 588
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 2291
+Unauthorized: /api/get_tokens
+"POST /api/get_tokens HTTP/1.1" 401 194
+"POST /api/get_tokens HTTP/1.1" 200 4939
+/home/grgr/Projects/iwdev/iwdev/inworkapi/utils.py changed, reloading.
+Watching for file changes with StatReloader
+"POST /api/get_tokens HTTP/1.1" 200 5615
+/home/grgr/Projects/iwdev/iwdev/inworkapi/utils.py changed, reloading.
+Watching for file changes with StatReloader
+"POST /api/get_tokens HTTP/1.1" 200 4749
+Internal Server Error: /api/refresh_tokens/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/api/views.py", line 72, in refresh_jwt_tokens
+    auth_response = refresh_id_token(refresh_token)
+  File "/home/grgr/Projects/iwdev/iwdev/tokens_test.py", line 47, in refresh_id_token
+    data = {auth_result}
+TypeError: unhashable type: 'dict'
+"POST /api/refresh_tokens/ HTTP/1.1" 500 20390
+/home/grgr/Projects/iwdev/iwdev/tokens_test.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/tokens_test.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/refresh_tokens/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/api/views.py", line 78, in refresh_jwt_tokens
+    id_token = auth_response['data']['AuthenticationResult'].get('IdToken')
+KeyError: 'AuthenticationResult'
+"POST /api/refresh_tokens/ HTTP/1.1" 500 20296
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/refresh_tokens/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/api/views.py", line 78, in refresh_jwt_tokens
+    id_token = auth_response['data']['auth_response']['AuthenticationResult'].get('IdToken')
+KeyError: 'auth_response'
+"POST /api/refresh_tokens/ HTTP/1.1" 500 20299
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/refresh_tokens/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/api/views.py", line 79, in refresh_jwt_tokens
+    id_token = auth_response['data']['auth_response']['AuthenticationResult'].get('IdToken')
+KeyError: 'auth_response'
+"POST /api/refresh_tokens/ HTTP/1.1" 500 20299
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/refresh_tokens/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/api/views.py", line 79, in refresh_jwt_tokens
+    id_token = auth_response['data']['auth_response']['AuthenticationResult'].get('IdToken')
+KeyError: 'auth_response'
+"POST /api/refresh_tokens/ HTTP/1.1" 500 20299
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/refresh_tokens/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/api/views.py", line 79, in refresh_jwt_tokens
+    id_token = auth_response['data']['auth_response']['auth_result']['AuthenticationResult'].get('IdToken')
+KeyError: 'auth_response'
+"POST /api/refresh_tokens/ HTTP/1.1" 500 20314
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+"POST /api/refresh_tokens/ HTTP/1.1" 200 2981
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+/home/grgr/Projects/iwdev/iwdev/tokens_test.py changed, reloading.
+Watching for file changes with StatReloader
+"POST /api/get_tokens HTTP/1.1" 200 4749
+"POST /api/refresh_tokens/ HTTP/1.1" 200 2983
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+Internal Server Error: /api/refresh_tokens/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/api/views.py", line 85, in refresh_jwt_tokens
+    return Response(auth_response, status=status.HTTP_200_OK)
+UnboundLocalError: local variable 'response' referenced before assignment
+"POST /api/refresh_tokens/ HTTP/1.1" 500 20364
+Internal Server Error: /api/refresh_tokens/
+Traceback (most recent call last):
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/decorators/csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/django/views/generic/base.py", line 71, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 505, in dispatch
+    response = self.handle_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 465, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 476, in raise_uncaught_exception
+    raise exc
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/views.py", line 502, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/home/grgr/Projects/iwdev/env/lib/python3.7/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "/home/grgr/Projects/iwdev/iwdev/api/views.py", line 85, in refresh_jwt_tokens
+    return Response(auth_response, status=status.HTTP_200_OK)
+UnboundLocalError: local variable 'response' referenced before assignment
+"POST /api/refresh_tokens/ HTTP/1.1" 500 20364
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader
+"POST /api/refresh_tokens/ HTTP/1.1" 200 2937
+/home/grgr/Projects/iwdev/iwdev/api/views.py changed, reloading.
+Watching for file changes with StatReloader

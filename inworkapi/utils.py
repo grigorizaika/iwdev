@@ -64,4 +64,5 @@ class JSendResponse:
         elif self.status == self.ERROR:
             response_dict['message'] = None
 
-        return json.dumps(response_dict)
+        #return json.dumps(response_dict, indent=4)
+        return response_dict
