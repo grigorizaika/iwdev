@@ -12,17 +12,16 @@ def handler404(request, *args, **argv):
     response = {}
     response['status'] = 'fail'
     response['data'] = '404 page not found'
-    return JsonResponse(response)
+    return JsonResponse(response, status=status.HTTP_404_NOT_FOUND)
 
 def handler500(request, *args, **argv):
     response = {}
     response['status'] = 'fail'
     response['data'] = '500 internal server error'
-    return JsonResponse(response)
+    return JsonResponse(response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def signIn(request):
     return render(request, 'signIn.html')
-
 
 def postSignIn(request):
     email = request.POST.get('email')

@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .helpers import create_presigned_post
 from .models import Address, CustomFile
 from .serializers import AddressSerializer, FileSerializer
 from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
@@ -35,6 +36,7 @@ def get_presigned_upload_url(request, **kwargs):
     file_name = request.data['file_name']
 
     if location == 'users':
+        # TODO move to permission_classess
         if request.user.is_authenticated:
             object_name = location + '/' + request.user.email + '/' + file_name
         else:
@@ -51,7 +53,7 @@ def get_presigned_upload_url(request, **kwargs):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
     
     # MIGRATION TODO
-    bucket_name = 'inwork-s3-bucket'
+    bucket_name = 'inwork-bucket'
     data['response'] = create_presigned_post(bucket_name, object_name)
 
     return Response(data, status=status.HTTP_200_OK)
