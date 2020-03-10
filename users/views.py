@@ -121,7 +121,6 @@ def confirm_reset_password(request, **kwargs):
 
 @api_view(['POST'])
 @authentication_classes([JSONWebTokenAuthentication])
-#@permission_classes([IsAdministrator])
 def resend_confirmation_code(request, **kwargs):
     response = {}
 

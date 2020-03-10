@@ -7,7 +7,6 @@ from .views import (
 )
 
 
-
 app_name = 'utils'
 
 address_list = AddressView.as_view()

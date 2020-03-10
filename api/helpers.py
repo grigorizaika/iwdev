@@ -28,26 +28,6 @@ def create_address(owner, street, house_no, city, district, country, flat_no=Non
     )
 
 
-def create_presigned_post(bucket_name, object_name,
-                          fields=None, conditions=None, expiration=3600):
-    import boto3
-    import logging
-    from botocore.exceptions import ClientError
-    
-    s3_client = boto3.client('s3')
-
-    try:
-        response = s3_client.generate_presigned_post(bucket_name,
-                                                     object_name,
-                                                     Fields=fields,
-                                                     Conditions=conditions,
-                                                     ExpiresIn=expiration)
-    except ClientError as e:
-        logging.error(e)
-        return None
-
-    return response
-
 def json_list_group_by(group_by_field, json_list):
     distinct_group_by_field_values = []
     grouped = {}
