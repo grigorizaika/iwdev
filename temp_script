@@ -1,6 +1,0 @@
-#!/bin/bash
-input="requirements.txt"
-while IFS= read -r line
-do
-	heroku run pip install "$line"
-done < "$input"

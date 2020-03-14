@@ -1,6 +1,16 @@
+import boto3
 import json
+import sys
+
+from django_cognito_jwt import JSONWebTokenAuthentication
+from django.conf import settings
+
 
 class JSendResponse:
+    """
+        Reseponse with a structure described in
+        https://github.com/omniti-labs/jsend
+    """
     SUCCESS = 'success'
     FAIL = 'fail'
     ERROR = 'error'
@@ -64,5 +74,60 @@ class JSendResponse:
         elif self.status == self.ERROR:
             response_dict['message'] = None
 
-        #return json.dumps(response_dict, indent=4)
+        # TODO: sholdn't it be "return json.dumps(response_dict, indent=4)"?
+        # that way it is displayed without formatting in Postman
         return response_dict
+
+
+class TokenHelper:
+
+    @staticmethod
+    def get_tokens(username, password):
+
+        client = boto3.client(
+            'cognito-idp', 
+            region_name=settings.COGNITO_AWS_REGION, 
+            aws_access_key_id = settings.AWS_ACCESS_KEY_ID, 
+            aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        )
+
+        response = client.initiate_auth(
+            AuthFlow='USER_PASSWORD_AUTH',
+            AuthParameters={
+            'USERNAME': username,
+            'PASSWORD': password,
+            },
+            ClientId=settings.COGNITO_APP_CLIENT_ID,
+        )
+
+        return response
+
+
+    @staticmethod
+    def refresh_id_token(refresh_token):
+
+        client = boto3.client(
+            'cognito-idp', 
+            region_name = settings.COGNITO_AWS_REGION, 
+            aws_access_key_id = settings.AWS_ACCESS_KEY_ID, 
+            aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        )    
+
+        response = client.initiate_auth(
+            AuthFlow='REFRESH_TOKEN_AUTH',
+            AuthParameters={
+                'REFRESH_TOKEN': refresh_token
+            },
+            ClientId=settings.COGNITO_APP_CLIENT_ID,
+        )
+
+        return response
+
+    @staticmethod
+    def get_user_by_token(request, token):
+
+        auth = JSONWebTokenAuthentication()
+        jwt_payload = auth.get_token_validator(request).validate(token)
+        user = auth.get_user_model().objects.get_or_create_for_cognito(jwt_payload)
+
+        return user
