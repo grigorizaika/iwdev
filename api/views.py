@@ -57,7 +57,6 @@ def refresh_jwt_tokens(request, *args, **kwargs):
         id_token = auth_response['AuthenticationResult'].get('IdToken')
     except Exception as e:
         # TODO: Make this a boto3 client exception
-        # after creating a single, shared boto3 client
         response = JSendResponse(
             status = JSendResponse.ERROR,
             message = str(e)
@@ -79,6 +78,5 @@ def refresh_jwt_tokens(request, *args, **kwargs):
             status=JSendResponse.ERROR,
             message=str(e)
         ).make_json()
-
 
     return Response(response, status=status.HTTP_200_OK)

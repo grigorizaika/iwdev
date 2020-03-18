@@ -78,18 +78,23 @@ class JSendResponse:
         # that way it is displayed without formatting in Postman
         return response_dict
 
+class CognitoHelper:
+
+    @staticmethod
+    def get_client():
+        return boto3.client(
+            'cognito-idp', 
+            region_name=settings.COGNITO_AWS_REGION, 
+            aws_access_key_id = settings.AWS_ACCESS_KEY_ID, 
+            aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        )
 
 class TokenHelper:
 
     @staticmethod
     def get_tokens(username, password):
 
-        client = boto3.client(
-            'cognito-idp', 
-            region_name=settings.COGNITO_AWS_REGION, 
-            aws_access_key_id = settings.AWS_ACCESS_KEY_ID, 
-            aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
-        )
+        client = CognitoHelper.get_client()
 
         response = client.initiate_auth(
             AuthFlow='USER_PASSWORD_AUTH',
@@ -106,12 +111,7 @@ class TokenHelper:
     @staticmethod
     def refresh_id_token(refresh_token):
 
-        client = boto3.client(
-            'cognito-idp', 
-            region_name = settings.COGNITO_AWS_REGION, 
-            aws_access_key_id = settings.AWS_ACCESS_KEY_ID, 
-            aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
-        )    
+        client = CognitoHelper.get_client()
 
         response = client.initiate_auth(
             AuthFlow='REFRESH_TOKEN_AUTH',
