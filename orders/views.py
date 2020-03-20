@@ -21,6 +21,7 @@ from .models import Order, Task
 from .serializers import OrderSerializer, TaskSerializer
 from api.helpers import bulk_create_tasks, json_list_group_by
 from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
+from inworkapi.utils import JSendResponse
 
 
 
@@ -35,31 +36,55 @@ class OrderView(APIView):
 
     def get(self, request, **kwargs):
 
-        data = {}
         if 'id' in kwargs:
+
             order_id = kwargs.get('id')
+            
             try:
                 order = Order.objects.get(id=order_id)
 
                 if not order.client.company == request.user.company:
-                    data['response'] = 'Order client\'s company doesn\'t match the request user\'s company'
-                    return Response(data, status=status.HTTP_403_FORBIDDEN)
+                    response = JSendResponse(
+                        status=JSendResponse.FAIL,
+                        data={
+                            'response': 'Order\'s company doesn\'t match the request user\'s company',
+                        }
+                    ).make_json()
+                    return Response(response, status=status.HTTP_403_FORBIDDEN)
 
                 serializer = OrderSerializer(order)
+            
+                response = JSendResponse(
+                    status=JSendResponse.SUCCESS,
+                    data=serializer.data
+                ).make_json()
+            
+                return Response(response, status=status.HTTP_200_OK)
 
-                return Response(serializer.data)
-            except Order.DoesNotExist:
-                data['response'] = 'Order with an id ' + str(order_id) + ' does not exist'
-                return Response(data)
-        else:
+            except Order.DoesNotExist as e:
+                response = JSendResponse(
+                    status=JSendResponse.FAIL,
+                    data=str(e)
+                ).make_json()
+                
+                return Response(response, status=status.HTTP_404_NOT_FOUND)
+
+        elif not 'id' in kwargs:
+            # TODO: permissions
+            
             queryset = Order.objects.filter(client__company=request.user.company)
+    
             serializer = OrderSerializer(queryset, many=True)
-            return Response(serializer.data)
+    
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data=serializer.data
+            ).make_json()
+
+            return Response(response, status=status.HTTP_200_OK)
 
 
     def post(self, request, **kwargs):
-        # TODO: clean this mess with the names that contain the word 'data'
-        data = {}
 
         modified_data = dict(request.data)
         modified_data = { key: val[0]  for key, val in modified_data.items() }
@@ -72,76 +97,160 @@ class OrderView(APIView):
 
         client_instance = Client.objects.get(id=client_id)
 
-        if not client_instance.company == request.user.company:
-            data['response'] = 'Client\'s company doesn\'t match the company of the request user'
-            return Response(data, status=status.HTTP_403_FORBIDDEN)
+        if not order.client.company == request.user.company:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'response': 'Order\'s company doesn\'t match the request user\'s company',
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         if not client_instance.addresses().filter(id=address_id).exists():
-            data['response'] = 'Client ' + client_id + ' doesn\'t have an address with an id' + address_id 
-            return Response(data)
+            response = JSendResponse(
+                status=JSendResponse.ERROR,
+                message=f'Client {client_id} doesn\'t have an address with an id {address_id}'
+            ).make_json()
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
 
-        # Proceed to creation
         if orderSerializer.is_valid():
             order = orderSerializer.save()
             order.save()
 
             if 'task_list' in modified_data:
+                # TODO: rewrite it
+                                
                 task_list = json.loads(request.data.get('task_list'))
+                
                 bulk_task_creation_response = bulk_create_tasks(task_list, request.user, order.id)
-                data['response'] = ['Created order ' + str(order.id) + ' \"' + str(order.name) + '\"']
-                data['response'].append(bulk_task_creation_response)
-            else:
-                data['response'] = 'Created order ' + str(order.id) + ' \"' + str(order.name) + '\"'
-            
-        else:
-            data['orderErrors'] = orderSerializer.errors
+                
+                response = JSendResponse(
+                    status=JSendResponse.SUCCESS,
+                    data={
+                        'order': str(order),
+                        'tasks': bulk_task_creation_response,
+                    }
+                ).make_json()
+                
+                return Response(response, status=status.HTTP_200_OK)
 
-        return Response(data)
+            else:
+        
+                response = JSendResponse(
+                    status=JSendResponse.SUCCESS,
+                    data={
+                        'order': str(order),
+                    }
+                ).make_json()
+             
+                return Response(response, status=status.HTTP_200_OK)
+        
+        else:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'order': orderSerializer.errors
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
     def patch(self, request, **kwargs):
-        data = {}
 
-        if 'id' in kwargs:
-            order_id = kwargs.get('id')
-            order = Order.objects.get(id=order_id)
+        if not 'id' in kwargs:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'id': 'Must specify an id in URL',
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        
+        order_id = kwargs.get('id')
 
-            if not order.client.company == request.user.company:
-                data['response'] = 'Order client\'s company doesn\'t match the request user\'s company'
-                return Response(data, status=status.HTTP_403_FORBIDDEN)
+        order = Order.objects.get(id=order_id)
+        
+        if not order.client.company == request.user.company:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                'response': 'Order\'s company doesn\'t match the request user\'s company',
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
 
-            serializer = OrderSerializer(order, data=request.data, partial=True)
-            data = {}
-            if serializer.is_valid():
-                client = serializer.save()
-                data['response'] = 'Updated order ' + str(order.id) + ' ' + str(order.name)
-            else:
-                data = serializer.errors
+        serializer = OrderSerializer(order, data=request.data, partial=True)
+
+        if serializer.is_valid():
+
+            order = serializer.save()
+            
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data={
+                    'order': f'Updated order {order}'
+                }
+            ).make_json()
+        
+            return Response(response, status=status.HTTP_200_OK)
+
         else:
-            data['response'] = 'Must specify an id'
+            
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'order': serializer.errors
+                }
+            ).make_json()
 
-        return Response(data)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        
 
     def delete(self, request, **kwargs):
 
-        if 'id' in kwargs:
-            order_id = kwargs.get('id')
-            data = {}
-            try:
-                order = Order.objects.get(id=order_id)
+        if not 'id' in kwargs:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'id': 'Must specify an id in URL',
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        order_id = kwargs.get('id')            
+        
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist as e:
+
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=str(e)
+            ).make_json()
+
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
+        
+
+        if not order.client.company == request.user.company:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                'response': 'Order\'s company doesn\'t match the request user\'s company',
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
                 
-                if not order.client.company == request.user.company:
-                    data['response'] = 'Order client\'s company doesn\'t match the request user\'s company'
-                    return Response(data, status=status.HTTP_403_FORBIDDEN)
-                
-                orderName = order.name
-                order.delete()
-                data['response'] = 'Successfully deleted order ' + str(order_id) + ' ' + str(orderName)
-            except Order.DoesNotExist:
-                data['response'] = 'Order with an id ' + str(order_id) + ' does not exist'
-        else:
-            data['response'] = 'Must specify the id'
-        return Response(data)
+        orderName = order.name
+        order.delete()
+        
+        response = JSendResponse(
+            status=JSendResponse.SUCCESS,
+            data={
+                'order': f'Successfully deleted order {order_id} {orderName}',
+            }
+        ).make_json()
+
+        return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
 class TaskView(APIView):
@@ -166,10 +275,23 @@ class TaskView(APIView):
             try:
                 task = Task.objects.filter(order__client__company=request.user.company).get(id=task_id)
                 serializer = TaskSerializer(task)
-                return Response(serializer.data)
-            except Task.DoesNotExist:
-                data['response'] = 'Task with an id ' + str(task_id) + ' does not exist'
-                return Response(data)
+
+                response = JSendResponse(
+                    status=JSendResponse.SUCCESS,
+                    data=serializer.data
+                ).make_json()
+
+                return Response(response, status=status.HTTP_200_OK)
+            
+            except Task.DoesNotExist as e:
+                
+                response = JSendResponse(
+                    status=JSendResponse.FAIL,
+                    data=str(e)
+                ).make_json()
+
+                return Response(response, status=status.HTTP_404_NOT_FOUND)
+
         elif worker_id:
             # TODO: Check admin permissions properly using DRF permissions
             if request.user.role.name == 'Administrator':
@@ -188,16 +310,36 @@ class TaskView(APIView):
                                         .filter(date__month=month) \
                                         .filter(worker=worker_id)
                     serializer = TaskSerializer(queryset, many=True)
-                    return Response(serializer.data)
+                    
+                    response = JSendResponse(
+                        status=JSendResponse.SUCCESS,
+                        data=serializer.data
+                    ).make_json()
+
+                    return Response(response, status=status.HTTP_200_OK)
+
                 else:
                     queryset = Task.objects.filter(order__client__company=request.user.company).filter(worker=worker_id)
-                    # TODO: add this to the message
-                    data['comment'] = 'Date wasn\'t specified, returning all task assigned to the worker ' + worker_id        
+                
                 serializer = TaskSerializer(queryset, many=True)
-                return Response(serializer.data)
+                
+                response = JSendResponse(
+                    status=JSendResponse.SUCCESS,
+                    data=serializer.data
+                ).make_json()
+        
+                return Response(response, status=status.HTTP_200_OK)    
+            
             else:
-                data['response'] = 'You must have administrator permissions to perform this action'
-                return Response(data)
+                response = JSendResponse(
+                    status=JSendResponse.FAIL,
+                    data={
+                        'response': 'You must have administrator permissions to perform this action'
+                    }
+                ).make_json()
+                
+                return Response(response, status=status.HTTP_403_FORBIDDEN)
+
         elif date or (date_start and date_end) or (year and month):
             # When neither worker nor particular task are specified, default to my tasks
             if date:
@@ -228,72 +370,153 @@ class TaskView(APIView):
             if group_by_worker:
                 data = json_list_group_by('worker_id', data)
 
-            return Response(data)
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data=data
+            ).make_json()
+
+            return Response(response, status=status.HTTP_200_OK)
+
         else:
             # TODO: Check admin permissions properly using DRF permissions
+
             if request.user.role.name == 'Administrator':
+                
                 queryset = Task.objects.filter(order__client__company=request.user.company)
+                
                 serializer = TaskSerializer(queryset, many=True)
-                return Response(serializer.data)
-                #short_list = slice_fields(['id', 'order', 'name', 'worker'], serializer.data)
-                #return Response(short_list)
+                
+                response = JSendResponse(
+                    status=JSendResponse.SUCCESS,
+                    data=serialier.data
+                ).make_json()
+                
+                return Response(response, status=status.HTTP_200_OK)
+
             else:
-                data['response'] = 'You must have administrator permissions to perform this action'
-                return Response(data)
+                response = JSendResponse(
+                    status=JSendResponse.FAIL,
+                    data={
+                        'response': 'You must have administrator permissions to perform this action'
+                    }
+                ).make_json()
+                
+                return Response(response, status=status.HTTP_403_FORBIDDEN)
 
 
     def post(self, request, **kwargs):
         data = {}
         task_list = json.loads(request.data.get('task_list'))
         bulk_creation_result = bulk_create_tasks(task_list, request.user)
-        data['response'] = bulk_creation_result
-        return Response(data)
+        
+        response = JSendResponse(
+            status=JSendResponse.SUCCESS,
+            data={
+                'tasks': bulk_creation_result
+            }
+        ).make_json()
+        
+        return Response(response, status=status.HTTP_200_OK)
 
 
     def patch(self, request, **kwargs):
-        data = {}
-        if 'id' in kwargs:
-            task_id = kwargs.get('id')
-            task = Task.objects.get(id=task_id)
 
-            if not task.order.client.company == request.user.company:
-                data['response'] = 'Task\'s company doesn\'t match the company of the request user'
-                return Response(data, status=status.HTTP_403_FORBIDDEN)
+        if not 'id' in kwargs:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'id': 'Must specify an id in URL',
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        
+        task_id = kwargs.get('id')
 
-            serializer = TaskSerializer(task, data=request.data, partial=True)
-            data = {}
-            if serializer.is_valid():
-                task = serializer.save()
-                data['response'] = 'Updated task ' + str(task.id) + ' ' + str(task.name)
-            else:
-                data = serializer.errors
+        task = Task.objects.get(id=task_id)
+        
+        if not task.order.client.company == request.user.company:
+            
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'response': 'Task\'s company doesn\'t match the company of the request user'
+                }
+            ).make_json()
+
+            return Response(data, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = TaskSerializer(task, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            task = serializer.save()
+
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data={
+                    'response': f'Updated task {task.id} {task.name}',
+                }
+            ).make_json()
+
+            return Response(response, status=status.HTTP_200_OK)
+
         else:
-            data['response'] = 'Must specify an id'
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=serializer.errors
+            ).make_json()
 
-        return Response(data)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
     def delete(self, request, **kwargs):
         
-        data = {}
+        if not 'id' in kwargs:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'id': 'Must specify an id in URL',
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        
+        task_id = kwargs.get('id')
 
-        if 'id' in kwargs:
-            task_id = kwargs.get('id')
-            data = {}
-            try:
-                task = Task.objects.get(id=task_id)
-                if not task.order.client.company == request.user.company:
-                    data['response'] = 'Task\'s company doesn\'t match the company of the request user'
-                    return Response(data, status=status.HTTP_403_FORBIDDEN)
-                taskName = task.name
-                task.delete()
-                data['response'] = 'Successfully deleted task ' + str(task_id) + ' ' + str(taskName)
-            except Task.DoesNotExist:
-                data['response'] = 'Task with an id ' + str(task_id) + ' does not exist'
-        else:
-            data['response']= 'Must specify an id'
+        try:
+            
+            task = Task.objects.get(id=task_id)
+            
+            if not task.order.client.company == request.user.company:
+                
+                response = JSendResponse(
+                    status=JSendResponse.FAIL,
+                    data={
+                        'response': 'Task\'s company doesn\'t match the company of the request user'
+                    }
+                ).make_json()
 
-        return Response(data)
+                return Response(data, status=status.HTTP_403_FORBIDDEN)
+
+            taskName = task.name
+
+            task.delete()
+            
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data={
+                    'response': 'Successfully deleted task ' + str(task_id) + ' ' + str(taskName)
+                }
+            ).make_json()
+            
+            return Response(response, status=status.HTTP_204_NO_CONTENT)
+            
+        except Task.DoesNotExist as e:
+
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=str(e)
+            ).make_json()
+
+        return Response(response, status=status.HTTP_404_NOT_FOUND )
 
 
 @api_view(['PUT'])
@@ -303,13 +526,43 @@ def accept_hours_worked(request, **kwargs):
     task_id = request.data.get('id')
     try:
         task = Task.objects.get(id=task_id)
+
         if not task.order.client.company == user.request.company:
-            return Response({ 'response': 'This task belongs to another company than the request user\'s company' }, status=status.HTTP_403_FORBIDDEN)
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data={
+                    'response': 'This task belongs to another company than the request user\'s company'
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+        
         if not task.is_hours_worked_accepted:
             task.is_hours_worked_accepted = True
             task.save()
-            return Response({ 'response': 'Successfully accepted hours in task ' + str(task_id) })
+            
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data={
+                    'response': f'Successfully accepted hours in task {task_id}'
+                }
+            ).make_json()
+
+            return Response(response, status=status.HTTP_200_OK)
+        
         else:
-            return Response({ 'response': 'Hours on task ' + str(task_id) + ' were already accepted by an administrator'})
-    except Task.DoesNotExist:
-        return Response({ 'response': 'Task id ' + str(task_id) + ' does not exist' })
+
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data={ 
+                    'response': 'Hours on task ' + str(task_id) + ' were already accepted by an administrator'
+                }
+            ).make_json()
+
+            return Response(response, status=status.HTTP_200_OK)
+    
+    except Task.DoesNotExist as e:
+        response = JSendResponse(
+            status=JSendResponse.FAIL,
+            data=str(e)
+        ).make_json()
+        return Response(response, status=status.HTTP_404_NOT_FOUND)

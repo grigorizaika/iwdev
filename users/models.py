@@ -11,6 +11,7 @@ from django.db.models.signals       import post_delete, post_save
 from django.utils.translation       import gettext as _
 from phonenumber_field.modelfields  import PhoneNumberField
 
+from inworkapi.utils import CognitoHelper
 from utils.models import AddressOwner, Address, CustomFile, FileOwner
 from warrant import Cognito
 
@@ -63,8 +64,6 @@ class UserManager(BaseUserManager):
 
     def get_or_create_for_cognito(self, payload):
         cognito_id = payload['sub']
-        print('-------------------------------- PAYLOAD ---------------------------------------')
-        print('cognito_id', cognito_id)
 #        try:
         return self.get(cognito_id=cognito_id)
 #        except self.model.DoesNotExist:
@@ -167,7 +166,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 # TODO: Disallow Django user creation if Cognito user creation fails
     @staticmethod
     def create_cognito_user(instance, password):
-        client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
+        
+        client = CognitoHelper.get_client()
+
         username = str(instance.email)
         try:
             response = client.sign_up(
@@ -222,7 +223,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @staticmethod
     def delete_cognito_user(instance):
-        client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
+        
+        client = CognitoHelper.get_client()
+
         try:
             response = client.admin_delete_user(
                 UserPoolId=settings.COGNITO_USER_POOL_ID,
@@ -300,7 +303,9 @@ post_save.connect(User.create_setup, sender=User)
 
 # TODO: Change it toa normal sign up confirmation endpoint
 def cognito_confirm_sign_up(username):
-    client = boto3.client('cognito-idp', region_name='eu-central-1', aws_access_key_id = settings.AWS_ACCESS_KEY_ID, aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY)
+    
+    client = CognitoHelper.get_client()
+
     response = client.admin_confirm_sign_up(
         UserPoolId=settings.COGNITO_USER_POOL_ID,
         Username=username,

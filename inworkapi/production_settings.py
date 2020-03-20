@@ -11,6 +11,23 @@ DEBUG = False
 
 APPEND_SLASH = True
 
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+SECURE_BROWSER_XSS_FILTER = True
+
+X_FRAME_OPTIONS = 'DENY'
+
+
+# TODO: set to True after Apache setup for port 443
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+# TODO: set to 1 after Apache setup for port 443
+SECURE_HSTS_SECONDS = 0
+
+
+
 ALLOWED_HOSTS = [
     '127.0.0.1',
     '.compute.amazonaws.com',
@@ -45,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'inworkapi.urls'
