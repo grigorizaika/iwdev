@@ -7,7 +7,7 @@ print('using production settings')
 
 SECRET_KEY = os.getenv('DJANGO_INWORK_SECRET_KEY')
 
-DEBUG = False
+DEBUG = True
 
 APPEND_SLASH = True
 
