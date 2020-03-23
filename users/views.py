@@ -63,9 +63,7 @@ def get_current_user(request):
     serializer = UserSerializer(request.user)
     response = JSendResponse(
         status=JSendResponse.SUCCESS,
-        data={
-            'user': serializer.data
-        }
+        data=serializer.data
     ).make_json()
     return Response(response, status=status.HTTP_200_OK)
 
