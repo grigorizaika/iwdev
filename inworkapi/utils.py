@@ -2,6 +2,8 @@ import boto3
 import json
 import sys
 
+from botocore.config import Config
+from botocore.exceptions import ClientError
 from django_cognito_jwt import JSONWebTokenAuthentication
 from django.conf import settings
 
@@ -88,6 +90,67 @@ class CognitoHelper:
             aws_access_key_id = settings.AWS_ACCESS_KEY_ID, 
             aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
         )
+
+class S3Helper:
+
+    MAIN_BUCKET_NAME = 'inwork-bucket'
+
+    @staticmethod
+    def get_client():
+        return boto3.client(
+            's3', 
+            region_name=settings.COGNITO_AWS_REGION, 
+            aws_access_key_id = settings.AWS_ACCESS_KEY_ID, 
+            aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY,
+            config=Config(signature_version='s3v4'),
+        )
+    
+    @staticmethod
+    def create_presigned_post(object_name, bucket_name=MAIN_BUCKET_NAME,
+                          fields=None, conditions=None, 
+                          expiration=3600):
+        """
+        NOTE:
+        Using POST yields 405 (Method Not Allowed) 
+        when making a request to the generated URL.
+        Substituted it with the function below, 
+        which generates a pre-signed PUT.
+        TODO: 
+        Didn't find the answer on neither forums, 
+        nor stackoverflow. Further investigate the issue.
+        """
+        
+        s3_client = S3Helper.get_client()
+
+        try:
+            return s3_client.generate_presigned_post(
+                bucket_name,
+                object_name,
+                Fields=fields,
+                Conditions=conditions,
+                ExpiresIn=expiration
+            )
+        except ClientError as e:
+            logging.error(e)
+            return None
+
+    def create_presigned_put(object_name, bucket_name=MAIN_BUCKET_NAME,
+                          fields=None, conditions=None, 
+                          expiration=3600):
+        s3_client = S3Helper.get_client()
+
+        try:
+            return s3_client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': bucket_name,
+                    'Key': object_name,
+                },
+                HttpMethod="PUT",
+            )
+        except ClientError as e:
+            print(e)
+
 
 class TokenHelper:
 

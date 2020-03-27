@@ -14,12 +14,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .helpers import create_presigned_post
 from .models import Address, CustomFile
 from .serializers import AddressSerializer, FileSerializer
 from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
 from inworkapi.decorators import required_body_params
-from inworkapi.utils import JSendResponse
+from inworkapi.utils import JSendResponse, S3Helper
 from orders.models import Order, Task
 from users.models import User as CustomUser
 
@@ -34,11 +33,14 @@ def get_presigned_upload_url(request, **kwargs):
     file_name = request.data['file_name']
 
     if location == 'users':
-        
+        # NOTE: This will only allow users to upload files to their own profiles.
+        # Administrators won't be able to upload a file to a user profile unless an id 
+        # of that user is specified in the request and an email is inferred from that id
         object_name = location + '/' + request.user.email + '/' + file_name
 
     else:
         # TODO: allow upload to client only if admin is assigned to the client
+        
         if not 'id' in request.data:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
@@ -50,14 +52,12 @@ def get_presigned_upload_url(request, **kwargs):
 
         resource_id = request.data['id']
         object_name = location + '/' + resource_id + '/' + file_name
-    
-    # MIGRATION TODO
-    bucket_name = 'inwork-bucket'
+
 
     response = JSendResponse(
-        status=JSendResponse.FAIL,
+        status=JSendResponse.SUCCESS,
         data={
-            'response': create_presigned_post(bucket_name, object_name)
+            'response': S3Helper.create_presigned_put(object_name)
         }
     ).make_json()
 
@@ -522,4 +522,3 @@ class FileView(APIView):
         ).make_json()
         
         return Response(response, status=status.HTTP_204_NO_CONTENT)
-        
