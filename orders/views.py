@@ -21,6 +21,7 @@ from .models import Order, Task
 from .serializers import OrderSerializer, TaskSerializer
 from api.helpers import bulk_create_tasks, json_list_group_by
 from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
+from clients.models import Client
 from inworkapi.utils import JSendResponse
 
 
@@ -95,7 +96,14 @@ class OrderView(APIView):
         address_id = modified_data.get('address_id')
         client_id = modified_data.get('client_id')
 
-        client_instance = Client.objects.get(id=client_id)
+        try:
+            client_instance = Client.objects.get(id=client_id)
+        except Client.DoesNotExist as e:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=str(e)
+            ).make_json()
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
 
         if not order.client.company == request.user.company:
             response = JSendResponse(
@@ -168,7 +176,14 @@ class OrderView(APIView):
         
         order_id = kwargs.get('id')
 
-        order = Order.objects.get(id=order_id)
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist as e:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=str(e)
+            ).make_json()
+            return Response(response, status.HTTP_404_NOT_FOUND)
         
         if not order.client.company == request.user.company:
             response = JSendResponse(
@@ -222,12 +237,10 @@ class OrderView(APIView):
         try:
             order = Order.objects.get(id=order_id)
         except Order.DoesNotExist as e:
-
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data=str(e)
             ).make_json()
-
             return Response(response, status=status.HTTP_404_NOT_FOUND)
         
 
@@ -432,7 +445,16 @@ class TaskView(APIView):
         
         task_id = kwargs.get('id')
 
-        task = Task.objects.get(id=task_id)
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist as e:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'response': str(e)
+                }
+            ).make_json()
+            return Response(response, status.HTTP_404_NOT_FOUND)
         
         if not task.order.client.company == request.user.company:
             

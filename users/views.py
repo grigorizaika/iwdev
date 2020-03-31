@@ -509,7 +509,8 @@ class UserView(APIView):
 
     def post(self, request, *args, **kwargs):
 
-        processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
+        #processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
+        processed_data = request.data
 
         if processed_data.get('role'):
             del processed_data['role']
@@ -580,8 +581,10 @@ class UserView(APIView):
     def patch(self, request, **kwargs):
         # Check if admin or self
 
-        processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
-        
+        # processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
+        # TODO: rename it, it isn't 'processed' anymore
+        processed_data = request.data
+
         data = {}
 
         # Role should not be changed using PATCH request
