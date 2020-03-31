@@ -105,7 +105,7 @@ class OrderView(APIView):
             ).make_json()
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
-        if not order.client.company == request.user.company:
+        if not client_instance.company == request.user.company:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
