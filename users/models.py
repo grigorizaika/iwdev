@@ -274,6 +274,8 @@ class Absence(models.Model):
             ('Rejected', 'rejected')
         ],
         default='Pending')
+    # paid
+    # description
 
 
     def save(self, *args, **kwargs):
