@@ -101,9 +101,7 @@ class OrderView(APIView):
         except Client.DoesNotExist as e:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
-                data={
-                    'response': str(e)
-                }
+                data=str(e)
             ).make_json()
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
@@ -178,7 +176,14 @@ class OrderView(APIView):
         
         order_id = kwargs.get('id')
 
-        order = Order.objects.get(id=order_id)
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist as e:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=str(e)
+            ).make_json()
+            return Response(response, status.HTTP_404_NOT_FOUND)
         
         if not order.client.company == request.user.company:
             response = JSendResponse(
@@ -232,12 +237,10 @@ class OrderView(APIView):
         try:
             order = Order.objects.get(id=order_id)
         except Order.DoesNotExist as e:
-
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data=str(e)
             ).make_json()
-
             return Response(response, status=status.HTTP_404_NOT_FOUND)
         
 
@@ -442,7 +445,16 @@ class TaskView(APIView):
         
         task_id = kwargs.get('id')
 
-        task = Task.objects.get(id=task_id)
+        try:
+            task = Task.objects.get(id=task_id)
+        except Task.DoesNotExist as e:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'response': str(e)
+                }
+            ).make_json()
+            return Response(response, status.HTTP_404_NOT_FOUND)
         
         if not task.order.client.company == request.user.company:
             
