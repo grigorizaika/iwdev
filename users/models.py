@@ -274,26 +274,29 @@ class Absence(models.Model):
             ('Rejected', 'rejected')
         ],
         default='Pending')
-    # paid
-    # description
+    paid = models.BooleanField(default=False)
+    description = models.TextField(null=True, blank=True)
+
+    def total_days(self):
+        return (self.date_end - self.date_start).days
 
 
     def save(self, *args, **kwargs):
-        if self.dateEnd > self.dateStart:
+        if self.date_start < self.date_end:
             super(Absence, self).save(*args, **kwargs)
         else:
-            raise Exception('dateEnd can\'t be earlier than dateStart')
+            raise ValueError('date_end can\'t be earlier than date_start')
 
 
     def __str__(self):
-        return (str(self.user) + ', from ' + str(self.dateStart) + ' to ' + str(self.dateEnd) + ' ' + str(self.dateStart-self.dateEnd))
+        return f'Absence, user: {self.user}, from {self.date_start} to {self.date_end}, {self.total_days()} days'
 
 
 class Company(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
 
     def __str__(self):
-            return 'id: ' + str(self.id) + '; ' + 'name: ' + str(self.name)
+        return f'id: {self.id}; name: {self.name};'
 
     class Meta:
         verbose_name_plural = 'companies'

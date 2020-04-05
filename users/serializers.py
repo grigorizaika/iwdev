@@ -1,10 +1,20 @@
 from rest_framework import serializers
 
-from .models import User as CustomUser
-from .models import (Company, Role)
+from .models import Absence, Company, Role, User as CustomUser
 from utils.serializers import AddressSerializer
 
+class AbsenceSerializer(serializers.ModelSerializer):
+    
+    def validate(self, data):
+        if data['date_start'] > data['date_end']:
+            raise serializers.ValidationError('date_end has to be later than date_start')
 
+        return super(AbsenceSerializer, self).validate(data)
+
+    class Meta:
+        model = Absence
+        fields = '__all__'
+        
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:

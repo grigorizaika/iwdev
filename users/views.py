@@ -2,6 +2,7 @@ from botocore import exceptions as botocore_exceptions
 from django_cognito_jwt import JSONWebTokenAuthentication
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics, mixins, status
 from rest_framework.authentication import get_authorization_header
@@ -10,11 +11,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import User as CustomUser, Role, Company
-from .serializers import CompanySerializer, PasswordSerializer, RegistrationSerializer, UserSerializer
+from .models import Absence, Company, Role, User as CustomUser
+from .serializers import (
+                            AbsenceSerializer, CompanySerializer, 
+                            PasswordSerializer, RegistrationSerializer, UserSerializer
+                        )
 from api.helpers import generate_temporary_password
-from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
-from inworkapi.decorators import required_body_params
+from api.permissions import IsPostOrIsAuthenticated, IsAdministrator
+from inworkapi.decorators import required_body_params, required_kwargs
 from inworkapi.utils import JSendResponse, CognitoHelper
 from utils.serializers import AddressSerializer
 
@@ -618,7 +622,7 @@ class UserView(APIView):
                 }
             ).make_json()
             
-            return Response(response, status=status.HTTP_403_FORBIDDEN)    
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
         
         serializer = UserSerializer(djangoUser, data=processed_data, partial=True)
         
@@ -631,14 +635,13 @@ class UserView(APIView):
                     'response': f'Successfully updated user {djangoUser.email}'
                 }
             ).make_json()
-
             return Response(response, status=status.HTTP_200_OK)
+
         else:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data=serializer.errors
             ).make_json()
-
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -693,6 +696,155 @@ class UserView(APIView):
                 data=str(e)
             ).make_json()
 
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
+
+
+class AbsenceView(APIView):
+    authentication_classes = [JSONWebTokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+
+    def get_list(self, whos_asking, want_serialized=False):
+        if whos_asking.is_superuser:
+            absences = Absence.objects.all()
+        elif whos_asking.is_administrator():
+            absences_same_company = Absence.objects.filter(user__company=whos_asking.company)
+            absences = absences_same_company
+        else:
+            absences_same_user = Absence.objects.filter(user=whos_asking)
+            absences = absences_same_user
+
+        return AbsenceSerializer(absences, many=True).data if want_serialized else absences
+
+    
+    def get_instance(self, id, whos_asking, want_serialized=False):
+        if whos_asking.is_superuser:
+            absence = Absence.objects.get(id=id)
+        elif whos_asking.is_administrator():
+            absences_same_company = Absence.objects.filter(user__company=whos_asking.company)
+            absence = absences_same_company.get(id=id)
+        else:
+            absences_same_user = Absence.objects.filter(user=whos_asking)
+            absence = absences_same_user.get(id=id)
+
+        return AbsenceSerializer(absence).data if want_serialized else absence
+
+
+    def get(self, request, *args, **kwargs):
+        if not 'id' in kwargs:
+            absence_list = self.get_list(whos_asking=request.user, want_serialized=True)
+            response = JSendResponse(status=JSendResponse.SUCCESS, data=absence_list).make_json()
+            return Response(response, status=status.HTTP_200_OK)
+    
+        try:
+            absence = self.get_instance(kwargs['id'], whos_asking=request.user, want_serialized=True)
+            response = JSendResponse(status=JSendResponse.SUCCESS, data=absence).make_json()
+            return Response(response, status=status.HTTP_200_OK)
+
+        except Absence.DoesNotExist as e:
+            response = JSendResponse(status=JSendResponse.FAIL, data=str(e)).make_json()
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
+    
+
+    def post(self, request, *args, **kwargs):
+        processed_data = request.data.dict()
+        
+        # TODO: make it a decorator
+        if ('user' in processed_data or 'state' in processed_data) and not request.user.is_administrator():
+            response = JSendResponse(
+                status=JSendResponse.FAIL, 
+                data={ 'user': 'Only an administrator can \'user\' and \'status\' fields.'}
+            )
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
+        if not 'user' in processed_data:
+            processed_data['user'] = request.user.id
+
+        absence_serializer = AbsenceSerializer(data=processed_data)
+
+        if absence_serializer.is_valid():
+            absence = absence_serializer.save()
+
+            response = JSendResponse(status=JSendResponse.SUCCESS, data=f'Created {absence}').make_json()
+            return Response(response, status=status.HTTP_201_CREATED)
+        
+        else:
+            response = JSendResponse(status=JSendResponse.FAIL, data=absence_serializer.errors).make_json()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @required_kwargs(['id'])
+    def patch(self, request, *args, **kwargs):
+        processed_data = request.data.dict()
+        # TODO: make it a decorator
+        if ('user' in processed_data or 'state' in processed_data) and not request.user.is_administrator():
+            response = JSendResponse(
+                status=JSendResponse.FAIL, 
+                data={ 'user': 'Only an administrator can set \'user\' and \'status\' fields.'}
+                ).make_json()
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+        
+        try:
+            absence = self.get_instance(kwargs['id'], whos_asking=request.user, want_serialized=False)
+            
+            if not absence.state == 'Pending' and not request.user.is_administrator():
+                response = JSendResponse(
+                    status=JSendResponse.FAIL, 
+                    data={ 'absence': 'absence can\'t be changed by workers once it\'s been confirmed' } 
+                ).make_json()
+                return Response(response, status=status.HTTP_403_FORBIDDEN)
+
+        except Absence.DoesNotExist as e:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=str(e)
+            ).make_json()
+            return Response(response, status=status.HTTP_404_NOT_FOUND)
+
+        absence_serializer = AbsenceSerializer(absence, data=request.data, partial=True)
+
+        if absence_serializer.is_valid():
+            absence = absence_serializer.save()
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS,
+                data={
+                    'response': f'Updated {absence}'
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_200_OK)
+        else:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=absence_serializer.errors
+            ).make_json()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+    @required_kwargs(['id'])
+    def delete(self, request, *args, **kwargs):
+        if not (request.user.is_administrator() or request.user.is_superuser):
+            response = JSendResponse(
+                status=JSendResponse.FAIL, 
+                data={ 'user': 'Only an administrator can delete absences.'}
+            ).make_json()
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            absence = self.get_instance(kwargs['id'], whos_asking=request.user, want_serialized=False)
+            absence.delete()
+            id = kwargs['id']
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'absence': f'absence {id} has been deleted'
+                }
+            ).make_json()
+            return Response(response, status=status.HTTP_204_NO_CONTENT)
+
+        except Absence.DoesNotExist as e:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data=str(e)
+            ).make_json()
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
 
