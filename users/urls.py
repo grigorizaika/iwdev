@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf.urls import url, include
 
 from .views import (
-    UserView, CompanyView, check_phone, get_current_user, 
+    AbsenceView, UserView, CompanyView, check_phone, get_current_user, 
     change_password, initiate_reset_password, confirm_reset_password, 
     confirm_sign_up, initiate_verify_attribute, admin_create_cognito_user,
     respond_to_new_password_required_challenge, verify_attribute,
@@ -15,6 +15,7 @@ app_name = 'users'
 
 company_list = CompanyView.as_view()
 user_list = UserView.as_view()
+absence_list = AbsenceView.as_view()
 
 urlpatterns = [
     url(r'^users/?$', user_list),
@@ -34,4 +35,10 @@ urlpatterns = [
 
     path('companies/', company_list),
     path('companies/<int:id>/', company_list),
+    
+
+    path('absences', absence_list),
+    path('absences/', absence_list),
+    path('absences/<int:id>', absence_list),
+    path('absences/<int:id>/', absence_list),
 ]
