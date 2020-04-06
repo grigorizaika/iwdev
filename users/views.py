@@ -838,11 +838,13 @@ class AbsenceView(APIView):
         try:
             absence = self.get_instance(kwargs['id'], whos_asking=request.user, want_serialized=False)
             absence.delete()
-            id = kwargs['id']
+
+            absence_id = kwargs['id']
+            
             response = JSendResponse(
-                status=JSendResponse.FAIL,
+                status=JSendResponse.SUCCESS,
                 data={
-                    'absence': f'absence {id} has been deleted'
+                    'absence': f'absence {absence_id} has been deleted'
                 }
             ).make_json()
             return Response(response, status=status.HTTP_204_NO_CONTENT)

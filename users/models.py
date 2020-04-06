@@ -70,7 +70,6 @@ class UserManager(BaseUserManager):
  
 
 
-
 class User(AbstractBaseUser, PermissionsMixin):
     username                = None
     email                   = models.EmailField(_('email address'), unique=True)
@@ -289,7 +288,7 @@ class Absence(models.Model):
 
 
     def __str__(self):
-        return f'Absence, user: {self.user}, from {self.date_start} to {self.date_end}, {self.total_days()} days'
+        return f'Absence {self.id}, user {self.user}, from {self.date_start} to {self.date_end}, {self.total_days()} days'
 
 
 class Company(models.Model):
@@ -306,7 +305,7 @@ post_delete.connect(User.delete_cleanup, sender=User)
 post_save.connect(User.create_setup, sender=User)
 
 
-# TODO: Change it toa normal sign up confirmation endpoint
+# TODO: Change it to a normal sign up confirmation endpoint
 def cognito_confirm_sign_up(username):
     
     client = CognitoHelper.get_client()
