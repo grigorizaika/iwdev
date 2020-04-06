@@ -1,4 +1,4 @@
-from botocore import exceptions as botocore_exceptions
+import botocore
 from django_cognito_jwt import JSONWebTokenAuthentication
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
@@ -89,11 +89,18 @@ def change_password(request, **kwargs):
 
             # TODO: catch An error occurred (NotAuthorizedException) when calling 
             # the ChangePassword operation: Invalid Access Token
-            cognito_response = client.change_password(
-                PreviousPassword=serializer.data['old_password'],
-                ProposedPassword=serializer.data['new_password'],
-                AccessToken=request.data['access_token']
-            )
+            try:
+                cognito_response = client.change_password(
+                    PreviousPassword=serializer.data['old_password'],
+                    ProposedPassword=serializer.data['new_password'],
+                    AccessToken=request.data['access_token']
+                )
+            except client.exceptions.NotAuthorizedException as e:
+                response = JSendResponse(
+                    status=JSendResponse.FAIL,
+                    data=str(e)
+                ).make_json()
+                return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
             user.set_password(serializer.data['new_password'])
             user.save()
@@ -345,7 +352,7 @@ def admin_create_cognito_user(request, **kwargs):
             DesiredDeliveryMediums=['EMAIL'],
         )
 
-    except botocore_exceptions.ParamValidationError as e:
+    except botocore.exceptions.ParamValidationError as e:
 
         response = JSendResponse(
             status=JSendResponse.ERROR,
