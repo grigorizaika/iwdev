@@ -18,7 +18,7 @@ from .serializers import (
                         )
 from api.helpers import generate_temporary_password
 from api.permissions import IsPostOrIsAuthenticated, IsAdministrator
-from inworkapi.decorators import required_body_params, required_kwargs
+from inworkapi.decorators import required_body_params, admin_body_params, required_kwargs
 from inworkapi.utils import JSendResponse, CognitoHelper
 from utils.serializers import AddressSerializer
 
@@ -520,8 +520,7 @@ class UserView(APIView):
 
     def post(self, request, *args, **kwargs):
 
-        #processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
-        processed_data = request.data
+        processed_data = request.data.dict()
 
         if processed_data.get('role'):
             del processed_data['role']
@@ -588,31 +587,16 @@ class UserView(APIView):
 
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-
+    @required_kwargs(['id'])
     def patch(self, request, **kwargs):
         # Check if admin or self
 
-        # processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
-        # TODO: rename it, it isn't 'processed' anymore
-        processed_data = request.data
+        processed_data = request.data.dict()
 
-        data = {}
-
-        # Role should not be changed using PATCH request
         if 'role' in processed_data:
+            # Role should not be changed using PATCH request
             processed_data.pop('role')
-
         
-        if not 'id' in kwargs:
-            response = JSendResponse(
-                status=JSendResponse.FAIL,
-                data={
-                    'id': 'User id wasn\'t specified'
-                }
-            ).make_json()
-
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
- 
         if 'profile_picture_url' in processed_data:
             processed_data['profile_picture_url'] = str(processed_data['profile_picture_url'])
 
@@ -752,17 +736,17 @@ class AbsenceView(APIView):
             response = JSendResponse(status=JSendResponse.FAIL, data=str(e)).make_json()
             return Response(response, status=status.HTTP_404_NOT_FOUND)
     
-
+    @admin_body_params(['user', 'state'])
     def post(self, request, *args, **kwargs):
         processed_data = request.data.dict()
         
         # TODO: make it a decorator
-        if ('user' in processed_data or 'state' in processed_data) and not request.user.is_administrator():
-            response = JSendResponse(
-                status=JSendResponse.FAIL, 
-                data={ 'user': 'Only an administrator can \'user\' and \'status\' fields.'}
-            )
-            return Response(response, status=status.HTTP_403_FORBIDDEN)
+        # if ('user' in processed_data or 'state' in processed_data) and not request.user.is_administrator():
+        #     response = JSendResponse(
+        #         status=JSendResponse.FAIL, 
+        #         data={ 'user': 'Only an administrator can set \'user\' and \'status\' fields.'}
+        #     )
+        #     return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         if not 'user' in processed_data:
             processed_data['user'] = request.user.id
