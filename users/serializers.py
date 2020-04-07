@@ -4,7 +4,11 @@ from .models import Absence, Company, Role, User as CustomUser
 from utils.serializers import AddressSerializer
 
 class AbsenceSerializer(serializers.ModelSerializer):
-    
+    total_days = serializers.SerializerMethodField()
+
+    def get_total_days(self, obj):
+        return obj.total_days()
+
     def validate(self, data):
         if data['date_start'] > data['date_end']:
             raise serializers.ValidationError('date_end has to be later than date_start')

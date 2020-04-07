@@ -275,9 +275,26 @@ class Absence(models.Model):
         default='Pending')
     paid = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
+    exclude_saturday = models.BooleanField(default=True)
+    exclude_sunday = models.BooleanField(default=True)
+
 
     def total_days(self):
-        return (self.date_end - self.date_start).days
+        date_current = self.date_start
+        day_delta = datetime.timedelta(days=1)
+        days_total = 0
+
+        while date_current <= self.date_end:
+            if (
+                not (self.exclude_saturday and date_current.weekday() == 5)
+                and 
+                not (self.exclude_sunday and date_current.weekday() == 6)
+            ):
+                days_total += 1
+
+            date_current += day_delta
+        
+        return days_total
 
 
     def save(self, *args, **kwargs):
