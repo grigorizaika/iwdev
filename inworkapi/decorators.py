@@ -35,3 +35,20 @@ def required_kwargs(kwarg_list=[]):
             return view_function(request, *args, **kwargs)
         return wrap
     return decorator
+
+
+def admin_body_params(parameter_list=[]):
+    def decorator(view_function):
+        def wrap(request, *args, **kwargs):
+            for param in parameter_list:
+                if param in request.data and not request.user.is_administrator():
+                    response = JSendResponse(
+                        status=JSendResponse.FAIL,
+                        data={
+                            param: f'Only an administrator can set \'{param}\' field'
+                        }
+                    ).make_json()
+                    return Response(response, status=status.HTTP_403_BAD_REQUEST)
+            return view_function(request, *args, **kwargs)
+        return wrap
+    return decorator

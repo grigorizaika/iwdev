@@ -116,7 +116,7 @@ def model_files(request, **kwargs):
                 
         fo = instance.file_owner
         
-        processed_data = { k: v[0] for (k, v) in dict(request.data).items() }
+        processed_data = request.data.dict()
         
         processed_data['owner'] = fo.id
         
