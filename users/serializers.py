@@ -11,34 +11,19 @@ class AbsenceSerializer(serializers.ModelSerializer):
     def get_total_days(self, obj):
         return obj.total_days()
 
-    def validate_date_start(self, value):
-        initial_data = dict(self.to_representation(self.instance))
-        
-        # TODO: change if date format changes, better set a global variable
-        date_end = datetime.datetime.strptime(initial_data['date_end'], "%Y-%m-%d").date()
-
-        if value > date_end:
-            raise serializers.ValidationError('date_start has to be earlier than date_end')
-
-        return value
-
-    def validate_date_end(self, value):
-        initial_data = dict(self.to_representation(self.instance))
-        
-        # TODO: change if date format changes, better set a global variable
-        date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
-        
-        if value < date_start:
-            raise serializers.ValidationError('date_end has to be later than date_start')
-
-        return value
-
     def validate(self, data):
-        # TODO: make it easier to read and understand 
 
-        if 'date_start' in data and 'date_end' in data and data['date_start'] > data['date_end']:
+        # TODO: make it easier to read and understand 
+        if ('date_start' in data and 'date_end' in data) and (data['date_start'] > data['date_end']):
             raise serializers.ValidationError('date_end has to be later than date_start')
-                
+        elif 'date_start' in data and not 'date_end' in data:
+            date_end = datetime.datetime.strptime(initial_data['date_end'], "%Y-%m-%d").date()
+            if data['date_start'] > date_end:
+                raise serializers.ValidationError('date_end has to be later than date_start')
+        elif not 'date_start' in data and 'date_end' in data:
+            date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
+            if data['date_end'] < date_start:
+                raise serializers.ValidationError('date_end has to be later than date_start')
 
         return super(AbsenceSerializer, self).validate(data)
 
