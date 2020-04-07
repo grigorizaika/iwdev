@@ -15,7 +15,7 @@ class AbsenceSerializer(serializers.ModelSerializer):
         initial_data = dict(self.to_representation(self.instance))
         
         # TODO: change if date format changes, better set a global variable
-        date_end = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
+        date_end = datetime.datetime.strptime(initial_data['date_end'], "%Y-%m-%d").date()
 
         if value > date_end:
             raise serializers.ValidationError('date_start has to be earlier than date_end')
@@ -26,7 +26,7 @@ class AbsenceSerializer(serializers.ModelSerializer):
         initial_data = dict(self.to_representation(self.instance))
         
         # TODO: change if date format changes, better set a global variable
-        date_start = datetime.datetime.strptime(initial_data['date_end'], "%Y-%m-%d").date()
+        date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
         
         if value < date_start:
             raise serializers.ValidationError('date_end has to be later than date_start')
