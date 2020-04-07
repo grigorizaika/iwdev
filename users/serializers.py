@@ -12,7 +12,7 @@ class AbsenceSerializer(serializers.ModelSerializer):
         return obj.total_days()
 
     def validate(self, data):
-
+        initial_data = dict(self.to_representation(self.instance))
         # TODO: make it easier to read and understand 
         if ('date_start' in data and 'date_end' in data) and (data['date_start'] > data['date_end']):
             raise serializers.ValidationError('date_end has to be later than date_start')
@@ -24,6 +24,9 @@ class AbsenceSerializer(serializers.ModelSerializer):
             date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
             if data['date_end'] < date_start:
                 raise serializers.ValidationError('date_end has to be later than date_start')
+
+        elif not 'date_start' in data and 'date_end' in data:
+            date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
 
         return super(AbsenceSerializer, self).validate(data)
 
