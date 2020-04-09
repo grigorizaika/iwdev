@@ -37,7 +37,7 @@ urlpatterns = [
     path('', include('users.urls', namespace='users')),
     path('', include('orders.urls', namespace='orders')),
 
-    url(r'get_tokens(?P<username>\w{0,50})(?P<password>\w{0,50})/?$', get_jwt_tokens),
+    url(r'get_tokens/?$', get_jwt_tokens, name='get-tokens'),
     url(r'refresh_tokens/?$', refresh_jwt_tokens),
 ]
 
