@@ -187,6 +187,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             )
         except Exception as e:
             instance.delete()
+            return
 
         try:
             response = client.admin_get_user(
@@ -196,6 +197,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             instance.cognito_id = [item for item in response.get('UserAttributes') if item['Name'] == 'sub'][0]['Value']
         except Exception as e:
             print(e)
+
         #TODO: do as below
         cognito_confirm_sign_up(username)
 
@@ -214,6 +216,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def delete_address_owner(instance):
         if instance.address_owner:
             instance.address_owner.delete()
+
 
     @staticmethod
     def delete_file_owner(instance):

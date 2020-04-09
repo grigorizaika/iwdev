@@ -1,5 +1,15 @@
 from rest_framework import permissions
 
+from inworkapi.utils import JSendResponse
+
+class IsAuthenticated(permissions.IsAuthenticated):
+    message = JSendResponse(
+        status=JSendResponse.FAIL, 
+        data='Authentication credentials were not provided'
+    ).make_json()
+
+    def has_permission(self, request, view):
+        return super().has_permission(request, view)
 
 class IsPostOrIsAuthenticated(permissions.BasePermission):
 

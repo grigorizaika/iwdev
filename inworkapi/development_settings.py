@@ -130,6 +130,10 @@ DATABASES = {
         'PASSWORD':  variables_dict['INWORK_DB_PASSWORD'],
         'HOST': 'localhost',
         'PORT': '',
+        'TEST': {
+            'USER': 'test',
+            'PASSWORD': 'test',
+        }
     }
 }
 
