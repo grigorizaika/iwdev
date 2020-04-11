@@ -140,7 +140,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_addresses(self, obj):
         queryset = obj.addresses()
-        print('QUERYSET', queryset)
         if len(queryset) == 0:
             return None
         serializer = AddressSerializer(queryset, many=True)
