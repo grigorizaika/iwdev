@@ -128,7 +128,7 @@ class ClientView(APIView):
             if serializer.is_valid():
                 client = serializer.save()
                 response = JSendResponse(
-                    status=JSendResponse.FAIL,
+                    status=JSendResponse.SUCCESS,
                     data={
                         'client': f'Updated client {client.name}',
                     }

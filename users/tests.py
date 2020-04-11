@@ -45,12 +45,12 @@ class AbsenceTests(APITestCase):
 
 
     # NOTE: Candidate for separate APITestCase class method
-    def get_id_token(self):
+    def get_id_token(self, email=test_user_data['email'], password=test_user_data['password']):
         token_grant_endpoint = reverse('api:get-tokens')
         
         data = {
-            'username': self.test_user_data['email'],
-            'password': self.test_user_data['password']
+            'username': email,
+            'password': password
         }
         
         response = self.client.post(token_grant_endpoint, data=data)
@@ -67,11 +67,27 @@ class AbsenceTests(APITestCase):
 
     def test_get_absences(self):
         absences_url = self.get_absences_url()
-        response = self.get_authenticated_client().get(absences_url)
+        client = self.get_authenticated_client()
+        response = client.get(absences_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertJSendSuccess(response)
 
 
     def test_post_and_get_absence(self):
-        pass
+        absences_url = self.get_absences_url()
+        client = self.get_authenticated_client()
+        
+        absence_user_id = models.User.objects.get(email=self.test_user_data['email']).id
+
+        absence_data_correct = {
+            'date_start': '2018-06-15',
+            'date_end': '2018-06-15',
+            'user': absence_user_id,
+            'paid': 'True',
+            'description': 'Roxanne! You don\'t have to put on the red light'
+        }
+
+        response = client.post(absences_url, data=absence_data_correct)
+
+        assertEqual(response.status_code, status.HTTP_200_OK)
