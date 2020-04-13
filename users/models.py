@@ -301,7 +301,7 @@ class Absence(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if self.date_start < self.date_end:
+        if self.date_start <= self.date_end:
             super(Absence, self).save(*args, **kwargs)
         else:
             raise ValueError('date_end can\'t be earlier than date_start')
