@@ -757,7 +757,14 @@ class AbsenceView(APIView):
         if absence_serializer.is_valid():
             absence = absence_serializer.save()
 
-            response = JSendResponse(status=JSendResponse.SUCCESS, data=f'Created {absence}').make_json()
+            response = JSendResponse(
+                status=JSendResponse.SUCCESS, 
+                data={
+                    'response': f'Created {absence}',
+                    'id': absence.id
+                }
+            ).make_json()
+
             return Response(response, status=status.HTTP_201_CREATED)
         
         else:

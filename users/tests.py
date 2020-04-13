@@ -18,6 +18,24 @@ class AbsenceTests(APITestCase):
         }
 
 
+    test_absence_data = {
+        'correct': {
+            'date_start': '2018-06-15',
+            'date_end': '2018-07-15',
+            'user': None,
+            'paid': 'True',
+            'description': 'Roxanne! You don\'t have to put on the red light'
+        },
+        'invalid_dates': {
+            'date_start': '2018-06-15',
+            'date_end': '2017-07-15',
+            'user': None,
+            'paid': 'True',
+            'description': 'Roxanne! You don\'t have to put on the red light'
+        }
+    }
+
+
     def get_absences_url(self, url_kwargs=None):
         return reverse('api:users:absence-list', kwargs=url_kwargs)
 
@@ -26,6 +44,9 @@ class AbsenceTests(APITestCase):
         user = models.User.objects.create_user(**self.test_user_data)
         user.role =  models.Role.objects.get_or_create(name='Administrator')[0]
         user.save()
+
+        self.test_absence_data['correct']['user'] = user.id
+        self.test_absence_data['invalid_dates']['user'] = user.id
     
 
     def tearDown(self):
@@ -78,16 +99,23 @@ class AbsenceTests(APITestCase):
         absences_url = self.get_absences_url()
         client = self.get_authenticated_client()
         
-        absence_user_id = models.User.objects.get(email=self.test_user_data['email']).id
+        post_response_correct = client.post(absences_url, data=self.test_absence_data['correct'])
+        post_response_invalid_dates = client.post(absences_url, data=self.test_absence_data['invalid_dates'])
 
-        absence_data_correct = {
-            'date_start': '2018-06-15',
-            'date_end': '2018-06-15',
-            'user': absence_user_id,
-            'paid': 'True',
-            'description': 'Roxanne! You don\'t have to put on the red light'
-        }
+        self.assertEqual(post_response_correct.status_code, status.HTTP_201_CREATED) 
+        self.assertEqual(post_response_invalid_dates.status_code, status.HTTP_400_BAD_REQUEST)
 
-        response = client.post(absences_url, data=absence_data_correct)
+        # Get newly created absence
+        absence_id = post_response_correct.data['data']['id']
+        absence_url = self.get_absences_url(url_kwargs={'id': absence_id})
+        response = client.get(absence_url)
 
-        assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        
+    def test_patch_and_get_absence(self):
+        pass
+
+
+    def test_create_delete_and_get_absence(self):
+        pass

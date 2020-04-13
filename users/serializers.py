@@ -5,36 +5,6 @@ from rest_framework import serializers
 from .models import Absence, Company, Role, User as CustomUser
 from utils.serializers import AddressSerializer
 
-class AbsenceSerializer(serializers.ModelSerializer):
-    total_days = serializers.SerializerMethodField()
-
-    def get_total_days(self, obj):
-        return obj.total_days()
-
-    def validate(self, data):
-        initial_data = dict(self.to_representation(self.instance))
-        # TODO: make it easier to read and understand 
-        if ('date_start' in data and 'date_end' in data) and (data['date_start'] > data['date_end']):
-            raise serializers.ValidationError('date_end has to be later than date_start')
-        elif 'date_start' in data and not 'date_end' in data:
-            date_end = datetime.datetime.strptime(initial_data['date_end'], "%Y-%m-%d").date()
-            if data['date_start'] > date_end:
-                raise serializers.ValidationError('date_end has to be later than date_start')
-        elif not 'date_start' in data and 'date_end' in data:
-            date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
-            if data['date_end'] < date_start:
-                raise serializers.ValidationError('date_end has to be later than date_start')
-
-        elif not 'date_start' in data and 'date_end' in data:
-            date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
-
-        return super(AbsenceSerializer, self).validate(data)
-
-    class Meta:
-        model = Absence
-        fields = '__all__'
-        
-
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
@@ -156,3 +126,43 @@ class UserSerializer(serializers.ModelSerializer):
 class PasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+
+
+
+class AbsenceSerializer(serializers.ModelSerializer):
+    total_days = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(source='user',  queryset=CustomUser.objects.all(), )
+
+    def get_total_days(self, obj):
+        return obj.total_days()
+
+    def validate(self, data):
+        try:
+            initial_data = dict(self.to_representation(self.instance))
+        except AttributeError:
+            # print('instance doesn\'t exist yet')
+            pass
+
+    
+        # TODO: make it easier to read and understand 
+        if ('date_start' in data and 'date_end' in data) and (data['date_start'] > data['date_end']):
+            raise serializers.ValidationError('date_end has to be later than date_start')
+        elif 'date_start' in data and not 'date_end' in data:
+            date_end = datetime.datetime.strptime(initial_data['date_end'], "%Y-%m-%d").date()
+            if data['date_start'] > date_end:
+                raise serializers.ValidationError('date_end has to be later than date_start')
+        elif not 'date_start' in data and 'date_end' in data:
+            date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
+            if data['date_end'] < date_start:
+                raise serializers.ValidationError('date_end has to be later than date_start')
+
+        elif not 'date_start' in data and 'date_end' in data:
+            date_start = datetime.datetime.strptime(initial_data['date_start'], "%Y-%m-%d").date()
+
+        return super(AbsenceSerializer, self).validate(data)
+
+    class Meta:
+        model = Absence
+        fields = '__all__'
+        
