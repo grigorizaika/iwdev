@@ -1,23 +1,15 @@
 from django_cognito_jwt import JSONWebTokenAuthentication
-from django.conf import settings
-from django.contrib.auth.hashers import check_password
-from django.db.models.query import QuerySet
-from django.shortcuts import get_object_or_404, render
-from rest_framework import generics
-from rest_framework import mixins
-from rest_framework import permissions
 from rest_framework import status
-from rest_framework import viewsets
 from rest_framework.decorators import (
-    action, api_view, authentication_classes, permission_classes)
+    api_view, authentication_classes, permission_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Address, CustomFile
+from .models import Address, AddressOwner, CustomFile
 from .serializers import AddressSerializer, FileSerializer
-from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
-from inworkapi.decorators import required_body_params
+from api.permissions import IsAdministrator
+from inworkapi.decorators import required_body_params, required_kwargs
 from inworkapi.utils import JSendResponse, S3Helper
 from orders.models import Order, Task
 from users.models import User as CustomUser
@@ -28,7 +20,7 @@ from users.models import User as CustomUser
 @permission_classes([IsAuthenticated])
 @required_body_params(['to', 'file_name'])
 def get_presigned_upload_url(request, **kwargs):
-    
+
     location = request.data['to']
     file_name = request.data['file_name']
 
@@ -40,8 +32,8 @@ def get_presigned_upload_url(request, **kwargs):
 
     else:
         # TODO: allow upload to client only if admin is assigned to the client
-        
-        if not 'id' in request.data:
+
+        if 'id' not in request.data:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
@@ -52,7 +44,6 @@ def get_presigned_upload_url(request, **kwargs):
 
         resource_id = request.data['id']
         object_name = location + '/' + resource_id + '/' + file_name
-
 
     response = JSendResponse(
         status=JSendResponse.SUCCESS,
@@ -70,13 +61,13 @@ def get_presigned_upload_url(request, **kwargs):
 def model_files(request, **kwargs):
 
     possible_model_values = {
-        'users': CustomUser, 
+        'users': CustomUser,
         'workers': CustomUser,
-        'orders': Order, 
-        'tasks' : Task,
+        'orders': Order,
+        'tasks': Task,
     }
 
-    if (not 'model' in kwargs or not 'id' in kwargs):
+    if ('model' not in kwargs or 'id' not in kwargs):
         response = JSendResponse(
             status=JSendResponse.FAIL,
             data={
@@ -188,43 +179,40 @@ class AddressView(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        if not 'id' in kwargs:
-            # TODO: Filter addresses by the owner's company
-            queryset = Address.objects.filter()
-            serializer = AddressSerializer(queryset, many=True)
-
+        if 'id' not in kwargs:
+            # TODO: restrict addresses for users
+            # make this filtering in Adress model
+            addresses = Address.objects.all()
+            serializer = AddressSerializer(addresses, many=True)
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
-                data = serializer.data
+                data=serializer.data
             ).make_json()
-            
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
-            
+            return Response(response, status=status.HTTP_200_OK)
+
         address_id = kwargs.get('id')
 
         try:
             address = Address.objects.get(id=address_id)
-
         except Address.DoesNotExist as e:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data=str(e)
             ).make_json()
-
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
-        if not address.owner.get_owner_instance.company == request.user.company:
+        if address.owner.get_owner_instance().company != request.user.company:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
-                data = {
-                    'response': 'Addresses\' owner company doesn\'t match your company'
+                data={
+                    'response': '''Addresses\' owner company doesn\'t \
+                        match your company'''
                 }
             ).make_json()
-
             return Response(response, status=status.HTTP_403_FORBIDDEN)    
 
         serializer = AddressSerializer(address)
-        
+
         response = JSendResponse(
             status=JSendResponse.SUCCESS,
             data=serializer.data
@@ -232,35 +220,35 @@ class AddressView(APIView):
 
         return Response(response, status=status.HTTP_200_OK)
 
-
-    def post(self, request, *args,**kwargs):
+    def post(self, request, *args, **kwargs):
 
         if 'owner' in request.data:
             ao = AddressOwner.objects.get(id=request.data['owner'])
             owner_instance = ao.get_owner_instance()
 
-            if not owner_instance.company == request.user.company:
+            if owner_instance.company != request.user.company:
                 response = JSendResponse(
                     status=JSendResponse.FAIL,
-                    data = {
-                        'response': 'Owner\'s company doesn\'t match your company'
+                    data={
+                        'response': '''Owner\'s company doesn\'t \
+                            match your company'''
                     }
                 ).make_json()
 
                 return Response(response, status=status.HTTP_403_FORBIDDEN)
-        
+
         serializer = AddressSerializer(data=request.data)
 
         if serializer.is_valid():
             address = serializer.save()
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
                     'response': f'Created Address {address}'
                 }
             ).make_json()
-            
+
             return Response(response, status=status.HTTP_200_OK)
 
         else:
@@ -268,49 +256,39 @@ class AddressView(APIView):
                 status=JSendResponse.FAIL,
                 data=serializer.errors
             ).make_json()
-            
+
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-
+    @required_kwargs(['id'])
     def patch(self, request, **kwargs):
-        
-        if not 'id' in kwargs:
-            response = JSendResponse(
-                status=JSendResponse.FAIL, 
-                data={ 'id': 'Must specify an id' } 
-            ).make_json()
-            
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
-
         address_id = kwargs.get('id')
-        
+
         try:
             address = Address.objects.get(id=address_id)
             owner_instance = address.owner.get_owner_instance()
-
         except Address.DoesNotExist as e:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data=str(e)
-            )
+            ).make_json()
 
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
-        if not owner_instance.company == request.user.company:
+        if owner_instance.company != request.user.company:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
-                data = {
+                data={
                     'response': 'Owner\'s company doesn\'t match your company'
                 }
             ).make_json()
 
             return Response(response, status=status.HTTP_403_FORBIDDEN)
-                    
+
         serializer = AddressSerializer(address, data=request.data, partial=True)
-        
+
         if serializer.is_valid():
             address = serializer.save()
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
@@ -325,22 +303,11 @@ class AddressView(APIView):
                 status=JSendResponse.FAIL,
                 data=serializer.errors
             ).make_json()
-    
+
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-
+    @required_kwargs(['id'])
     def delete(self, request, *args, **kwargs):
-
-        if not 'id' in kwargs:
-            response = JSendResponse(
-                status=JSendResponse.FAIL,
-                data={
-                    'id': 'Must specify an id'
-                }
-            ).make_json()
-            
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             address = Address.objects.get(id=kwargs.get('id'))
             owner_instance = address.owner.get_owner_instance()
@@ -356,7 +323,7 @@ class AddressView(APIView):
         if not owner_instance.company == request.user.company:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
-                data = {
+                data={
                     'response': 'Owner\'s company doesn\'t match your company'
                 }
             ).make_json()
@@ -364,16 +331,16 @@ class AddressView(APIView):
             return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         address_str = str(address)
-        
+
         address.delete()
-        
+
         response = JSendResponse(
             status=JSendResponse.SUCCESS,
             data={
-                'response': 'Successfully deleted address {address_str}'
+                'response': f'Successfully deleted address {address_str}'
             }
         ).make_json()
-        
+
         return Response(response, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -381,7 +348,7 @@ class FileView(APIView):
     authentication_classes = [JSONWebTokenAuthentication]
 
     def get(self, request, *args, **kwargs):
-        
+
         if not 'id' in kwargs:
             queryset = CustomFile.objects.all()
             serializer = FileSerializer(queryset, many=True)
