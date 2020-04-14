@@ -4,6 +4,7 @@ from rest_framework import exceptions
 import users.models 
 import clients.models
 
+
 class Address(models.Model):
     owner                   = models.ForeignKey(
                                 'utils.AddressOwner',
@@ -28,11 +29,11 @@ class Address(models.Model):
     def __str__(self):
         flat_no = ("/" + str(self.flat_no)) if self.flat_no else ''
         return (str(self.house_no) + flat_no + " "
-            + self.street + ", " 
-            + self.city + ", " 
-            + self.district + ", " 
+            + self.street + ", "
+            + self.city + ", "
+            + self.district + ", "
             + self.country)
-    
+
     class Meta:
         verbose_name_plural = "Addresses"
 
@@ -47,15 +48,19 @@ class AddressOwner(models.Model):
         # Search a list of all classes that are address owners
         # TODO: so far, this is implemented on the assumption that 
         # all one to one relations with this model are address owners
-        owner_instance_models = [ field.related_model for field in self._meta.get_fields() 
-                                if field.__class__ is models.fields.reverse_related.OneToOneRel]
+        owner_instance_models = [
+            field.related_model for field in self._meta.get_fields()
+            if field.__class__ is models.fields.reverse_related.OneToOneRel
+        ]
+
         owner_instance = None
+
         for owner_instance_model in owner_instance_models:
             try:
                 owner_instance = owner_instance_model.objects.get(address_owner=self.id)
             except owner_instance_model.DoesNotExist:
                 continue
-        
+
         try:
             if not owner_instance:
                 print("""Neither the of owner instance classes has an instance 

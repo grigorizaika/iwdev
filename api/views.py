@@ -22,7 +22,7 @@ def get_jwt_tokens(request, **kwargs):
         id_token = auth_response['AuthenticationResult'].get('IdToken')
     except Exception as e:
         response = JSendResponse(
-            status=JSendResponse.ERROR, 
+            status=JSendResponse.ERROR,
             message=str(e),
         ).make_json()
         return Response(response, status=status.HTTP_401_UNAUTHORIZED)             
