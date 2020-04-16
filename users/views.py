@@ -300,6 +300,8 @@ def verify_attribute(request, **kwargs):
 @permission_classes([IsAdministrator])
 @required_body_params(['email', 'phone_number', 'name', 'surname'])
 def admin_create_cognito_user(request, **kwargs):
+    # TODO: the name is misleading, change it
+
     email = request.data['email']
     phone_number = request.data['phone_number']
     name = request.data['name']
@@ -330,7 +332,7 @@ def admin_create_cognito_user(request, **kwargs):
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
     sub = next(attribute['Value'] for attribute
-               in response['User']['Attributes']
+               in cognito_response['User']['Attributes']
                if attribute['Name'] == 'sub')
 
     user_data = {

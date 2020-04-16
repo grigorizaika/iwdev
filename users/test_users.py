@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
@@ -121,6 +120,9 @@ class UserTests(APITestCase):
         CognitoHelper.assertCognitoUserExists(
             self.user_test_data['correct']['email'])
 
+    def test_patch_and_get(self):
+        pass
+
     def test_delete_and_get(self):
         user_url = self.get_users_url(
             url_kwargs={'id': self.initial_user.id})
@@ -132,6 +134,9 @@ class UserTests(APITestCase):
             delete_response.status_code,
             status.HTTP_204_NO_CONTENT
         )
+
+        CognitoHelper.assertCognitoUserDoesntExist(
+            self.initial_user.email)
 
     # def test_address_owner_created_on_create(self):
         # pass
@@ -145,15 +150,75 @@ class UserTests(APITestCase):
     # def test_file_owner_deleted_on_delete(self):
         # pass
 
-    # def test_admin_registration(self):
-        # pass
+    def test_admin_registration(self):
+        admin_registration_endpoint = reverse(
+            'api:users:admin-create-user')
+        token_grant_endpoint = reverse('api:get-tokens')
+        respond_to_new_password_challenge_endpoint = reverse(
+            'api:users:respond-to-new-password-challenge')
+
+        client = self.get_authenticated_client()
+
+        user_data = self.user_test_data['correct'].copy()
+        user_data['phone_number'] = user_data.pop('phone')
+        user_data.pop('password')
+        user_data.pop('password2')
+
+        registration_initiation_response = client.post(
+            admin_registration_endpoint,
+            data=user_data)
+
+        self.assertEqual(
+            registration_initiation_response.status_code,
+            status.HTTP_200_OK)
+
+        temporary_password = (registration_initiation_response
+                              .data['data']['temporary_password'])
+
+        temporary_login_data = {
+            'username': user_data['email'],
+            'password': temporary_password
+        }
+
+        first_login_response = client.post(
+            token_grant_endpoint,
+            data=temporary_login_data)
+
+        self.assertEqual(
+            first_login_response.status_code,
+            status.HTTP_200_OK)
+
+        password_change_data = {
+            'email': user_data['email'],
+            'session': first_login_response.data['data']['Session'],
+            'new_password': self.user_test_data['correct']['password']
+        }
+
+        temporary_password_change_response = client.post(
+            respond_to_new_password_challenge_endpoint,
+            data=password_change_data)
+
+        self.assertEqual(
+            temporary_password_change_response.status_code,
+            status.HTTP_200_OK)
+        self.assertIn('data',
+                      temporary_password_change_response.data)
+        self.assertIn('cognito_response',
+                      temporary_password_change_response.data['data'])
+        self.assertIn('AuthenticationResult',
+                      temporary_password_change_response.data['data']
+                      ['cognito_response'])
+        self.assertIn('IdToken',
+                      temporary_password_change_response.data['data']
+                      ['cognito_response']['AuthenticationResult'])
+
 
     # def test_role(self):
         # ?
         # pass
 
 
-# NOTE: sometimes, when an exception other than
+# NOTE: when an exception other than
 # assertionError is thrown, tearDown doesn't get
 # called, which results in: 'An error occurred
 # (UsernameExistsException) when calling the
