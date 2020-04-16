@@ -124,7 +124,7 @@ LOGGING = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', 
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': variables_dict['INWORK_DB_NAME'],
         'USER': variables_dict['INWORK_DB_USER'],
         'PASSWORD':  variables_dict['INWORK_DB_PASSWORD'],
@@ -186,13 +186,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
-
-
 AUTH_USER_MODEL = 'users.User'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    #'django_warrant.backend.CognitoBackend',
+    # 'django_warrant.backend.CognitoBackend',
 ]
 
 REST_FRAMEWORK = {
@@ -200,7 +198,7 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
@@ -209,9 +207,9 @@ REST_FRAMEWORK = {
 }
 
 # Heroku
-import dj_database_url 
-prod_db  =  dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(prod_db)
+# import dj_database_url
+# prod_db  =  dj_database_url.config(conn_max_age=500)
+# DATABASES['default'].update(prod_db)
 
 # Cognito
 COGNITO_USER_POOL_ID = variables_dict['INWORK_COGNITO_USER_POOL_ID']
