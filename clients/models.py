@@ -5,34 +5,29 @@ from django.db.models.signals import (post_delete, post_save)
 import utils.models
 
 class Client(models.Model):
-    name                = models.CharField(max_length=40, unique=True)
-    email               = models.EmailField(_('email address'))
-    contact_name        = models.CharField(max_length=40)
-    contact_phone       = PhoneNumberField()
-    company             = models.ForeignKey(
-                            'users.Company',
-                            on_delete=models.CASCADE,
-                            null=True,
-                            blank=True,
-                            )   
-    address_owner       = models.OneToOneField(
-                            'utils.AddressOwner', 
-                            on_delete=models.CASCADE, 
-                            null=True, 
-                            blank=True
-                        )
-    file_owner          = models.OneToOneField(
-                            'utils.FileOwner',
-                            on_delete=models.CASCADE,
-                            null=True,
-                            blank=True,
-                            )
-    logo_url            = models.CharField(max_length=300, blank=True, null=True)
+    name = models.CharField(max_length=40, unique=True)
+    email = models.EmailField(_('email address'))
+    contact_name = models.CharField(max_length=40)
+    contact_phone = PhoneNumberField()
+    company = models.ForeignKey('users.Company',
+                                on_delete=models.CASCADE,
+                                null=True,
+                                blank=True)
+    address_owner = models.OneToOneField('utils.AddressOwner',
+                                         on_delete=models.CASCADE,
+                                         null=True,
+                                         blank=True)
+    file_owner = models.OneToOneField('utils.FileOwner',
+                                      on_delete=models.CASCADE,
+                                      null=True,
+                                      blank=True)
+    logo_url = models.CharField(max_length=300, blank=True, null=True)
 
     def addresses(self):
-        addresses = utils.models.Address.objects.filter(owner=self.address_owner)
+        addresses = utils.models.Address.objects.filter(
+            owner=self.address_owner)
         return addresses
-    
+
     def files(self):
         files = utils.models.CustomFile.objects.filter(owner=self.file_owner)
         return files
