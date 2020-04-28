@@ -21,9 +21,10 @@ class OrderSerializer(serializers.ModelSerializer):
     address_id = serializers.PrimaryKeyRelatedField(source='address',  queryset=Address.objects.all(), )
 
     def create(self, validated_data):
+        print('in validated_data: ', validated_data)
         return Order.objects.create(
             name = validated_data['name'],
-            client = validated_data['client_id'],
+            client = validated_data['client'],
             billing_period = validated_data['billing_period'],
             description = validated_data['description'],
             address = validated_data['address']
