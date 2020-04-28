@@ -7,6 +7,7 @@ from django_cognito_jwt import JSONWebTokenAuthentication
 from django.conf import settings
 
 
+
 class JSendResponse:
     """
         Reseponse with a structure described in
@@ -120,6 +121,13 @@ class S3Helper:
 
     MAIN_BUCKET_NAME = 'inwork-bucket'
 
+    KEY_TO_MODEL_MAPPING = {
+        'clients': 'Client',
+        'orders': 'Order',
+        'tasks': 'Task',
+        'users': 'User',
+    }
+
     @staticmethod
     def get_client():
         return boto3.client(
@@ -140,8 +148,8 @@ class S3Helper:
         Substituted it with the function below,
         which generates a pre-signed PUT.
         TODO:
-        Didn't find the answer on neither forums,
-        nor stackoverflow. Further investigate the issue.
+        Didn't find the answer neither on forums,
+        nor at stackoverflow. Further investigate the issue.
         """
 
         s3_client = S3Helper.get_client()
@@ -174,6 +182,29 @@ class S3Helper:
         except ClientError as e:
             print(e)
 
+    @staticmethod
+    def delete_files(file_keys_list, bucket_name=MAIN_BUCKET_NAME):
+        objects_aws_formatted = [
+            {'Key': file_key}
+            for file_key in file_keys_list]
+
+        try:
+            S3Helper.get_client().delete_objects(
+                Bucket=bucket_name,
+                Delete={
+                    'Objects': objects_aws_formatted
+                })
+        except ClientError as e:
+            print(e)
+
+    @staticmethod
+    def delete_all_with_prefix(prefix, bucket_name=MAIN_BUCKET_NAME):
+        bucket = boto3.resource('s3').Bucket(bucket_name)
+        
+        delete_response = bucket.objects.filter(Prefix=prefix).delete()
+
+        return delete_response
+        
 
 class TokenHelper:
 

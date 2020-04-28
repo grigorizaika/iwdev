@@ -9,7 +9,7 @@ from django.db.models.signals import post_delete, post_save
 from django.utils.translation import gettext as _
 from phonenumber_field.modelfields import PhoneNumberField
 
-from inworkapi.utils import CognitoHelper
+from inworkapi.utils import CognitoHelper, S3Helper
 from utils.models import AddressOwner, Address, CustomFile, FileOwner
 
 
@@ -208,6 +208,19 @@ class User(AbstractBaseUser, PermissionsMixin):
             instance.file_owner.delete()
 
     @staticmethod
+    def delete_s3_files(instance):
+        model_location = next(
+            model_key for model_key
+            in S3Helper.KEY_TO_MODEL_MAPPING
+            if (S3Helper.KEY_TO_MODEL_MAPPING[model_key] 
+                == instance.__class__.__name__)
+        )
+
+        url_prefix = f'{model_location}/{instance.id}'
+
+        return S3Helper.delete_all_with_prefix(prefix=url_prefix)
+
+    @staticmethod
     def delete_cognito_user(instance):
         try:
             CognitoHelper.get_client().admin_delete_user(
@@ -224,6 +237,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         User.delete_address_owner(instance)
         User.delete_file_owner(instance)
         User.delete_cognito_user(instance)
+        User.delete_s3_files(instance)
 
     def __str__(self):
         return f'{self.name}, {self.email}'

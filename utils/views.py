@@ -1,3 +1,4 @@
+import django.apps
 from django_cognito_jwt import JSONWebTokenAuthentication
 from rest_framework import status
 from rest_framework.decorators import (
@@ -18,18 +19,37 @@ from users.models import User as CustomUser
 @api_view(['GET'])
 @authentication_classes([JSONWebTokenAuthentication])
 @permission_classes([IsAuthenticated])
-@required_body_params(['to', 'file_name'])
+@required_body_params(['to', 'id', 'file_name'])
 def get_presigned_upload_url(request, **kwargs):
 
     location = request.data['to']
     file_name = request.data['file_name']
 
-    if location == 'users':
-        # NOTE: This will only allow users to upload files to their own profiles.
-        # Administrators won't be able to upload a file to a user profile unless an id 
-        # of that user is specified in the request and an email is inferred from that id
-        object_name = location + '/' + request.user.email + '/' + file_name
+    # TODO: decorator
+    if location not in S3Helper.KEY_TO_MODEL_MAPPING.keys():
+        response = JSendResponse(
+            status=JSendResponse.FAIL,
+            data={
+                'response': f'location should be one of \
+                    the following values: {S3Helper.KEY_TO_MODEL_MAPPING.keys()}'
+            }
+        ).make_json()
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
+    if (location == 'users'
+        and not (request.user.is_administrator()
+                 or request.user.is_staff)):
+
+        if ('id' in request.data
+                and request.data['id'] != request.user.id):
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data = {'id': 'Only administrators can \
+                    add files to users other than themselves.'}
+            )
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
+        object_name = f'{location}/{request.user.id}/{file_name}'
     else:
         # TODO: allow upload to client only if admin is assigned to the client
 
@@ -43,7 +63,7 @@ def get_presigned_upload_url(request, **kwargs):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
         resource_id = request.data['id']
-        object_name = location + '/' + resource_id + '/' + file_name
+        object_name = f'{location}/{resource_id}/{file_name}'
 
     response = JSendResponse(
         status=JSendResponse.SUCCESS,
@@ -60,11 +80,21 @@ def get_presigned_upload_url(request, **kwargs):
 @permission_classes([IsAdministrator])
 def model_files(request, **kwargs):
 
+    all_model_classess = {
+        model_class.__name__: model_class
+        for model_class in django.apps.apps.get_models()
+        }
+
     possible_model_values = {
-        'users': CustomUser,
-        'workers': CustomUser,
-        'orders': Order,
-        'tasks': Task,
+        model_key: model_class
+        # S3Helper.KEY_TO_MODEL_MAPPING lists names
+        # of models that can have files
+        for model_key in S3Helper.KEY_TO_MODEL_MAPPING.keys()
+        # all_model_classes are used here to convert
+        # model class name strings from above to class format
+        for model_class in all_model_classess.values()
+        if (model_class.__name__
+            == S3Helper.KEY_TO_MODEL_MAPPING[model_key])
     }
 
     if ('model' not in kwargs or 'id' not in kwargs):
@@ -81,15 +111,16 @@ def model_files(request, **kwargs):
         response = JSendResponse(
             status=JSendResponse.FAIL,
             data={
-                'response': f'\'model\' must be one of these values: { list(possible_model_values.keys()) }'
+                'response': f'\'model\' must be \
+                    one of these values: { list(possible_model_values.keys()) }'
             }
         ).make_json()
 
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
-    
+
     model = possible_model_values[kwargs['model']]
 
-    instance_id = kwargs['id']    
+    instance_id = kwargs['id']
 
     if request.method == 'POST':
         try:
@@ -102,7 +133,7 @@ def model_files(request, **kwargs):
                     'response': f'{model.__name__} with an id {instance_id} does not exist'
                 }
             ).make_json()
-            
+
             return Response(response, status=status.HTTP_404_NOT_FOUND)
                 
         fo = instance.file_owner
@@ -115,7 +146,7 @@ def model_files(request, **kwargs):
         
         if serializer.is_valid():
             file = serializer.save()
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
