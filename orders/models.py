@@ -18,7 +18,7 @@ class Order(models.Model):
         max_length=40, null=False, blank=False, default='-')
     description = models.TextField()
 
-    file_owner          = models.OneToOneField(
+    file_owner = models.OneToOneField(
                             'utils.FileOwner',
                             on_delete=models.CASCADE,
                             null=True,

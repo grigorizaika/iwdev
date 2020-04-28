@@ -25,7 +25,6 @@ from clients.models import Client
 from inworkapi.utils import JSendResponse
 
 
-
 class OrderView(APIView):
     queryset = Order.objects.all()
     serializer = OrderSerializer
@@ -54,7 +53,7 @@ class OrderView(APIView):
                     return Response(response, status=status.HTTP_403_FORBIDDEN)
 
                 serializer = OrderSerializer(order)
-            
+
                 response = JSendResponse(
                     status=JSendResponse.SUCCESS,
                     data=serializer.data
@@ -70,7 +69,7 @@ class OrderView(APIView):
                 
                 return Response(response, status=status.HTTP_404_NOT_FOUND)
 
-        elif not 'id' in kwargs:
+        elif 'id' not in kwargs:
             # TODO: permissions
             
             queryset = Order.objects.filter(client__company=request.user.company)
@@ -84,12 +83,11 @@ class OrderView(APIView):
 
             return Response(response, status=status.HTTP_200_OK)
 
-
     def post(self, request, **kwargs):
 
-        modified_data = dict(request.data)
-        modified_data = { key: val[0]  for key, val in modified_data.items() }
+        modified_data = request.data.dict()
 
+        print('mololo', modified_data)
         orderSerializer = OrderSerializer(data=modified_data)
 
         # Check if an address belongs to a client
@@ -242,7 +240,6 @@ class OrderView(APIView):
                 data=str(e)
             ).make_json()
             return Response(response, status=status.HTTP_404_NOT_FOUND)
-        
 
         if not order.client.company == request.user.company:
             response = JSendResponse(
@@ -252,10 +249,10 @@ class OrderView(APIView):
                 }
             ).make_json()
             return Response(response, status=status.HTTP_403_FORBIDDEN)
-                
+
         orderName = order.name
         order.delete()
-        
+
         response = JSendResponse(
             status=JSendResponse.SUCCESS,
             data={
