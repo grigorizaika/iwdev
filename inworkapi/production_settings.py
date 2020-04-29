@@ -31,6 +31,7 @@ SECURE_HSTS_SECONDS = 0
 ALLOWED_HOSTS = [
     '127.0.0.1',
     '.compute.amazonaws.com',
+    '54.93.249.212'
 ]
 
 INSTALLED_APPS = [
