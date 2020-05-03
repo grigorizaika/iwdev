@@ -26,12 +26,12 @@ CSRF_COOKIE_SECURE = False
 # TODO: set to 1 after Apache setup for port 443
 SECURE_HSTS_SECONDS = 0
 
-
-
 ALLOWED_HOSTS = [
     '127.0.0.1',
     '.compute.amazonaws.com',
-    '54.93.249.212'
+    '54.93.249.212',
+    '18.156.159.108',
+    '.inwork.app',
 ]
 
 INSTALLED_APPS = [
