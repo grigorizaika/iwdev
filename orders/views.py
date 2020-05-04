@@ -398,7 +398,7 @@ class TaskView(APIView):
                 
                 response = JSendResponse(
                     status=JSendResponse.SUCCESS,
-                    data=serialier.data
+                    data=serializer.data
                 ).make_json()
                 
                 return Response(response, status=status.HTTP_200_OK)
