@@ -269,6 +269,7 @@ class TaskView(APIView):
     authentication_classes = [JSONWebTokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    # TODO: refactor
     def get(self, request, **kwargs):
         worker_id = request.GET.get('worker')
         date = request.GET.get('date')

@@ -40,18 +40,21 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    #order = serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
-    # TODO: May need to restrict this to users only (workers?)
-    #worker = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-
     order = OrderSerializer(read_only=True)
-    order_id = serializers.PrimaryKeyRelatedField(source='order',  queryset=Order.objects.all(), )
+    order_id = serializers.PrimaryKeyRelatedField(
+                    source='order',
+                    queryset=Order.objects.all())
 
     worker = UserSerializer(read_only=True)
-    worker_id = serializers.PrimaryKeyRelatedField(source='worker',  queryset=CustomUser.objects.all(), )
+    worker_id = serializers.PrimaryKeyRelatedField(
+                    source='worker',
+                    queryset=CustomUser.objects.all())
 
-    worker_substitution  = UserSerializer(read_only=True)
-    worker_substitution_id = serializers.PrimaryKeyRelatedField(source='worker_substitution',  queryset=CustomUser.objects.all(), )
+    worker_substitution = UserSerializer(read_only=True)
+    worker_substitution_id = serializers.PrimaryKeyRelatedField(
+                    source='worker_substitution',
+                    queryset=CustomUser.objects.all(),
+                    required=False)
 
     def create(self, validated_data):
         print('validated_data:', validated_data)
