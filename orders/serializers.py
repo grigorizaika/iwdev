@@ -59,25 +59,26 @@ class TaskSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data.get('manual_time_set') is False:
             try:
-                data['starts_at']
+                data['hours_worked']
             except KeyError:
                 raise serializers.ValidationError(
-                    'starts_at needs to be specified \
+                    'hours_worked needs to be specified \
                     when manual_time_set is False')
         
         return super(TaskSerializer, self).validate(data)
 
-    def create(self, validated_data):
-        print('validated_data:', validated_data)
-        return Task.objects.create(
-            order=validated_data['order'],
-            name=validated_data['name'],
-            starts_at=validated_data['starts_at'],
-            manual_time_set=validated_data['manual_time_set'],
-            worker=validated_data['worker'],
-            description=validated_data['description'],
-            comment=validated_data['comment'],
-        )
+    # TODO: why do I have it?
+    # def create(self, validated_data):
+    #     print('validated_data:', validated_data)
+    #     return Task.objects.create(
+    #         order=validated_data['order'],
+    #         name=validated_data['name'],
+    #         starts_at=validated_data['starts_at'],
+    #         manual_time_set=validated_data['manual_time_set'],
+    #         worker=validated_data['worker'],
+    #         description=validated_data['description'],
+    #         comment=validated_data['comment'],
+    #     )
 
     class Meta:
         model = Task
