@@ -64,7 +64,7 @@ class Task(models.Model):
         blank=True
     )
     name = models.CharField(max_length=40, null=False, blank=False, default='')
-    # TODO: use DateField instead of DateTimeFeild
+    # TODO: remove default
     starts_at = models.DateTimeField(default=datetime.now())
     manual_time_set = models.BooleanField()
     hours_worked = models.TimeField(null=True, blank=True)
