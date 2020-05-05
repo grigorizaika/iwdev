@@ -1,8 +1,9 @@
+from datetime import datetime
 from django.db import models
-
 from django.db.models.signals import (post_delete, post_save)
 
 from utils.models import CustomFile, FileOwner
+
 
 class Order(models.Model):
     client = models.ForeignKey(
@@ -29,7 +30,7 @@ class Order(models.Model):
         return 'Order ' + str(self.id) + '. ' + str(self.name)
 
     def files(self):
-        files = utils.models.CustomFile.objects.filter(owner=self.file_owner)
+        files = CustomFile.objects.filter(owner=self.file_owner)
         return files
 
     @staticmethod
@@ -50,11 +51,9 @@ class Order(models.Model):
             return
         Order.create_file_owner(instance)
 
-
     @staticmethod
     def delete_cleanup(sender, instance, *args, **kwargs):
         Order.delete_file_owner(instance)
-
 
 
 class Task(models.Model):
@@ -66,7 +65,7 @@ class Task(models.Model):
     )
     name = models.CharField(max_length=40, null=False, blank=False, default='')
     # TODO: use DateField instead of DateTimeFeild
-    date = models.DateField()
+    starts_at = models.DateTimeField(default=datetime.now())
     manual_time_set = models.BooleanField()
     hours_worked = models.TimeField(null=True, blank=True)
     is_hours_worked_accepted = models.BooleanField(null=True, blank=True, default=False)
@@ -88,12 +87,11 @@ class Task(models.Model):
     description = models.TextField(blank=True)
     comment = models.TextField(blank=True)
 
-    file_owner          = models.OneToOneField(
-                            'utils.FileOwner',
-                            on_delete=models.CASCADE,
-                            null=True,
-                            blank=True,
-                            )
+    file_owner = models.OneToOneField(
+            'utils.FileOwner',
+            on_delete=models.CASCADE,
+            null=True,
+            blank=True)
 
     def __str__(self):
         return 'Task ' + str(self.id) + '. ' + str(self.name)
