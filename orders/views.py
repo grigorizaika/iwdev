@@ -293,9 +293,9 @@ class TaskView(APIView):
                 ).make_json()
 
                 return Response(response, status=status.HTTP_200_OK)
-            
+
             except Task.DoesNotExist as e:
-                
+
                 response = JSendResponse(
                     status=JSendResponse.FAIL,
                     data=str(e)
@@ -307,21 +307,28 @@ class TaskView(APIView):
             # TODO: Check admin permissions properly using DRF permissions
             if request.user.role.name == 'Administrator':
                 if date:
-                    queryset = Task.objects.filter(order__client__company=request.user.company).filter(worker=worker_id).filter(date=date)
+                    queryset = (Task.objects
+                                .filter(
+                                    order__client__company=request.user.company)
+                                .filter(worker=worker_id)
+                                .filter(starts_at=date))
                 elif date_start and date_end:
-                    queryset = Task.objects \
-                                        .filter(order__client__company=request.user.company) \
-                                        .filter(worker=worker_id) \
-                                        .filter(date__gte=date_start) \
-                                        .filter(date__lte=date_end)
+                    queryset = (Task.objects
+                                .filter(
+                                    order__client__company=request.user.company)
+                                .filter(worker=worker_id)
+                                .filter(starts_at__gte=date_start)
+                                .filter(starts_at__lte=date_end))
                 elif month and year:
-                    queryset = Task.objects \
-                                        .filter(order__client__company=request.user.company) \
-                                        .filter(date__year=year) \
-                                        .filter(date__month=month) \
-                                        .filter(worker=worker_id)
+                    queryset = (Task.objects
+                                .filter(
+                                    order__client__company=request.user.company)
+                                .filter(starts_at__year=year)
+                                .filter(starts_at__month=month)
+                                .filter(worker=worker_id))
+
                     serializer = TaskSerializer(queryset, many=True)
-                    
+
                     response = JSendResponse(
                         status=JSendResponse.SUCCESS,
                         data=serializer.data
@@ -356,24 +363,35 @@ class TaskView(APIView):
             if date:
                 if group_by_worker and request.user.role.name == 'Administrator':
                     # Tasks on a paricular day, grouped by workers
-                    queryset = Task.objects.filter(order__client__company=request.user.company).filter(date=date)#.values('worker')
-                    #query.group_by = ['worker']
-                    #queryset = QuerySet(query=query, model=Task)
+                    # TODO: = might not work here
+                    queryset = (
+                        Task.objects
+                            .filter(
+                                order__client__company=request.user.company)
+                            .filter(starts_at=date))  # .values('worker')
+
+                    # query.group_by = ['worker']
+                    # queryset = QuerySet(query=query, model=Task)
                 else:
-                    queryset = Task.objects.filter(worker=request.user.id).filter(date=date)
+                    # TODO: = might not work here
+                    queryset = (Task.objects
+                                .filter(worker=request.user.id)
+                                .filter(starts_at=date))
 
             elif date_start and date_end:
-                queryset = Task.objects \
-                                    .filter(order__client__company=request.user.company) \
-                                    .filter(worker=request.user.id) \
-                                    .filter(date__gte=date_start) \
-                                    .filter(date__lte=date_end)
+                queryset = (Task.objects
+                            .filter(
+                                order__client__company=request.user.company)
+                            .filter(worker=request.user.id)
+                            .filter(starts_at__gte=date_start)
+                            .filter(starts_at__lte=date_end))
             elif month and year:
-                queryset = Task.objects \
-                                    .filter(order__client__company=request.user.company) \
-                                    .filter(worker=request.user.id) \
-                                    .filter(date__year=year) \
-                                    .filter(date__month=month)
+                queryset = (Task.objects
+                            .filter(
+                                order__client__company=request.user.company)
+                            .filter(worker=request.user.id)
+                            .filter(starts_at__year=year)
+                            .filter(starts_at__month=month))
 
             serializer = TaskSerializer(queryset, many=True)
             data = serializer.data
@@ -393,7 +411,8 @@ class TaskView(APIView):
 
             if request.user.role.name == 'Administrator':
                 
-                queryset = Task.objects.filter(order__client__company=request.user.company)
+                queryset = Task.objects.filter(
+                    order__client__company=request.user.company)
                 
                 serializer = TaskSerializer(queryset, many=True)
                 
