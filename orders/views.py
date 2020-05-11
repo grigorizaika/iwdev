@@ -3,16 +3,9 @@ import json
 
 from django_cognito_jwt import JSONWebTokenAuthentication
 from django.conf import settings
-from django.contrib.auth.hashers import check_password
-from django.db.models.query import QuerySet
-from django.shortcuts import get_object_or_404, render
-from rest_framework import generics
-from rest_framework import mixins
-from rest_framework import permissions
 from rest_framework import status
-from rest_framework import viewsets
 from rest_framework.decorators import (
-    action, api_view, authentication_classes, permission_classes)
+    api_view, authentication_classes, permission_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,7 +13,7 @@ from rest_framework.views import APIView
 from .models import Order, Task
 from .serializers import OrderSerializer, TaskSerializer
 from api.helpers import bulk_create_tasks, json_list_group_by
-from api.permissions import (IsPostOrIsAuthenticated, IsAdministrator)
+from api.permissions import IsAdministrator
 from clients.models import Client
 from inworkapi.utils import JSendResponse
 
@@ -39,7 +32,7 @@ class OrderView(APIView):
         if 'id' in kwargs:
 
             order_id = kwargs.get('id')
-            
+
             try:
                 order = Order.objects.get(id=order_id)
 
@@ -47,7 +40,8 @@ class OrderView(APIView):
                     response = JSendResponse(
                         status=JSendResponse.FAIL,
                         data={
-                            'response': 'Order\'s company doesn\'t match the request user\'s company',
+                            'response': """Order\'s company doesn\'t match \
+                                the request user\'s company""",
                         }
                     ).make_json()
                     return Response(response, status=status.HTTP_403_FORBIDDEN)
@@ -58,7 +52,7 @@ class OrderView(APIView):
                     status=JSendResponse.SUCCESS,
                     data=serializer.data
                 ).make_json()
-            
+
                 return Response(response, status=status.HTTP_200_OK)
 
             except Order.DoesNotExist as e:
@@ -66,16 +60,17 @@ class OrderView(APIView):
                     status=JSendResponse.FAIL,
                     data=str(e)
                 ).make_json()
-                
+
                 return Response(response, status=status.HTTP_404_NOT_FOUND)
 
         elif 'id' not in kwargs:
             # TODO: permissions
-            
-            queryset = Order.objects.filter(client__company=request.user.company)
-    
+
+            queryset = Order.objects.filter(
+                client__company=request.user.company)
+
             serializer = OrderSerializer(queryset, many=True)
-    
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data=serializer.data
@@ -107,7 +102,8 @@ class OrderView(APIView):
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
-                    'response': 'Order\'s company doesn\'t match the request user\'s company',
+                    'response': """Order\'s company doesn\'t match \
+                        the request user\'s company""",
                 }
             ).make_json()
             return Response(response, status=status.HTTP_403_FORBIDDEN)
@@ -115,7 +111,8 @@ class OrderView(APIView):
         if not client_instance.addresses().filter(id=address_id).exists():
             response = JSendResponse(
                 status=JSendResponse.ERROR,
-                message=f'Client {client_id} doesn\'t have an address with an id {address_id}'
+                message=f"""Client {client_id} doesn\'t have an address \
+                    with an id {address_id}"""
             ).make_json()
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
@@ -125,11 +122,12 @@ class OrderView(APIView):
 
             if 'task_list' in modified_data:
                 # TODO: rewrite it
-                                
+
                 task_list = json.loads(request.data.get('task_list'))
-                
-                bulk_task_creation_response = bulk_create_tasks(task_list, request.user, order.id)
-                
+
+                bulk_task_creation_response = bulk_create_tasks(
+                    task_list, request.user, order.id)
+
                 response = JSendResponse(
                     status=JSendResponse.SUCCESS,
                     data={
@@ -137,20 +135,20 @@ class OrderView(APIView):
                         'tasks': bulk_task_creation_response,
                     }
                 ).make_json()
-                
+
                 return Response(response, status=status.HTTP_200_OK)
 
             else:
-        
+
                 response = JSendResponse(
                     status=JSendResponse.SUCCESS,
                     data={
                         'order': str(order),
                     }
                 ).make_json()
-             
+
                 return Response(response, status=status.HTTP_200_OK)
-        
+
         else:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
@@ -160,10 +158,9 @@ class OrderView(APIView):
             ).make_json()
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-
     def patch(self, request, **kwargs):
 
-        if not 'id' in kwargs:
+        if 'id' not in kwargs:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
@@ -171,7 +168,7 @@ class OrderView(APIView):
                 }
             ).make_json()
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        
+
         order_id = kwargs.get('id')
 
         try:
@@ -182,12 +179,13 @@ class OrderView(APIView):
                 data=str(e)
             ).make_json()
             return Response(response, status.HTTP_404_NOT_FOUND)
-        
+
         if not order.client.company == request.user.company:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
-                'response': 'Order\'s company doesn\'t match the request user\'s company',
+                    'response': """Order\'s company doesn\'t \
+                        match the request user\'s company""",
                 }
             ).make_json()
             return Response(response, status=status.HTTP_403_FORBIDDEN)
@@ -197,18 +195,18 @@ class OrderView(APIView):
         if serializer.is_valid():
 
             order = serializer.save()
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
                     'order': f'Updated order {order}'
                 }
             ).make_json()
-        
+
             return Response(response, status=status.HTTP_200_OK)
 
         else:
-            
+
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
@@ -217,11 +215,10 @@ class OrderView(APIView):
             ).make_json()
 
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        
 
     def delete(self, request, **kwargs):
 
-        if not 'id' in kwargs:
+        if 'id' not in kwargs:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
@@ -230,8 +227,8 @@ class OrderView(APIView):
             ).make_json()
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-        order_id = kwargs.get('id')            
-        
+        order_id = kwargs.get('id')
+
         try:
             order = Order.objects.get(id=order_id)
         except Order.DoesNotExist as e:
@@ -245,7 +242,8 @@ class OrderView(APIView):
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
-                'response': 'Order\'s company doesn\'t match the request user\'s company',
+                    'response': """Order\'s company doesn\'t match \
+                                    the request user\'s company""",
                 }
             ).make_json()
             return Response(response, status=status.HTTP_403_FORBIDDEN)
@@ -284,7 +282,10 @@ class TaskView(APIView):
         if 'id' in kwargs:
             task_id = kwargs.get('id')
             try:
-                task = Task.objects.filter(order__client__company=request.user.company).get(id=task_id)
+                task = (Task.objects
+                        .filter(
+                            order__client__company=request.user.company)
+                        .get(id=task_id))
                 serializer = TaskSerializer(task)
 
                 response = JSendResponse(
@@ -337,31 +338,37 @@ class TaskView(APIView):
                     return Response(response, status=status.HTTP_200_OK)
 
                 else:
-                    queryset = Task.objects.filter(order__client__company=request.user.company).filter(worker=worker_id)
-                
+                    queryset = (Task.objects
+                                .filter(
+                                    order__client__company=request.user.company)
+                                .filter(worker=worker_id))
+
                 serializer = TaskSerializer(queryset, many=True)
-                
+
                 response = JSendResponse(
                     status=JSendResponse.SUCCESS,
                     data=serializer.data
                 ).make_json()
-        
-                return Response(response, status=status.HTTP_200_OK)    
-            
+
+                return Response(response, status=status.HTTP_200_OK)
+
             else:
                 response = JSendResponse(
                     status=JSendResponse.FAIL,
                     data={
-                        'response': 'You must have administrator permissions to perform this action'
+                        'response': """You must have administrator \
+                                    permissions to perform this action"""
                     }
                 ).make_json()
-                
+
                 return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         elif date or (date_start and date_end) or (year and month):
-            # When neither worker nor particular task are specified, default to my tasks
+            # When neither worker nor particular task are specified,
+            # default to my tasks
             if date:
-                if group_by_worker and request.user.role.name == 'Administrator':
+                if (group_by_worker and
+                        request.user.role.name == 'Administrator'):
                     # Tasks on a paricular day, grouped by workers
                     # TODO: = might not work here
                     queryset = (
@@ -410,48 +417,46 @@ class TaskView(APIView):
             # TODO: Check admin permissions properly using DRF permissions
 
             if request.user.role.name == 'Administrator':
-                
+
                 queryset = Task.objects.filter(
                     order__client__company=request.user.company)
-                
+
                 serializer = TaskSerializer(queryset, many=True)
-                
+
                 response = JSendResponse(
                     status=JSendResponse.SUCCESS,
                     data=serializer.data
                 ).make_json()
-                
+
                 return Response(response, status=status.HTTP_200_OK)
 
             else:
                 response = JSendResponse(
                     status=JSendResponse.FAIL,
                     data={
-                        'response': 'You must have administrator permissions to perform this action'
+                        'response': """You must have administrator \
+                                    permissions to perform this action"""
                     }
                 ).make_json()
-                
+
                 return Response(response, status=status.HTTP_403_FORBIDDEN)
 
-
     def post(self, request, **kwargs):
-        data = {}
         task_list = json.loads(request.data.get('task_list'))
         bulk_creation_result = bulk_create_tasks(task_list, request.user)
-        
+
         response = JSendResponse(
             status=JSendResponse.SUCCESS,
             data={
                 'tasks': bulk_creation_result
             }
         ).make_json()
-        
-        return Response(response, status=status.HTTP_200_OK)
 
+        return Response(response, status=status.HTTP_200_OK)
 
     def patch(self, request, **kwargs):
 
-        if not 'id' in kwargs:
+        if 'id' not in kwargs:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
@@ -459,7 +464,7 @@ class TaskView(APIView):
                 }
             ).make_json()
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        
+
         task_id = kwargs.get('id')
 
         try:
@@ -472,17 +477,18 @@ class TaskView(APIView):
                 }
             ).make_json()
             return Response(response, status.HTTP_404_NOT_FOUND)
-        
+
         if not task.order.client.company == request.user.company:
-            
+
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
-                    'response': 'Task\'s company doesn\'t match the company of the request user'
+                    'response': """Task\'s company doesn\'t match \
+                        the company of the request user"""
                 }
             ).make_json()
 
-            return Response(data, status=status.HTTP_403_FORBIDDEN)
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         serializer = TaskSerializer(task, data=request.data, partial=True)
 
@@ -506,10 +512,9 @@ class TaskView(APIView):
 
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-
     def delete(self, request, **kwargs):
-        
-        if not 'id' in kwargs:
+
+        if 'id' not in kwargs:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
@@ -517,37 +522,39 @@ class TaskView(APIView):
                 }
             ).make_json()
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        
+
         task_id = kwargs.get('id')
 
         try:
-            
+
             task = Task.objects.get(id=task_id)
-            
+
             if not task.order.client.company == request.user.company:
-                
+
                 response = JSendResponse(
                     status=JSendResponse.FAIL,
                     data={
-                        'response': 'Task\'s company doesn\'t match the company of the request user'
+                        'response': """Task\'s company doesn\'t match \
+                                    the company of the request user"""
                     }
                 ).make_json()
 
-                return Response(data, status=status.HTTP_403_FORBIDDEN)
+                return Response(response, status=status.HTTP_403_FORBIDDEN)
 
             taskName = task.name
 
             task.delete()
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
-                    'response': 'Successfully deleted task ' + str(task_id) + ' ' + str(taskName)
+                    'response': f'Successfully deleted task \
+                                 {task_id} {taskName}'
                 }
             ).make_json()
-            
+
             return Response(response, status=status.HTTP_204_NO_CONTENT)
-            
+
         except Task.DoesNotExist as e:
 
             response = JSendResponse(
@@ -555,7 +562,7 @@ class TaskView(APIView):
                 data=str(e)
             ).make_json()
 
-        return Response(response, status=status.HTTP_404_NOT_FOUND )
+        return Response(response, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['PUT'])
@@ -566,39 +573,43 @@ def accept_hours_worked(request, **kwargs):
     try:
         task = Task.objects.get(id=task_id)
 
-        if not task.order.client.company == user.request.company:
+        if not task.order.client.company == request.user.request.company:
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
-                    'response': 'This task belongs to another company than the request user\'s company'
+                    'response': 'This task belongs to another company \
+                        than the request user\'s company'
                 }
             ).make_json()
             return Response(response, status=status.HTTP_403_FORBIDDEN)
-        
+
         if not task.is_hours_worked_accepted:
             task.is_hours_worked_accepted = True
             task.save()
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
-                    'response': f'Successfully accepted hours in task {task_id}'
+                    'response': f'Successfully accepted hours \
+                        in task {task_id}'
                 }
             ).make_json()
 
             return Response(response, status=status.HTTP_200_OK)
-        
+
         else:
 
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
-                data={ 
-                    'response': 'Hours on task ' + str(task_id) + ' were already accepted by an administrator'
+                data={
+                    'response': (f"""Hours on task {task_id} \
+                                 were already accepted \
+                                 by an administrator""")
                 }
             ).make_json()
 
             return Response(response, status=status.HTTP_200_OK)
-    
+
     except Task.DoesNotExist as e:
         response = JSendResponse(
             status=JSendResponse.FAIL,

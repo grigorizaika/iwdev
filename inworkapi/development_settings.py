@@ -1,7 +1,8 @@
 import json
 import os
 
-VARIABLES_PATH = os.path.abspath('/home/grgr/Projects/iwdev/variables.json')
+# TODO: Use django-environ
+VARIABLES_PATH = os.path.abspath('/home/grgr/Projects/inwork/variables.json')
 
 with open(VARIABLES_PATH) as variables_json_file:
     variables_dict = json.load(variables_json_file)
