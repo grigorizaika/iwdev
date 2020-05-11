@@ -270,7 +270,8 @@ class TaskView(APIView):
     # TODO: refactor
     def get(self, request, **kwargs):
         worker_id = request.GET.get('worker')
-        date = request.GET.get('date')
+        # TODO: CHenge this variable's name to starts_at
+        date = request.GET.get('starts_at')
         date_start = request.GET.get('date_start')
         date_end = request.GET.get('date_end')
         month = request.GET.get('month')
