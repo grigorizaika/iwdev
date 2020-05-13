@@ -20,11 +20,11 @@ X_FRAME_OPTIONS = 'DENY'
 
 
 # TODO: set to True after Apache setup for port 443
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 # TODO: set to 1 after Apache setup for port 443
-SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_SECONDS = 1
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
@@ -176,5 +176,3 @@ AWS_SECRET_ACCESS_KEY = os.getenv('INWORK_AWS_SECRET_ACCESS_KEY')
 COGNITO_APP_ID = COGNITO_APP_CLIENT_ID
 COGNITO_USER_POOL = COGNITO_USER_POOL_ID
 COGNITO_AUDIENCE = COGNITO_APP_CLIENT_ID
-
-
