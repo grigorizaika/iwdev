@@ -1,9 +1,7 @@
 from django.urls import path
-from django.conf.urls import url, include
+from django.conf.urls import url
 
 from .views import ClientView, client_addresses
-
-
 
 app_name = 'clients'
 

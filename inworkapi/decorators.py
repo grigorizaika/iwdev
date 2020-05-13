@@ -79,7 +79,8 @@ def admin_body_params(parameter_list=[]):
                 None)
 
             for param in parameter_list:
-                if param in request.data and not request.user.is_administrator():
+                if (param in request.data
+                        and not request.user.is_administrator()):
                     response = JSendResponse(
                         status=JSendResponse.FAIL,
                         data={
@@ -87,7 +88,7 @@ def admin_body_params(parameter_list=[]):
                                 can set \'{param}\' field'''
                         }
                     ).make_json()
-                    return Response(response, 
+                    return Response(response,
                                     status=status.HTTP_403_BAD_REQUEST)
 
             if instance is not None:

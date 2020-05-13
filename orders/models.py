@@ -12,11 +12,13 @@ class Order(models.Model):
         null=False,
         blank=False
     )
-    name = models.CharField(max_length=40, null=False, blank=False, default='')
-    address = models.ForeignKey('utils.Address', on_delete=models.CASCADE, null=True)
+    name = models.CharField(max_length=40, null=False,
+                            blank=False, default='')
+    address = models.ForeignKey('utils.Address',
+                                on_delete=models.CASCADE, null=True)
     billing_period = models.PositiveIntegerField()
-    status = models.CharField(
-        max_length=40, null=False, blank=False, default='-')
+    status = models.CharField(max_length=40, null=False,
+                              blank=False, default='-')
     description = models.TextField()
 
     file_owner = models.OneToOneField(
@@ -68,7 +70,8 @@ class Task(models.Model):
     starts_at = models.DateTimeField(default=datetime.now())
     manual_time_set = models.BooleanField()
     hours_worked = models.TimeField(null=True, blank=True)
-    is_hours_worked_accepted = models.BooleanField(null=True, blank=True, default=False)
+    is_hours_worked_accepted = models.BooleanField(null=True,
+                                                   blank=True, default=False)
     is_cancelled = models.BooleanField(null=True, blank=True, default=False)
     worker = models.ForeignKey(
         'users.User',
@@ -97,9 +100,8 @@ class Task(models.Model):
         return 'Task ' + str(self.id) + '. ' + str(self.name)
 
     def files(self):
-        files = utils.models.CustomFile.objects.filter(owner=self.file_owner)
+        files = CustomFile.objects.filter(owner=self.file_owner)
         return files
-
 
     @staticmethod
     def create_file_owner(instance):
@@ -119,15 +121,12 @@ class Task(models.Model):
             return
         Task.create_file_owner(instance)
 
-
     @staticmethod
     def delete_cleanup(sender, instance, *args, **kwargs):
         Task.delete_file_owner(instance)
-
 
 
 post_delete.connect(Task.delete_cleanup, sender=Task)
 post_save.connect(Task.create_setup, sender=Task)
 post_delete.connect(Order.delete_cleanup, sender=Order)
 post_save.connect(Order.create_setup, sender=Order)
-
