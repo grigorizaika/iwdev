@@ -4,7 +4,6 @@ from .models import Client
 from utils.serializers import AddressSerializer
 
 
-
 class ClientSerializer(serializers.ModelSerializer):
     address_owner = serializers.PrimaryKeyRelatedField(read_only=True)
     file_owner = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -12,7 +11,7 @@ class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = '__all__'
-        depth=1
+        depth = 1
 
     addresses = serializers.SerializerMethodField()
 

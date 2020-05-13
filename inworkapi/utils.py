@@ -7,7 +7,6 @@ from django_cognito_jwt import JSONWebTokenAuthentication
 from django.conf import settings
 
 
-
 class JSendResponse:
     """
         Reseponse with a structure described in
@@ -21,12 +20,15 @@ class JSendResponse:
     def __init__(self, status, data=None, message=None):
 
         if status not in self.statuses:
-            raise ValueError('Status must be one of these values: {}'.format(self.statuses))
+            raise ValueError(
+                'Status must be one of these values: {}'
+                .format(self.statuses))
 
         self._status = status
 
         if not status == self.ERROR and message:
-            raise ValueError('Only a response with a status \'error\' can have \'message\' attribute ')
+            raise ValueError("""Only a response with a status \
+                \'error\' can have \'message\' attribute """)
 
         self._data = data
         self._message = message
@@ -52,8 +54,8 @@ class JSendResponse:
         if self.status == self.ERROR:
             self._message = value
         else:
-            raise ValueError('Can only set a mesage on a response \
-                              with an \'error\' status'
+            raise ValueError("""Can only set a mesage on a response \
+                              with an \'error\' status"""
                              .format(self._status))
 
     def make_json(self):
@@ -100,7 +102,8 @@ class CognitoHelper:
         except ClientError as e:
             if e.response['Error']['Code'] == 'UserNotFoundException':
                 raise AssertionError(
-                    f'No {email} in {settings.COGNITO_USER_POOL_ID} user pool.')
+                    f"""No {email} in \
+                        {settings.COGNITO_USER_POOL_ID} user pool.""")
             else:
                 raise e
 
@@ -109,7 +112,8 @@ class CognitoHelper:
         try:
             CognitoHelper.get_cognito_user(email)
             raise AssertionError(
-                f'{email} exists in {settings.COGNITO_USER_POOL_ID} user pool.')
+                f"""{email} exists in \
+                    {settings.COGNITO_USER_POOL_ID} user pool.""")
         except ClientError as e:
             if e.response['Error']['Code'] == 'UserNotFoundException':
                 return
@@ -200,11 +204,11 @@ class S3Helper:
     @staticmethod
     def delete_all_with_prefix(prefix, bucket_name=MAIN_BUCKET_NAME):
         bucket = boto3.resource('s3').Bucket(bucket_name)
-        
+
         delete_response = bucket.objects.filter(Prefix=prefix).delete()
 
         return delete_response
-        
+
 
 class TokenHelper:
 

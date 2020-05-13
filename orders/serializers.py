@@ -8,26 +8,24 @@ from users.serializers import UserSerializer
 from utils.models import Address
 from utils.serializers import AddressSerializer
 
-class OrderSerializer(serializers.ModelSerializer):
-    #address = serializers.StringRelatedField()
-    #client_name = serializers.SerializerMethodField()
-    #client = serializers.PrimaryKeyRelatedField(queryset=Client.objects.all())
-    #address = serializers.PrimaryKeyRelatedField(queryset=Address.objects.all())
 
+class OrderSerializer(serializers.ModelSerializer):
     client = ClientSerializer(read_only=True)
-    client_id = serializers.PrimaryKeyRelatedField(source='client',  queryset=Client.objects.all(), )
+    client_id = serializers.PrimaryKeyRelatedField(
+        source='client', queryset=Client.objects.all())
 
     address = AddressSerializer(read_only=True)
-    address_id = serializers.PrimaryKeyRelatedField(source='address',  queryset=Address.objects.all(), )
+    address_id = serializers.PrimaryKeyRelatedField(
+        source='address', queryset=Address.objects.all())
 
     def create(self, validated_data):
         print('in validated_data: ', validated_data)
         return Order.objects.create(
-            name = validated_data['name'],
-            client = validated_data['client'],
-            billing_period = validated_data['billing_period'],
-            description = validated_data['description'],
-            address = validated_data['address']
+            name=validated_data['name'],
+            client=validated_data['client'],
+            billing_period=validated_data['billing_period'],
+            description=validated_data['description'],
+            address=validated_data['address']
         )
 
     def get_client_name(self, obj):
@@ -36,7 +34,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
-        depth=1
+        depth = 1
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -64,7 +62,7 @@ class TaskSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     'hours_worked needs to be specified \
                     when manual_time_set is False')
-        
+
         return super(TaskSerializer, self).validate(data)
 
     # TODO: why do I have it?
@@ -83,6 +81,4 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
-        depth=1
-
-
+        depth = 1

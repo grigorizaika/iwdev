@@ -4,6 +4,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.db.models.signals import (post_delete, post_save)
 import utils.models
 
+
 class Client(models.Model):
     name = models.CharField(max_length=40, unique=True)
     email = models.EmailField(_('email address'))
@@ -53,7 +54,6 @@ class Client(models.Model):
         if instance.file_owner:
             instance.file_owner.delete()
 
-
     @staticmethod
     def create_setup(sender, instance, created, *args, **kwagrs):
         if not created:
@@ -61,15 +61,14 @@ class Client(models.Model):
         Client.create_address_owner(instance)
         Client.create_file_owner(instance)
 
-
     @staticmethod
     def delete_cleanup(sender, instance, *args, **kwargs):
         Client.delete_address_owner(instance)
         Client.delete_file_owner(instance)
 
-
     def __str__(self):
         return self.name
+
 
 post_delete.connect(Client.delete_cleanup, sender=Client)
 post_save.connect(Client.create_setup, sender=Client)
