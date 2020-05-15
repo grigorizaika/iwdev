@@ -22,6 +22,7 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^explorer/', include('explorer.urls')),
     url(r'^$', views.main_page),
     url(r'^api-auth/', include('rest_framework.urls',
                                namespace='rest_framework')),
