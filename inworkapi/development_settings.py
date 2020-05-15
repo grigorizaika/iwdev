@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'phonenumber_field',
-
+    'rangefilter',
     # Local apps
     'users',
     'utils',
