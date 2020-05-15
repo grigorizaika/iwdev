@@ -189,5 +189,5 @@ COGNITO_AUDIENCE = COGNITO_APP_CLIENT_ID
 
 
 # TODO: change this to readonly!
-EXPLORER_CONNECTIONS = {'Default': 'default'}
-EXPLORER_DEFAULT_CONNECTION = 'default'
+EXPLORER_CONNECTIONS = {'Default': 'readonly'}
+EXPLORER_DEFAULT_CONNECTION = 'readonly'
