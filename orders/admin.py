@@ -10,4 +10,8 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'order', 'name', 'starts_at',
+                    'worker', 'manual_time_set', 'hours_worked',
+                    'is_hours_worked_accepted')
+    list_filter = ('order', 'order__client',
+                   'starts_at', 'worker')
