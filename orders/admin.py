@@ -3,6 +3,7 @@ from orders.models import (Order, Task)
 # Register your models here.
 from rangefilter.filter import DateRangeFilter
 
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     pass
