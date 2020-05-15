@@ -29,7 +29,7 @@ class Order(models.Model):
                             )
 
     def __str__(self):
-        return 'Order ' + str(self.id) + '. ' + str(self.name)
+        return self.name
 
     def files(self):
         files = CustomFile.objects.filter(owner=self.file_owner)
@@ -97,7 +97,7 @@ class Task(models.Model):
             blank=True)
 
     def __str__(self):
-        return 'Task ' + str(self.id) + '. ' + str(self.name)
+        return self.name
 
     def files(self):
         files = CustomFile.objects.filter(owner=self.file_owner)
