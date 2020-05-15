@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # External packages
     'django_filters',
     'drf_yasg',
+    'explorer',
     'rest_framework',
     'phonenumber_field',
     'rangefilter',
@@ -109,6 +110,14 @@ DATABASES = {
         'NAME': os.getenv('INWORK_DB_USER'),
         'USER': os.getenv('INWORK_DB_NAME'),
         'PASSWORD': os.getenv('INWORK_DB_PASSWORD'),
+        'HOST': 'localhost',
+        'PORT': '',
+    },
+    'readonly': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('INWORK_DB_NAME'),
+        'USER': os.getenv('INWORK_READONLY_USER'),
+        'PASSWORD': os.getenv('INWORK_READONLY_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -177,3 +186,7 @@ AWS_SECRET_ACCESS_KEY = os.getenv('INWORK_AWS_SECRET_ACCESS_KEY')
 COGNITO_APP_ID = COGNITO_APP_CLIENT_ID
 COGNITO_USER_POOL = COGNITO_USER_POOL_ID
 COGNITO_AUDIENCE = COGNITO_APP_CLIENT_ID
+
+
+EXPLORER_CONNECTIONS = {'Default': 'readonly'}
+EXPLORER_DEFAULT_CONNECTION = 'readonly'
