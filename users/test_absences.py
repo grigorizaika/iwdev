@@ -57,7 +57,7 @@ class AbsenceTests(APITestCase):
         user = models.User.objects.create_user(**self.initial_user_data)
         user.role = models.Role.objects.get_or_create(name='Administrator')[0]
         user.save()
-        
+
         self.initial_absence_data['description']
         self.absences_test_data['correct']['user_id'] = user.id
         self.absences_test_data['invalid_dates']['user_id'] = user.id

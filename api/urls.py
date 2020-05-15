@@ -3,10 +3,8 @@ from django.urls import path
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
-from rest_framework import routers
 
 from api.views import get_jwt_tokens, refresh_jwt_tokens
-
 
 
 app_name = 'api'
@@ -27,8 +25,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     url(r'^$', schema_view),
     url(
-        r'^swagger/?$', 
-        schema_view.with_ui('swagger', cache_timeout=0), 
+        r'^swagger/?$',
+        schema_view.with_ui('swagger', cache_timeout=0),
         name='schema-swagger-ui'
     ),
 
@@ -40,4 +38,3 @@ urlpatterns = [
     url(r'get_tokens/?$', get_jwt_tokens, name='get-tokens'),
     url(r'refresh_tokens/?$', refresh_jwt_tokens),
 ]
-

@@ -213,11 +213,6 @@ class UserTests(APITestCase):
                       ['cognito_response']['AuthenticationResult'])
 
 
-    # def test_role(self):
-        # ?
-        # pass
-
-
 # NOTE: when an exception other than
 # assertionError is thrown, tearDown doesn't get
 # called, which results in: 'An error occurred

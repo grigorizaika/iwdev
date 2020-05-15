@@ -1,12 +1,10 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from inworkapi.decorators import required_body_params
 from inworkapi.utils import JSendResponse, TokenHelper
 from users.serializers import UserSerializer
-
 
 
 @api_view(['POST'])
@@ -62,12 +60,12 @@ def refresh_jwt_tokens(request, *args, **kwargs):
     except Exception as e:
         # TODO: Make this a boto3 client exception
         response = JSendResponse(
-            status = JSendResponse.ERROR,
-            message = str(e)
+            status=JSendResponse.ERROR,
+            message=str(e)
         ).make_json()
         return Response(response, status=status.HTTP_404_NOT_FOUND)
 
-    try:        
+    try:
         user = TokenHelper.get_user_by_token(request, id_token)
         response = JSendResponse(
             status=JSendResponse.SUCCESS,

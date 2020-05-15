@@ -12,8 +12,6 @@ from .serializers import AddressSerializer, FileSerializer
 from api.permissions import IsAdministrator
 from inworkapi.decorators import required_body_params, required_kwargs
 from inworkapi.utils import JSendResponse, S3Helper
-from orders.models import Order, Task
-from users.models import User as CustomUser
 
 
 @api_view(['GET'])
@@ -30,8 +28,9 @@ def get_presigned_upload_url(request, **kwargs):
         response = JSendResponse(
             status=JSendResponse.FAIL,
             data={
-                'response': f'location should be one of \
-                    the following values: {S3Helper.KEY_TO_MODEL_MAPPING.keys()}'
+                'response': f"""location should be one of \
+                    the following values: \
+                    {S3Helper.KEY_TO_MODEL_MAPPING.keys()}"""
             }
         ).make_json()
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
@@ -44,15 +43,14 @@ def get_presigned_upload_url(request, **kwargs):
                 and request.data['id'] != request.user.id):
             response = JSendResponse(
                 status=JSendResponse.FAIL,
-                data = {'id': 'Only administrators can \
-                    add files to users other than themselves.'}
+                data={'id': """Only administrators can \
+                    add files to users other than themselves."""}
             )
             return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         object_name = f'{location}/{request.user.id}/{file_name}'
     else:
         # TODO: allow upload to client only if admin is assigned to the client
-
         if 'id' not in request.data:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
@@ -101,7 +99,8 @@ def model_files(request, **kwargs):
         response = JSendResponse(
             status=JSendResponse.FAIL,
             data={
-                'response': 'Proper URL structure: /api/<string:model>/<int:id>/files/'
+                'response': """Proper URL structure: \
+                    /api/<string:model>/<int:id>/files/"""
             }
         ).make_json()
 
@@ -111,8 +110,9 @@ def model_files(request, **kwargs):
         response = JSendResponse(
             status=JSendResponse.FAIL,
             data={
-                'response': f'\'model\' must be \
-                    one of these values: { list(possible_model_values.keys()) }'
+                'response': f"""\'model\' must be \
+                    one of these values: \
+                    { list(possible_model_values.keys()) }"""
             }
         ).make_json()
 
@@ -130,20 +130,21 @@ def model_files(request, **kwargs):
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
-                    'response': f'{model.__name__} with an id {instance_id} does not exist'
+                    'response': f"""{model.__name__} with \
+                        an id {instance_id} does not exist"""
                 }
             ).make_json()
 
             return Response(response, status=status.HTTP_404_NOT_FOUND)
-                
+
         fo = instance.file_owner
-        
+
         processed_data = request.data.dict()
-        
+
         processed_data['owner'] = fo.id
-        
+
         serializer = FileSerializer(data=processed_data)
-        
+
         if serializer.is_valid():
             file = serializer.save()
 
@@ -168,32 +169,33 @@ def model_files(request, **kwargs):
         try:
             instance = model.objects.get(id=instance_id)
             fo = instance.file_owner
-            
+
             queryset = CustomFile.objects.filter(owner=fo)
             serializer = FileSerializer(queryset, many=True)
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data=serializer.data
             ).make_json()
-            
+
             return Response(response, status=status.HTTP_200_OK)
 
         except model.DoesNotExist:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
-                    'response': f'{model.__name__} with an id {instance_id} does not exist'
+                    'response': f"""{model.__name__} with an id \
+                        {instance_id} does not exist"""
                 }
             ).make_json()
 
             return Response(response, status=status.HTTP_404_NOT_FOUND)
-    
+
 
 @api_view(['GET', 'POST'])
 @authentication_classes([JSONWebTokenAuthentication])
 @permission_classes([IsAuthenticated])
-def my_files(request, **kwargs):   
+def my_files(request, **kwargs):
     me = request.user
     serializer = FileSerializer(me.files(), many=True)
     response = JSendResponse(
@@ -240,7 +242,7 @@ class AddressView(APIView):
                         match your company'''
                 }
             ).make_json()
-            return Response(response, status=status.HTTP_403_FORBIDDEN)    
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
 
         serializer = AddressSerializer(address)
 
@@ -315,7 +317,9 @@ class AddressView(APIView):
 
             return Response(response, status=status.HTTP_403_FORBIDDEN)
 
-        serializer = AddressSerializer(address, data=request.data, partial=True)
+        serializer = AddressSerializer(address,
+                                       data=request.data,
+                                       partial=True)
 
         if serializer.is_valid():
             address = serializer.save()
@@ -342,7 +346,7 @@ class AddressView(APIView):
         try:
             address = Address.objects.get(id=kwargs.get('id'))
             owner_instance = address.owner.get_owner_instance()
-        
+
         except Address.DoesNotExist as e:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
@@ -380,10 +384,10 @@ class FileView(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        if not 'id' in kwargs:
+        if 'id' not in kwargs:
             queryset = CustomFile.objects.all()
             serializer = FileSerializer(queryset, many=True)
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data=serializer.data
@@ -407,7 +411,7 @@ class FileView(APIView):
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
         serializer = FileSerializer(file)
-        
+
         response = JSendResponse(
             status=JSendResponse.SUCCESS,
             data=serializer.data
@@ -420,7 +424,7 @@ class FileView(APIView):
 
         if serializer.is_valid():
             file = serializer.save()
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
@@ -438,19 +442,19 @@ class FileView(APIView):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, **kwargs):
-        
-        if not 'id' in kwargs:
+
+        if 'id' not in kwargs:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
                     'id': 'Must specify an id'
                 }
             ).make_json()
-            
+
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        
+
         file_id = kwargs.get('id')
-            
+
         try:
             file = CustomFile.objects.get(id=file_id)
         except CustomFile.DoesNotExist as e:
@@ -461,12 +465,12 @@ class FileView(APIView):
                 }
             ).make_json()
             return Response(response, status=status.HTTP_404_NOT_FOUND)
-            
+
         serializer = FileSerializer(file, data=request.data, partial=True)
-        
+
         if serializer.is_valid():
             file = serializer.save()
-            
+
             response = JSendResponse(
                 status=JSendResponse.SUCCESS,
                 data={
@@ -484,19 +488,18 @@ class FileView(APIView):
 
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-
     def delete(self, request, *args, **kwargs):
-        
-        if not 'id' in kwargs:
+
+        if 'id' not in kwargs:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data={
                     'id': 'Must specify an id'
                 }
             ).make_json()
-            
+
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        
+
         try:
             file = CustomFile.objects.get(id=kwargs.get('id'))
         except CustomFile.DoesNotExist as e:
@@ -507,16 +510,16 @@ class FileView(APIView):
                 }
             ).make_json()
             return Response(response, status=status.HTTP_404_NOT_FOUND)
-        
+
         file_str = str(file)
 
         file.delete()
-        
-        response= JSendResponse(
+
+        response = JSendResponse(
             status=JSendResponse.SUCCESS,
             data={
                 'response': f'Successfully deleted file {file_str}'
             }
         ).make_json()
-        
+
         return Response(response, status=status.HTTP_204_NO_CONTENT)
