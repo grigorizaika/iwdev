@@ -15,6 +15,7 @@ from .serializers import OrderSerializer, TaskSerializer
 from api.helpers import bulk_create_tasks, json_list_group_by
 from api.permissions import IsAdministrator
 from clients.models import Client
+from inworkapi.decorators import required_kwargs
 from inworkapi.utils import JSendResponse
 
 
@@ -617,3 +618,39 @@ def accept_hours_worked(request, **kwargs):
             data=str(e)
         ).make_json()
         return Response(response, status=status.HTTP_404_NOT_FOUND)
+
+
+@required_kwargs(['id'])
+def get_order_tasks(request, *args, **kwargs):
+    order_id = kwargs['id']
+
+    # TODO: getting and filtering can be moved into separate functions
+    order = Order.objects.get(id=order_id)
+
+    # TODO: move this check into a model logic or a permission
+    if ((order.client.company == request.user.company
+            and request.user.is_administrator())
+       or request.user.is_staff):
+        # TODO: getting and filtering can be moved into separate functions
+        tasks_raw = Task.objects.filter(order=order_id)
+
+        tasks = TaskSerializer(tasks_raw, many=True).data
+
+        response = JSendResponse(
+            status=JSendResponse.SUCCESS,
+            data={
+                'tasks': tasks
+            }
+        ).make_json()
+
+        return Response(response, status=status.HTTP_200_OK)
+    else:
+        response = JSendResponse(
+            status=JSendResponse.FAIL,
+            data={
+                'response': 'You cannot access this order\'s \
+                    company information'
+            }
+        ).make_json()
+
+        return Response(response, status=status.HTTP_403_FORBIDDEN)

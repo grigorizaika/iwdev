@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf.urls import url
 
 from .views import (
-    OrderView, TaskView, accept_hours_worked
+    get_order_tasks, OrderView, TaskView, accept_hours_worked
 )
 
 
@@ -15,6 +15,7 @@ task_list = TaskView.as_view()
 urlpatterns = [
     url(r'orders/?$', order_list),
     path('orders/<int:id>/', order_list),
+    path('orders/<int:id>/tasks/', get_order_tasks),
 
     url(r'tasks/?$', task_list),
     path('tasks/<int:id>/', task_list),

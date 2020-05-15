@@ -2,6 +2,7 @@ from rest_framework import permissions
 
 from inworkapi.utils import JSendResponse
 
+
 class IsAuthenticated(permissions.IsAuthenticated):
     message = JSendResponse(
         status=JSendResponse.FAIL, 
@@ -11,11 +12,10 @@ class IsAuthenticated(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         return super().has_permission(request, view)
 
+
 class IsPostOrIsAuthenticated(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        print("in has_permission, ", request.user,
-              request.user.is_authenticated)
         # allow all POST requests
         if request.method == 'POST':
             return True
@@ -27,6 +27,7 @@ class IsPostOrIsAuthenticated(permissions.BasePermission):
 
 class IsAdministrator(permissions.BasePermission):
     message = 'Must have Administrator permissions to perform this action.'
+
     def has_permission(self, request, view):
         if request.user and not request.user.is_anonymous:
             if not request.user.role:

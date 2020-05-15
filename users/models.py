@@ -212,7 +212,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         model_location = next(
             model_key for model_key
             in S3Helper.KEY_TO_MODEL_MAPPING
-            if (S3Helper.KEY_TO_MODEL_MAPPING[model_key] 
+            if (S3Helper.KEY_TO_MODEL_MAPPING[model_key]
                 == instance.__class__.__name__)
         )
 
