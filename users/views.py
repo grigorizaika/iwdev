@@ -612,18 +612,9 @@ class UserView(APIView):
             ).make_json()
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
+    @required_kwargs(['id'])
     def delete(self, request, **kwargs):
         # TODO: also delete addresses
-
-        if 'id' not in kwargs:
-            response = JSendResponse(
-                status=JSendResponse.FAIL,
-                data={
-                    'id': 'User id wasn\'t specified'
-                }
-            ).make_json()
-
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             djangoUser = CustomUser.objects.get(id=kwargs.get('id'))

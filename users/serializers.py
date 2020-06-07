@@ -94,7 +94,6 @@ class UserSerializer(serializers.ModelSerializer):
         serializer = AddressSerializer(queryset, many=True)
         return serializer.data
 
-    # def update(self):
 
     class Meta:
         model = CustomUser

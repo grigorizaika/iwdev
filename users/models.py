@@ -186,6 +186,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         except Exception as e:
             print(e)
 
+        # TODO: get rid of confirmation
         cognito_confirm_sign_up(username)
 
     @staticmethod

@@ -83,7 +83,6 @@ class OrderView(APIView):
 
         modified_data = request.data.dict()
 
-        print('mololo', modified_data)
         orderSerializer = OrderSerializer(data=modified_data)
 
         # Check if an address belongs to a client
