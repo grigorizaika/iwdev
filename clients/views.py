@@ -262,13 +262,13 @@ def client_addresses(request, *args, **kwargs):
 
             # TODO: move "[] -> null" into serializer
             if len(serializer.data) == 0:
-                data['response'] = None
                 response = JSendResponse(
                     status=JSendResponse.SUCCESS,
                     data={
                         'addresses': None,
                     }
                 ).make_json()
+                return Response(response)
 
             else:
                 response = JSendResponse(
@@ -277,7 +277,8 @@ def client_addresses(request, *args, **kwargs):
                         'addresses': serializer.data,
                     }
                 ).make_json()
-                return Response(response, status=status.HTTP_200_OK)
+                return Response(response)
+
         except Client.DoesNotExist as e:
             response = JSendResponse(
                     status=JSendResponse.FAIL,
