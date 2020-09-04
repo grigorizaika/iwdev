@@ -188,52 +188,56 @@ def client_addresses(request, *args, **kwargs):
 
         try:
             client = Client.objects.get(id=kwargs.get('id'))
+            
         except Client.DoesNotExist as e:
             response = JSendResponse(
                 status=JSendResponse.FAIL,
                 data=str(e)
             ).make_json()
+
             return Response(response, status=status.HTTP_404_NOT_FOUND)
 
-            # TODO: move to a separate method
-            if not client.company == request.user.company:
-                response = JSendResponse(
-                    status=JSendResponse.FAIL,
+        # TODO: move to a separate method
+        if not client.company == request.user.company:
+            response = JSendResponse(
+                status=JSendResponse.FAIL,
+                data={
+                    'response': """Client\'s company doesn\'t \
+                        match the request user\'s company""",
+                }
+            ).make_json()
+
+            return Response(response, status=status.HTTP_403_FORBIDDEN)
+
+        ao = client.address_owner
+
+        processed_data = request.data.dict()
+
+        processed_data['owner'] = ao.id
+
+        serializer = AddressSerializer(data=processed_data)
+
+        if serializer.is_valid():
+            address = serializer.save()
+
+            response = JSendResponse(
+                    status=JSendResponse.SUCCESS,
                     data={
-                        'response': """Client\'s company doesn\'t \
-                            match the request user\'s company""",
+                        'response': f'Created Address {address}',
+                        'address': processed_data
                     }
-                ).make_json()
+            ).make_json()
 
-                return Response(response, status=status.HTTP_403_FORBIDDEN)
+            return Response(response, status=status.HTTP_200_OK)
 
-            ao = client.address_owner
+        else:
+            response = JSendResponse(
+                    status=JSendResponse.FAIL,
+                    data=serializer.errors
+            ).make_json()
 
-            processed_data = request.data.dict()
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-            processed_data['owner'] = ao.id
-
-            serializer = AddressSerializer(data=processed_data)
-
-            if serializer.is_valid():
-                address = serializer.save()
-
-                response = JSendResponse(
-                        status=JSendResponse.SUCCESS,
-                        data={
-                            'response': f'Created Address {address}',
-                            'address': processed_data
-                        }
-                ).make_json()
-
-                return Response(response, status=status.HTTP_200_OK)
-
-            else:
-                response = JSendResponse(
-                        status=JSendResponse.FAIL,
-                        data=serializer.errors
-                ).make_json()
-                return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'GET':
         try:
