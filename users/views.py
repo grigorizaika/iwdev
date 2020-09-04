@@ -492,9 +492,10 @@ class UserView(APIView):
 
         return Response(response, status=status.HTTP_200_OK)
 
+
     def post(self, request, *args, **kwargs):
 
-        processed_data = request.data.dict()
+        processed_data = request.POST.copy()
 
         if processed_data.get('role'):
             del processed_data['role']
