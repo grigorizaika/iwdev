@@ -139,7 +139,7 @@ def model_files(request, **kwargs):
 
         fo = instance.file_owner
 
-        processed_data = request.data.dict()
+        processed_data = request.POST.copy()
 
         processed_data['owner'] = fo.id
 

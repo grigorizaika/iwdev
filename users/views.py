@@ -566,7 +566,7 @@ class UserView(APIView):
     def patch(self, request, **kwargs):
         # Check if admin or self
 
-        processed_data = request.POST.copy()
+        processed_data = request.data.copy()
 
         if 'role' in processed_data:
             # Role is not allowed to be

@@ -81,7 +81,7 @@ class OrderView(APIView):
 
     def post(self, request, **kwargs):
 
-        modified_data = request.data.dict()
+        modified_data = request.POST.copy()
 
         orderSerializer = OrderSerializer(data=modified_data)
 
