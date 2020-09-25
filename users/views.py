@@ -566,7 +566,7 @@ class UserView(APIView):
     def patch(self, request, **kwargs):
         # Check if admin or self
 
-        processed_data = request.data.dict()
+        processed_data = request.POST.copy()
 
         if 'role' in processed_data:
             # Role is not allowed to be
@@ -705,7 +705,7 @@ class AbsenceView(APIView):
 
     @admin_body_params(['user', 'state'])
     def post(self, request, *args, **kwargs):
-        processed_data = request.data.dict()
+        processed_data = request.POST.copy()
 
         if 'user' not in processed_data:
             processed_data['user'] = request.user.id

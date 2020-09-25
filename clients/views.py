@@ -211,7 +211,7 @@ def client_addresses(request, *args, **kwargs):
 
         ao = client.address_owner
 
-        processed_data = request.data.dict()
+        processed_data = request.POST.copy()
 
         processed_data['owner'] = ao.id
 
