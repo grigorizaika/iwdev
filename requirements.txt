@@ -29,7 +29,7 @@ djangorestframework-jwt==1.11.0
 docutils==0.15.2
 drf-firebase-auth==0.0.6
 drf-firebase-authentication==1.0.1
-drf-jwt==1.13.4
+drf-jwt==1.15.1
 drf-yasg==1.17.0
 ecdsa==0.14.1
 envs==1.3
